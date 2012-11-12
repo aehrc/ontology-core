@@ -14,13 +14,15 @@ import au.csiro.ontology.model.Concept;
  *
  */
 public interface IOntology<T extends Comparable<T>> {
-
+    
+    public enum AxiomForm {STATED, INFERRED}
+    
     /**
      * Returns the {@link Collection} of axioms in the ontology.
      * 
      * @return The axioms.
      */
-    public Collection<IAxiom> getAxioms();
+    public Collection<IAxiom> getAxioms(AxiomForm form);
     
     /**
      * Returns extra information for a concept. This method is typically used
@@ -40,6 +42,6 @@ public interface IOntology<T extends Comparable<T>> {
      * @param c A named concept.
      * @return The set of axioms that define the concept.
      */
-    public Set<IAxiom> getDefiningAxioms(Concept<T> c);
+    public Set<IAxiom> getDefiningAxioms(Concept<T> c, AxiomForm form);
 
 }

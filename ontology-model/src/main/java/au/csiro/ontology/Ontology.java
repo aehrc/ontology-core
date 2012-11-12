@@ -56,7 +56,8 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
     }
 
     @Override
-    public Collection<IAxiom> getAxioms() {
+    public Collection<IAxiom> getAxioms(AxiomForm form) {
+        // TODO: implement the different axiom forms
         return axioms;
     }
 
@@ -66,7 +67,7 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
     }
 
     @Override
-    public Set<IAxiom> getDefiningAxioms(Concept<T> c) {
+    public Set<IAxiom> getDefiningAxioms(Concept<T> c, AxiomForm form) {
         // TODO Auto-generated method stub
         return null;
     }
