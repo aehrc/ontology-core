@@ -16,12 +16,12 @@ import au.csiro.ontology.classification.NullProgressMonitor;
 
 
 /**
- * Unit tests for {@link RF1Importer}.
+ * Unit tests for {@link ExtendedRF1Importer}.
  * 
  * @author Alejandro Metke
  * 
  */
-public class TestRF1Importer {
+public class TestExtendedRF1Importer {
 
     final static String TEST_DIR = "src/test/resources/";
 
@@ -32,8 +32,9 @@ public class TestRF1Importer {
      */
     @Test
     public void testGetOntologyVersions() {
-        RF1Importer rf1i = new RF1Importer(new File(TEST_DIR
-                + "sct1_Concepts_Core_INT_20110731.txt"), new File(
+        ExtendedRF1Importer rf1i = new ExtendedRF1Importer(new File(TEST_DIR
+                + "sct1_Concepts_Core_INT_20110731.txt"), new File(TEST_DIR
+                + "sct1_Descriptions_en_INT_20110731.txt"), new File(
                 TEST_DIR + "sct1_Relationships_Core_INT_20110731.txt"),
                 "20110731");
 
@@ -49,13 +50,15 @@ public class TestRF1Importer {
      */
     @Test
     public void testExtractVersionRows() {
-        RF1Importer rf1i = new RF1Importer(new File(TEST_DIR
+        ExtendedRF1Importer rf1i = new ExtendedRF1Importer(new File(TEST_DIR
                 + "rf1_con_test.txt"), new File(TEST_DIR
+                + "rf1_desc_test.txt"), new File(TEST_DIR
                 + "rf1_rel_test.txt"), "20110731");
 
         VersionRows vr1 = rf1i.extractVersionRows();
         Assert.assertEquals("20110731", vr1.getVersionName());
         Assert.assertEquals(11, vr1.getConceptRows().size());
+        Assert.assertEquals(6, vr1.getDescriptionRows().size());
         Assert.assertEquals(13, vr1.getRelationshipRows().size());
     }
 
