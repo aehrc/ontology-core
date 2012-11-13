@@ -5,7 +5,7 @@
 package au.csiro.ontology;
 
 import au.csiro.ontology.model.AbstractInfo;
-import au.csiro.ontology.model.Concept;
+import au.csiro.ontology.model.INamedConcept;
 
 /**
  * Defines the methods of an ontology that includes extra information about
@@ -24,5 +24,5 @@ public interface IExtendedOntology<T extends Comparable<T>>
      * @param c A named concept.
      * @return The extra information about the concept.
      */
-    public AbstractInfo getConceptInfo(Concept<T> c);
+    public AbstractInfo getConceptInfo(INamedConcept<T> c);
 }

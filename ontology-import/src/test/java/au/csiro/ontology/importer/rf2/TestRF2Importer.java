@@ -33,18 +33,16 @@ public class TestRF2Importer {
      */
     @Test
     public void testGetOntologyVersions() {
-        try {
-            RF2Importer rf2i = new RF2Importer(
-                new File(TEST_DIR + "sct2_Concept_Full_INT_20120131.txt"), 
-                new File(TEST_DIR + 
-                        "sct2_StatedRelationship_Full_INT_20120131.txt"),
-                new File(TEST_DIR + 
-                        "der2_ssRefset_ModuleDependencyFull_INT_20120131.txt"),
-                ReleaseType.FULL);
-            Map<String, Map<String, IOntology<String>>> ovs = 
-                    rf2i.getOntologyVersions(new NullProgressMonitor());
-            Assert.assertEquals(1, ovs.keySet().size());
-        } catch(Throwable t) { t.printStackTrace(); }
+        RF2Importer rf2i = new RF2Importer(
+            new File(TEST_DIR + "sct2_Concept_Full_INT_20120131.txt"), 
+            new File(TEST_DIR + 
+                    "sct2_StatedRelationship_Full_INT_20120131.txt"),
+            new File(TEST_DIR + 
+                    "der2_ssRefset_ModuleDependencyFull_INT_20120131.txt"),
+            ReleaseType.FULL);
+        Map<String, Map<String, IOntology<String>>> ovs = 
+                rf2i.getOntologyVersions(new NullProgressMonitor());
+        Assert.assertEquals(1, ovs.keySet().size());
     }
 
     /**
