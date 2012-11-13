@@ -23,12 +23,13 @@ import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
-import au.csiro.ontology.IOntology;
-import au.csiro.ontology.Ontology;
+import au.csiro.ontology.ExtendedOntology;
+import au.csiro.ontology.IExtendedOntology;
 import au.csiro.ontology.axioms.ConceptInclusion;
 import au.csiro.ontology.axioms.IAxiom;
 import au.csiro.ontology.axioms.RoleInclusion;
 import au.csiro.ontology.classification.IProgressMonitor;
+import au.csiro.ontology.importer.IExtendedImporter;
 import au.csiro.ontology.model.AbstractInfo;
 import au.csiro.ontology.model.Conjunction;
 import au.csiro.ontology.model.Existential;
@@ -48,7 +49,7 @@ import au.csiro.ontology.snomed.refset.rf2.IModuleDependencyRefset;
  * @author Alejandro Metke
  *
  */
-public class ExtendedRF2Importer extends RF2Importer {
+public class ExtendedRF2Importer extends RF2Importer implements IExtendedImporter {
     
     // Logger
     private final static Logger log = Logger.getLogger(ExtendedRF2Importer.class);
@@ -72,7 +73,7 @@ public class ExtendedRF2Importer extends RF2Importer {
     }
     
     @Override
-    public Map<String, Map<String, IOntology<String>>> getOntologyVersions(
+    public Map<String, Map<String, IExtendedOntology<String>>> getExtendedOntologyVersions(
             IProgressMonitor monitor) {
 
         // TODO: do something with the monitor
@@ -165,7 +166,7 @@ public class ExtendedRF2Importer extends RF2Importer {
             }
         }
 
-        Map<String, Map<String, IOntology<String>>> res = new HashMap<>();
+        Map<String, Map<String, IExtendedOntology<String>>> res = new HashMap<>();
 
         // Transform each set of modules
         for (String modId : bundles.keySet()) {
@@ -374,14 +375,15 @@ public class ExtendedRF2Importer extends RF2Importer {
                     }
                 }
                 
-                Map<String, IOntology<String>> ontVersions = res.get(
+                Map<String, IExtendedOntology<String>> ontVersions = res.get(
                         URI_PREFIX+modId);
                 if(ontVersions == null) {
                     ontVersions = new HashMap<>();
                     res.put(URI_PREFIX+modId, ontVersions);
                 }
                 
-                ontVersions.put(version, new Ontology<String>(axioms, infoMap));
+                ontVersions.put(version, 
+                        new ExtendedOntology<String>(axioms, infoMap));
             }
         }
 

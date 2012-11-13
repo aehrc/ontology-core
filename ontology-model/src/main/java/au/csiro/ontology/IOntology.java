@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Set;
 
 import au.csiro.ontology.axioms.IAxiom;
-import au.csiro.ontology.model.AbstractInfo;
 import au.csiro.ontology.model.Concept;
 
 /**
@@ -23,15 +22,6 @@ public interface IOntology<T extends Comparable<T>> {
      * @return The axioms.
      */
     public Collection<IAxiom> getAxioms(AxiomForm form);
-    
-    /**
-     * Returns extra information for a concept. This method is typically used
-     * in retrieval applications.
-     * 
-     * @param c A named concept.
-     * @return The extra information about the concept.
-     */
-    public AbstractInfo getConceptInfo(Concept<T> c);
     
     /**
      * Returns a {@link Set} of {@link IAxiom}s that define this concept.

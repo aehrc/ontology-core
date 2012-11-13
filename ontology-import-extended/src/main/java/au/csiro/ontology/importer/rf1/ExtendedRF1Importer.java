@@ -14,12 +14,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import au.csiro.ontology.IOntology;
-import au.csiro.ontology.Ontology;
+import au.csiro.ontology.ExtendedOntology;
+import au.csiro.ontology.IExtendedOntology;
 import au.csiro.ontology.axioms.ConceptInclusion;
 import au.csiro.ontology.axioms.IAxiom;
 import au.csiro.ontology.axioms.RoleInclusion;
 import au.csiro.ontology.classification.IProgressMonitor;
+import au.csiro.ontology.importer.IExtendedImporter;
 import au.csiro.ontology.model.AbstractInfo;
 import au.csiro.ontology.model.Concept;
 import au.csiro.ontology.model.Conjunction;
@@ -36,7 +37,7 @@ import au.csiro.ontology.snomed.model.SnomedInfo;
  * @author Alejandro Metke
  * 
  */
-public class ExtendedRF1Importer extends RF1Importer {
+public class ExtendedRF1Importer extends RF1Importer implements IExtendedImporter  {
 
     protected final File descriptionsFile;
 
@@ -55,11 +56,11 @@ public class ExtendedRF1Importer extends RF1Importer {
     }
     
     @Override
-    public Map<String, Map<String, IOntology<String>>> getOntologyVersions(
+    public Map<String, Map<String, IExtendedOntology<String>>> getExtendedOntologyVersions(
             IProgressMonitor monitor) {
         monitor.taskStarted("Loading axioms");
         
-        Map<String, Map<String, IOntology<String>>> res = new HashMap<>();
+        Map<String, Map<String, IExtendedOntology<String>>> res = new HashMap<>();
 
         // Extract the version rows
         VersionRows vr = extractVersionRows();
@@ -218,8 +219,8 @@ public class ExtendedRF1Importer extends RF1Importer {
             }
         }
         
-        Map<String, IOntology<String>> map = new HashMap<>();
-        map.put(vr.getVersionName(), new Ontology<String>(axioms, infoMap));
+        Map<String, IExtendedOntology<String>> map = new HashMap<>();
+        map.put(vr.getVersionName(), new ExtendedOntology<String>(axioms, infoMap));
         res.put("snomed", map);
 
         return res;

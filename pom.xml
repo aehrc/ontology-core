@@ -23,6 +23,7 @@
 	<name>Internal Ontology Model - Parent Module</name>
 	<modules>
 		<module>ontology-model</module>
+		<module>ontology-model-extended</module>
 		<module>ontology-import</module>
 		<module>ontology-import-extended</module>
 	</modules>

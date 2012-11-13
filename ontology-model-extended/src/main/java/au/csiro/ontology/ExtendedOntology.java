@@ -21,7 +21,8 @@ import au.csiro.ontology.model.Concept;
  * @author Alejandro Metke
  *
  */
-public class Ontology<T extends Comparable<T>> implements IOntology<T> {
+public class ExtendedOntology<T extends Comparable<T>> 
+    implements IExtendedOntology<T> {
     
     /**
      * The collection of axioms that form the ontology.
@@ -29,14 +30,21 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
     protected final Collection<IAxiom> axioms;
     
     /**
+     * A map that contains the additional information for every concept in the
+     * ontology, indexed by id.
+     */
+    protected final Map<T, AbstractInfo> infoMap;
+    
+    /**
      * Builds a new ontology.
      * 
      * @param axioms The axioms in the ontology.
      * @param infoMap The additional information.
      */
-    public Ontology(Collection<IAxiom> axioms, 
+    public ExtendedOntology(Collection<IAxiom> axioms, 
             Map<T, AbstractInfo> infoMap) {
         this.axioms = axioms;
+        this.infoMap = infoMap;
     }
     
     /**
@@ -44,7 +52,7 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
      * 
      * @param axioms The axioms in the ontology.
      */
-    public Ontology(Collection<IAxiom> axioms) {
+    public ExtendedOntology(Collection<IAxiom> axioms) {
         this(axioms, null);
     }
 
@@ -52,6 +60,11 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
     public Collection<IAxiom> getAxioms(AxiomForm form) {
         // TODO: implement the different axiom forms
         return axioms;
+    }
+
+    @Override
+    public AbstractInfo getConceptInfo(Concept<T> c) {
+        return infoMap.get(c.getId());
     }
 
     @Override
