@@ -37,7 +37,7 @@ public interface IFactory<T> {
      * @param id
      * @return
      */
-    public IRole createRole(T id);
+    public INamedRole<T> createRole(T id);
     
     /**
      * Creates a feature with the specified id.

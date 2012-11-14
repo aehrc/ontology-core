@@ -15,22 +15,14 @@ import au.csiro.ontology.axioms.IAxiom;
 public interface IReasoner<T> {
     
     /**
-     * Performs a full classification and returns an instance of the reasoner
-     * with the classification results.
+     * Classifies the supplied axioms. The first time this method is called it 
+     * will perform a full classification. Subsequent calls will trigger
+     * incremental classifications.
      * 
      * @param axioms The axioms in the base ontology.
      * @return IReasoner
      */
     public IReasoner<T> classify(Set<IAxiom> axioms);
-
-    /**
-     * Performs an incremental classification and returns an instance of the
-     * reasoner with the new state.
-     * 
-     * @param axioms The incremental axioms.
-     * @return IReasoner
-     */
-    public IReasoner<T> classifyIncremental(Set<IAxiom> axioms);
     
     /**
      * Removes all the state in the classifier except the taxonomy generated

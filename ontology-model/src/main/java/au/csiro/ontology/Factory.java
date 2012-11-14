@@ -43,7 +43,7 @@ public class Factory<T extends Comparable<T>> implements IFactory<T> {
     }
 
     @Override
-    public IRole createRole(T id) {
+    public INamedRole<T> createRole(T id) {
         return new Role<>(id);
     }
 
