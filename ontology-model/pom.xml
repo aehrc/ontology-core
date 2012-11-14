@@ -7,7 +7,7 @@
   <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>Internal Ontology Model</name>
+  <name>Internal Core Ontology Model</name>
   <url>http://maven.apache.org</url>
   
   <parent>
@@ -32,26 +32,6 @@
       <artifactId>junit</artifactId>
       <version>4.0</version>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>net.sourceforge.owlapi</groupId>
-      <artifactId>owlapi-api</artifactId>
-      <version>3.3</version>
-    </dependency>
-    <dependency>
-      <groupId>net.sourceforge.owlapi</groupId>
-      <artifactId>owlapi-apibinding</artifactId>
-      <version>3.3</version>
-    </dependency>
-    <dependency>
-      <groupId>net.sourceforge.owlapi</groupId>
-      <artifactId>owlapi-reasoner</artifactId>
-      <version>3.3</version>
-    </dependency>
-    <dependency>
-      <groupId>net.sourceforge.owlapi</groupId>
-      <artifactId>owlapi-mansyntax</artifactId>
-      <version>3.3</version>
     </dependency>
   </dependencies>
   
