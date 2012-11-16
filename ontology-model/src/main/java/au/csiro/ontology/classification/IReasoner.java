@@ -1,5 +1,6 @@
 package au.csiro.ontology.classification;
 
+import java.util.Iterator;
 import java.util.Set;
 
 import au.csiro.ontology.Taxonomy;
@@ -23,6 +24,17 @@ public interface IReasoner<T> {
      * @return IReasoner
      */
     public IReasoner<T> classify(Set<IAxiom> axioms);
+    
+    /**
+     * Classifies the supplied axioms. The first time this method is called it 
+     * will perform a full classification. Subsequent calls will trigger
+     * incremental classifications.
+     * 
+     * @param axioms An iterator for the axioms. Implementations must be able
+     * to handle null values.
+     * @return IReasoner
+     */
+    public IReasoner<T> classify(Iterator<IAxiom> axioms);
     
     /**
      * Removes all the state in the classifier except the taxonomy generated
