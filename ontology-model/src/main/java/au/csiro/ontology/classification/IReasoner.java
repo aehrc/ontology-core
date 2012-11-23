@@ -3,6 +3,7 @@ package au.csiro.ontology.classification;
 import java.util.Iterator;
 import java.util.Set;
 
+import au.csiro.ontology.IOntology;
 import au.csiro.ontology.Taxonomy;
 import au.csiro.ontology.axioms.IAxiom;
 
@@ -13,7 +14,7 @@ import au.csiro.ontology.axioms.IAxiom;
  * @author Alejandro Metke
  *
  */
-public interface IReasoner<T> {
+public interface IReasoner<T extends Comparable<T>> {
     
     /**
      * Classifies the supplied axioms. The first time this method is called it 
@@ -52,5 +53,14 @@ public interface IReasoner<T> {
      * @return The taxonomy.
      */
     public Taxonomy<T> getTaxonomy();
+    
+    /**
+     * Returns an {@link IOntology} that represents the current set of
+     * classified axioms (or null if the ontology has not been classified yet).
+     * The ontology will contain only the inferred axioms.
+     * 
+     * @return The classified ontology.
+     */
+    public IOntology<T> getClassifiedOntology();
 
 }
