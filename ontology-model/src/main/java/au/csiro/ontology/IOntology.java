@@ -1,6 +1,7 @@
 package au.csiro.ontology;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Set;
 
 import au.csiro.ontology.axioms.IAxiom;
@@ -33,5 +34,22 @@ public interface IOntology<T extends Comparable<T>> {
      * @return The set of axioms that define the concept.
      */
     public Set<IAxiom> getDefiningAxioms(Concept<T> c, AxiomForm form);
+    
+    /**
+     * Returns the {@link Node} in the taxonomy that contains a specified 
+     * concept or null if such {@link Node} does not exist.
+     * 
+     * @param id The concept's id.
+     * @return the node.
+     */
+    public Node<T> getNode(T id);
+    
+    /**
+     * Returns an {@link Iterator} for all the nodes in the taxonomy or null if
+     * the ontology has not been classified.
+     * 
+     * @return the iterator.
+     */
+    public Iterator<Node<T>> nodeIterator();
 
 }

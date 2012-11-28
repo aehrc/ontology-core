@@ -4,7 +4,6 @@ import java.util.Iterator;
 import java.util.Set;
 
 import au.csiro.ontology.IOntology;
-import au.csiro.ontology.Taxonomy;
 import au.csiro.ontology.axioms.IAxiom;
 
 /**
@@ -42,25 +41,36 @@ public interface IReasoner<T extends Comparable<T>> {
      * after classification. If the classification process has not been run then
      * this method has no effect. Once pruned, it is no longer possible to run
      * an incremental classification. Doing so will generate a 
-     * {@link RuntimeException}.
+     * {@link RuntimeException}. It is also impossible to return the stated and
+     * inferred axioms. Calling the getClassifiedOntology method requesting
+     * any of these will also generate a {@link RuntimeException}.
      */
     public void prune();
-
-    /**
-     * Returns the resulting {@link Taxonomy} after classification (or null if
-     * the ontology has not been classified yet).
-     * 
-     * @return The taxonomy.
-     */
-    public Taxonomy<T> getTaxonomy();
     
     /**
-     * Returns an {@link IOntology} that represents the current set of
-     * classified axioms (or null if the ontology has not been classified yet).
-     * The ontology will contain only the inferred axioms.
+     * Returns an {@link IOntology} that represents the current set of stated
+     * axioms, classified axioms, and the generated taxonomy. If no axioms have
+     * yet been classified it returns null.
      * 
      * @return The classified ontology.
      */
     public IOntology<T> getClassifiedOntology();
+    
+    /**
+     * Returns an {@link IOntology} that represents the current set of stated
+     * axioms, classified axioms, and the generated taxonomy. If no axioms have
+     * yet been classified it returns null.
+     * 
+     * @param includeTaxonomy Indicates if the taxonomy should be included in 
+     * the generated ontology.
+     * @param includeStatedAxioms Indicates if the stated axioms should be
+     * included in the generated ontology.
+     * @param includeInferredAxioms Indicates if the inferred axioms should be
+     * included in the generated ontology.
+     * 
+     * @return The classified ontology.
+     */
+    public IOntology<T> getClassifiedOntology(boolean includeTaxonomy, 
+            boolean includeStatedAxioms, boolean includeInferredAxioms);
 
 }

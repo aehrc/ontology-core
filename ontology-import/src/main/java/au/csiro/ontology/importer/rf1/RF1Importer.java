@@ -212,7 +212,7 @@ public class RF1Importer implements IImporter {
         }
         
         Map<String, IOntology<String>> map = new HashMap<>();
-        map.put(vr.getVersionName(), new Ontology<String>(axioms));
+        map.put(vr.getVersionName(), new Ontology<String>(axioms, null, null));
         res.put("snomed", map);
 
         return res;
