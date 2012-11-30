@@ -2,6 +2,7 @@ package au.csiro.ontology;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import au.csiro.ontology.axioms.IAxiom;
@@ -36,11 +37,22 @@ public interface IOntology<T extends Comparable<T>> {
     public Set<IAxiom> getDefiningAxioms(Concept<T> c, AxiomForm form);
     
     /**
+     * Returns a {@link Set} of {@link IAxiom}s that define this concept.
+     * This includes the axioms of the form c [ x, x [ c, and c = x, where c is
+     * a named concept and x is an abstract concept (which means it can be
+     * either a named concept or a complex expression).
+     * 
+     * @param c The id of a named concept.
+     * @return The set of axioms that define the concept.
+     */
+    public Set<IAxiom> getDefiningAxioms(T c, AxiomForm form);
+    
+    /**
      * Returns the {@link Node} in the taxonomy that contains a specified 
      * concept or null if such {@link Node} does not exist.
      * 
      * @param id The concept's id.
-     * @return the node.
+     * @return The node.
      */
     public Node<T> getNode(T id);
     
@@ -48,8 +60,16 @@ public interface IOntology<T extends Comparable<T>> {
      * Returns an {@link Iterator} for all the nodes in the taxonomy or null if
      * the ontology has not been classified.
      * 
-     * @return the iterator.
+     * @return The iterator.
      */
     public Iterator<Node<T>> nodeIterator();
+    
+    /**
+     * Returns the taxonomy represented by a {@link Map} of keys to 
+     * {@link Node}s.
+     * 
+     * @return The taxonomy.
+     */
+    public Map<T, Node<T>> getNodeMap();
 
 }

@@ -107,5 +107,16 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
     public Iterator<Node<T>> nodeIterator() {
         return nodeMap.values().iterator();
     }
+
+    @Override
+    public Map<T, Node<T>> getNodeMap() {
+        return nodeMap;
+    }
+
+    @Override
+    public Set<IAxiom> getDefiningAxioms(T c,
+            au.csiro.ontology.IOntology.AxiomForm form) {
+        return getDefiningAxioms(new Concept<T>(c), form);
+    }
     
 }
