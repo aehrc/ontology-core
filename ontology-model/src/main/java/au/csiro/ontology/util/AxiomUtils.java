@@ -353,6 +353,11 @@ public class AxiomUtils {
         ri = (RoleInclusion)axiom3b;
         System.out.println("lhs: "+ri.lhs());
         System.out.println("rhs: "+ri.rhs());
+        
+        IAxiom axiom4 = AxiomUtils.deserialise("{ConceptInclusion,{Concept,java.lang.String,\"449539009\"},{Existential,{Role,java.lang.String,\"RoleGroup\"},{Concept,au.csiro.snorocket.core.model.Conjunction,\"(4 . 704 + 5 . 2490)\"}}}");
+        ci = (ConceptInclusion)axiom4;
+        System.out.println("lhs: "+ci.lhs());
+        System.out.println("rhs: "+ci.rhs());
     }
 
 }

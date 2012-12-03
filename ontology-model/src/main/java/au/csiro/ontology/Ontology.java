@@ -4,7 +4,9 @@
  */
 package au.csiro.ontology;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -52,9 +54,21 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
      */
     public Ontology(Collection<IAxiom> statedAxioms, 
             Collection<IAxiom> inferredAxioms, Map<T, Node<T>> nodeMap) {
-        this.statedAxioms = statedAxioms;
-        this.inferredAxioms = inferredAxioms;
-        this.nodeMap = nodeMap;
+        if(statedAxioms == null) {
+            this.statedAxioms = new ArrayList<>();
+        } else {
+            this.statedAxioms = statedAxioms;
+        }
+        if(inferredAxioms == null) {
+            this.inferredAxioms = new ArrayList<>();
+        } else {
+            this.inferredAxioms = inferredAxioms;
+        }
+        if(nodeMap == null) {
+            this.nodeMap = new HashMap<>();
+        } else {
+            this.nodeMap = nodeMap;
+        }
     }
 
     @Override

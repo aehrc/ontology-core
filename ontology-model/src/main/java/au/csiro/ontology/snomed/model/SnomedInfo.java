@@ -4,7 +4,6 @@
  */
 package au.csiro.ontology.snomed.model;
 
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -19,9 +18,11 @@ import au.csiro.ontology.model.AbstractInfo;
  */
 public class SnomedInfo extends AbstractInfo {
     
-    protected String module;
+    protected String moduleId;
     
-    protected Date effectiveTime;
+    protected String moduleVersion;
+    
+    protected String effectiveTime;
 
     protected boolean active;
 
@@ -41,14 +42,14 @@ public class SnomedInfo extends AbstractInfo {
     /**
      * @param module the module to set
      */
-    public void setModule(String module) {
-        this.module = module;
+    public void setModuleId(String moduleId) {
+        this.moduleId = moduleId;
     }
 
     /**
      * @return the effectiveTime
      */
-    public Date getEffectiveTime() {
+    public String getEffectiveTime() {
         return effectiveTime;
     }
 
@@ -56,7 +57,7 @@ public class SnomedInfo extends AbstractInfo {
      * @param effectiveTime
      *            the effectiveTime to set
      */
-    public void setEffectiveTime(Date effectiveTime) {
+    public void setEffectiveTime(String effectiveTime) {
         this.effectiveTime = effectiveTime;
     }
 
@@ -127,12 +128,25 @@ public class SnomedInfo extends AbstractInfo {
         return synonyms;
     }
     
-    
     /**
      * @return the module
      */
-    public String getModule() {
-        return module;
+    public String getModuleId() {
+        return moduleId;
+    }
+
+    /**
+     * @return the moduleVersion
+     */
+    public String getModuleVersion() {
+        return moduleVersion;
+    }
+
+    /**
+     * @param moduleVersion the moduleVersion to set
+     */
+    public void setModuleVersion(String moduleVersion) {
+        this.moduleVersion = moduleVersion;
     }
 
 }
