@@ -48,11 +48,6 @@ import au.csiro.ontology.snomed.refset.rf2.IModuleDependencyRefset;
  * 
  */
 public class RF2Importer implements IImporter {
-    
-    /**
-     * Prefix prepended to roor module ids to create the ontology identifier.
-     */
-    public static final String URI_PREFIX = "snomed/sct/";
 
     /**
      * Indicates the type of SNOMED release.
@@ -412,11 +407,10 @@ public class RF2Importer implements IImporter {
                     }
                 }
                 
-                Map<String, IOntology<String>> ontVersions = res.get(
-                        URI_PREFIX+modId);
+                Map<String, IOntology<String>> ontVersions = res.get(modId);
                 if(ontVersions == null) {
                     ontVersions = new HashMap<>();
-                    res.put(URI_PREFIX+modId, ontVersions);
+                    res.put(modId, ontVersions);
                 }
                 
                 ontVersions.put(version, new Ontology<String>(axioms, null, 
