@@ -19,7 +19,7 @@
 	<groupId>au.csiro</groupId>
 	<artifactId>ontology-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>0.0.1-uat-build-iteration-2</version>
 	<name>Internal Core Ontology Model - Parent Module</name>
 	<modules>
 		<module>ontology-model</module>
@@ -34,12 +34,17 @@
 		</dependency>
 	</dependencies>
 	
-	<distributionManagement>
-	  <repository>
-	    <id>ssh-repository</id>
-	    <url>scp://ict-ehrclf-cbr.vm.csiro.au/srv/aehrc.com/maven2</url>
-	  </repository>
-   </distributionManagement>
+  <!-- Temporary until we set up a parent POM -->
+  <distributionManagement>
+    <repository>
+      <id>maestro-deploy</id>
+      <url>https://va.maestrodev.com/archiva/repository/sim-releases</url>
+    </repository>
+    <snapshotRepository>
+      <id>ssh-repository</id>
+      <url>scp://ict-ehrclf-cbr.vm.csiro.au/srv/aehrc.com/maven2</url>
+    </snapshotRepository>
+  </distributionManagement>
 
   <repositories>
     <repository>
@@ -70,7 +75,21 @@
 	      <target>1.7</target>
 	    </configuration>
 	  </plugin>
+	  <plugin>
+	    <groupId>org.apache.maven.plugins</groupId>
+	    <artifactId>maven-release-plugin</artifactId>
+	    <version>2.3.2</version>
+	    <configuration>
+              <autoVersionSubmodules>true</autoVersionSubmodules>
+              <preparationGoals>clean validate</preparationGoals>
+	    </configuration>
+	  </plugin>
 	</plugins>
   </build>
   
+  <scm>
+    <connection>scm:svn:https://csfe.aceworkspace.net/svn/repos/sim-classifier/tags/ontology-parent-0.0.1-uat-build-iteration-2</connection>
+    <developerConnection>scm:svn:https://csfe.aceworkspace.net/svn/repos/sim-classifier/tags/ontology-parent-0.0.1-uat-build-iteration-2</developerConnection>
+    <url>https://csfe.aceworkspace.net/integration/viewvc/viewvc.cgi/tags/ontology-parent-0.0.1-uat-build-iteration-2?root=sim-classifier&amp;system=exsy1002</url>
+  </scm>
 </project>
