@@ -19,7 +19,7 @@
 	<groupId>au.csiro</groupId>
 	<artifactId>ontology-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>0.0.1-uat-build-iteration-2</version>
+	<version>0.0.1-SNAPSHOT</version>
 	<name>Internal Core Ontology Model - Parent Module</name>
 	<modules>
 		<module>ontology-model</module>
@@ -88,8 +88,8 @@
   </build>
   
   <scm>
-    <connection>scm:svn:https://csfe.aceworkspace.net/svn/repos/sim-classifier/tags/ontology-parent-0.0.1-uat-build-iteration-2</connection>
-    <developerConnection>scm:svn:https://csfe.aceworkspace.net/svn/repos/sim-classifier/tags/ontology-parent-0.0.1-uat-build-iteration-2</developerConnection>
-    <url>https://csfe.aceworkspace.net/integration/viewvc/viewvc.cgi/tags/ontology-parent-0.0.1-uat-build-iteration-2?root=sim-classifier&amp;system=exsy1002</url>
+    <connection>scm:svn:https://csfe.aceworkspace.net/svn/repos/sim-classifier/trunk/ontology-core</connection>
+    <developerConnection>scm:svn:https://csfe.aceworkspace.net/svn/repos/sim-classifier/trunk/ontology-core</developerConnection>
+    <url>https://csfe.aceworkspace.net/integration/viewvc/viewvc.cgi/trunk/ontology-core/?root=sim-classifier&amp;system=exsy1002</url>
   </scm>
 </project>

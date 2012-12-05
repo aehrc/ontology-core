@@ -3,7 +3,7 @@
 
   <groupId>au.csiro</groupId>
   <artifactId>ontology-import</artifactId>
-  <version>0.0.1-uat-build-iteration-2</version>
+  <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Core Ontology Importer</name>
@@ -12,7 +12,7 @@
   <parent>
     <groupId>au.csiro</groupId>
     <artifactId>ontology-parent</artifactId>
-    <version>0.0.1-uat-build-iteration-2</version>
+    <version>0.0.1-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
 
@@ -55,7 +55,7 @@
     <dependency>
       <groupId>au.csiro</groupId>
       <artifactId>ontology-model</artifactId>
-      <version>0.0.1-uat-build-iteration-2</version>
+      <version>0.0.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
   
