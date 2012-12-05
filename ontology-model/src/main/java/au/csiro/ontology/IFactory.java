@@ -9,7 +9,6 @@ import java.util.Calendar;
 import au.csiro.ontology.axioms.IAxiom;
 import au.csiro.ontology.model.ILiteral;
 import au.csiro.ontology.model.IConcept;
-import au.csiro.ontology.model.IFeature;
 import au.csiro.ontology.model.INamedFeature;
 import au.csiro.ontology.model.INamedRole;
 import au.csiro.ontology.model.IRole;
@@ -45,7 +44,7 @@ public interface IFactory<T> {
      * @param id
      * @return
      */
-    public IFeature createFeature(T id);
+    public INamedFeature<T> createFeature(T id);
     
     /**
      * Creates a conjunction.

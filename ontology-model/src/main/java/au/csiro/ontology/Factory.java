@@ -10,17 +10,16 @@ import au.csiro.ontology.axioms.ConceptInclusion;
 import au.csiro.ontology.axioms.IAxiom;
 import au.csiro.ontology.axioms.RoleInclusion;
 import au.csiro.ontology.model.BooleanLiteral;
-import au.csiro.ontology.model.DateLiteral;
-import au.csiro.ontology.model.DoubleLiteral;
-import au.csiro.ontology.model.FloatLiteral;
-import au.csiro.ontology.model.ILiteral;
 import au.csiro.ontology.model.Concept;
 import au.csiro.ontology.model.Conjunction;
 import au.csiro.ontology.model.Datatype;
+import au.csiro.ontology.model.DateLiteral;
+import au.csiro.ontology.model.DoubleLiteral;
 import au.csiro.ontology.model.Existential;
 import au.csiro.ontology.model.Feature;
+import au.csiro.ontology.model.FloatLiteral;
 import au.csiro.ontology.model.IConcept;
-import au.csiro.ontology.model.IFeature;
+import au.csiro.ontology.model.ILiteral;
 import au.csiro.ontology.model.INamedFeature;
 import au.csiro.ontology.model.INamedRole;
 import au.csiro.ontology.model.IRole;
@@ -48,7 +47,7 @@ public class Factory<T extends Comparable<T>> implements IFactory<T> {
     }
 
     @Override
-    public IFeature createFeature(T id) {
+    public INamedFeature<T> createFeature(T id) {
         return new Feature<>(id);
     }
 

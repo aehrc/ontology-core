@@ -6,7 +6,10 @@ package au.csiro.ontology.importer.rf2;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.InputStreamReader;
+import java.util.zip.GZIPInputStream;
 
 import org.apache.log4j.Logger;
 
@@ -36,7 +39,12 @@ public class RefsetImporter {
     public static IRefset importRefset(File refsetFile) {
         BufferedReader br = null;
         try {
-            br = new BufferedReader(new FileReader(refsetFile));
+            if(refsetFile.getName().endsWith(".gz")) {
+                br = new BufferedReader(new InputStreamReader(
+                        new GZIPInputStream(new FileInputStream(refsetFile)))); 
+            } else {
+                br = new BufferedReader(new FileReader(refsetFile));
+            }
             String line = br.readLine();
             
             String[] cols = line.split("[\t]");

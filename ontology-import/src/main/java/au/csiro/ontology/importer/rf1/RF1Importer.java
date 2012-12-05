@@ -6,7 +6,9 @@ package au.csiro.ontology.importer.rf1;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -15,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.zip.GZIPInputStream;
 
 import au.csiro.ontology.IOntology;
 import au.csiro.ontology.Ontology;
@@ -378,7 +381,12 @@ public class RF1Importer implements IImporter {
         List<ConceptRow> crs = new ArrayList<>();
         BufferedReader br = null;
         try {
-            br = new BufferedReader(new FileReader(conceptsFile));
+            if(conceptsFile.getName().endsWith(".gz")) {
+                br = new BufferedReader(new InputStreamReader(
+                        new GZIPInputStream(new FileInputStream(conceptsFile))));
+            } else {
+                br = new BufferedReader(new FileReader(conceptsFile));
+            }
             String line = br.readLine(); // Skip first line
 
             while (null != (line = br.readLine())) {
@@ -431,7 +439,13 @@ public class RF1Importer implements IImporter {
         // Read all the relationships from the raw data
         List<RelationshipRow> rrs = new ArrayList<>();
         try {
-            br = new BufferedReader(new FileReader(relationshipsFile));
+            if(relationshipsFile.getName().endsWith(".gz")) {
+                br = new BufferedReader(new InputStreamReader(
+                        new GZIPInputStream(
+                                new FileInputStream(relationshipsFile))));
+            } else {
+                br = new BufferedReader(new FileReader(relationshipsFile));
+            }
             String line = br.readLine(); // Skip first line
             while (null != (line = br.readLine())) {
                 if (line.trim().length() < 1) {

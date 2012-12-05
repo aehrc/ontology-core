@@ -33,8 +33,8 @@ public class TestRF1Importer {
     @Test
     public void testGetOntologyVersions() {
         RF1Importer rf1i = new RF1Importer(new File(TEST_DIR
-                + "sct1_Concepts_Core_INT_20110731.txt"), new File(
-                TEST_DIR + "sct1_Relationships_Core_INT_20110731.txt"),
+                + "sct1_Concepts_Core_INT_20110731.txt.gz"), new File(
+                TEST_DIR + "sct1_Relationships_Core_INT_20110731.txt.gz"),
                 "20110731");
 
         Map<String, Map<String, IOntology<String>>> ovs = 

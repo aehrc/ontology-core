@@ -34,9 +34,9 @@ public class TestRF2Importer {
     @Test
     public void testGetOntologyVersions() {
         RF2Importer rf2i = new RF2Importer(
-            new File(TEST_DIR + "sct2_Concept_Full_INT_20120131.txt"), 
+            new File(TEST_DIR + "sct2_Concept_Full_INT_20120131.txt.gz"), 
             new File(TEST_DIR + 
-                    "sct2_StatedRelationship_Full_INT_20120131.txt"),
+                    "sct2_StatedRelationship_Full_INT_20120131.txt.gz"),
             new File(TEST_DIR + 
                     "der2_ssRefset_ModuleDependencyFull_INT_20120131.txt"),
             ReleaseType.FULL);
