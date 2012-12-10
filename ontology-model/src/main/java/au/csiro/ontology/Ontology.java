@@ -119,7 +119,8 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
     
     @Override
     public Iterator<Node<T>> nodeIterator() {
-        return nodeMap.values().iterator();
+        Set<Node<T>> set = new HashSet<>(nodeMap.values());
+        return set.iterator();
     }
 
     @Override
