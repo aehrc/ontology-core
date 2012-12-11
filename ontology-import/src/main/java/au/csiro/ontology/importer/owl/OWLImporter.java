@@ -26,6 +26,7 @@ import org.semanticweb.owlapi.model.OWLDataExactCardinality;
 import org.semanticweb.owlapi.model.OWLDataHasValue;
 import org.semanticweb.owlapi.model.OWLDataMaxCardinality;
 import org.semanticweb.owlapi.model.OWLDataMinCardinality;
+import org.semanticweb.owlapi.model.OWLDataOneOf;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
 import org.semanticweb.owlapi.model.OWLDataPropertyRangeAxiom;
@@ -86,9 +87,6 @@ import au.csiro.ontology.model.StringLiteral;
 /**
  * Imports axioms in OWL format into the internal representation used by
  * Snorocket. This initial implementation does not support versions.
- * 
- * TODO: can OWLImports be mapped into modules? Do we benefit somehow by doing
- * this?
  * 
  * @author Alejandro Metke
  * 
@@ -255,7 +253,6 @@ public class OWLImporter implements IImporter {
         set.add(OWL2Datatype.XSD_DATE_TIME_STAMP);
         types.put(OWL2Datatype.XSD_DATE_TIME_STAMP, set);
 
-        // TODO: check hierachies for these datatypes
         set = new HashSet<OWL2Datatype>();
         set.add(OWL2Datatype.OWL_RATIONAL);
         types.put(OWL2Datatype.OWL_RATIONAL, set);
@@ -608,6 +605,35 @@ public class OWLImporter implements IImporter {
         }
         return res;
     }
+    
+    private void checkInconsistentProperty(OWLDataProperty dp, 
+            OWLDatatype type) {
+        for (OWLDataPropertyRangeAxiom a : dprAxioms) {
+            OWLDataPropertyExpression pe = a.getProperty();
+            OWLDataRange r = a.getRange();
+            // TODO: check DataOneOf
+            // TODO: check OWLDataIntersectionOf
+            OWLDatatype otype = r.asOWLDatatype();
+
+            if (!pe.isAnonymous()) {
+                OWLDataProperty odp = pe.asOWLDataProperty();
+
+                if (dp.equals(odp)) {
+                    boolean compatible = compatibleTypes(otype, type);
+                    if (!compatible) {
+                        // throw new InconsistentOntologyException();
+                        problems.add("The literal value restriction "
+                                + dp + " is inconsistent with the data "
+                                + "property range axiom " + a);
+                    }
+                }
+            } else {
+                System.err.println("Found anonymous data property "
+                        + "expression in data property range axiom: "
+                        + pe);
+            }
+        }
+    }
 
     /**
      * 
@@ -649,35 +675,10 @@ public class OWLImporter implements IImporter {
                 OWLLiteral l = e.getValue();
                 OWLDatatype type = l.getDatatype();
 
-                // Check for inconsistencies
-                for (OWLDataPropertyRangeAxiom a : dprAxioms) {
-                    OWLDataPropertyExpression pe = a.getProperty();
-                    OWLDataRange r = a.getRange();
-                    // TODO: check DataOneOf
-                    // TODO: check OWLDataIntersectionOf
-                    OWLDatatype otype = r.asOWLDatatype();
-
-                    if (!pe.isAnonymous()) {
-                        OWLDataProperty odp = pe.asOWLDataProperty();
-
-                        if (dp.equals(odp)) {
-                            boolean compatible = compatibleTypes(otype, type);
-                            if (!compatible) {
-                                // throw new InconsistentOntologyException();
-                                problems.add("The literal value restriction "
-                                        + e + " is inconsistent with the data "
-                                        + "property range axiom " + a);
-                            }
-                        }
-                    } else {
-                        System.err.println("Found anonymous data property "
-                                + "expression in data property range axiom: "
-                                + pe);
-                    }
-                }
+                checkInconsistentProperty(dp, type);
 
                 Feature<String> f = new Feature<>(dp.toStringID());
-                push(new Datatype<String>(f, Operator.EQUALS, getLiteral(l)));
+                push(new Datatype<>(f, Operator.EQUALS, getLiteral(l)));
             }
 
             public void visit(OWLDataAllValuesFrom e) {
@@ -685,8 +686,38 @@ public class OWLImporter implements IImporter {
             }
 
             public void visit(OWLDataSomeValuesFrom e) {
-                // TODO: also support this for concrete domains
-                unimplemented(e);
+                // TODO: apparently there is no way to include multiple data
+                // property expressions in OWLAPI even though the spec allows it
+                OWLDataProperty dp = e.getProperty().asOWLDataProperty();
+                OWLDataRange range = e.getFiller();
+                OWLLiteral l = null;
+                
+                /* 
+                 * An OWLDataRange can be one of the following: 
+                 * Datatype | DataIntersectionOf | DataUnionOf |
+                 * DataComplementOf | DataOneOf | DatatypeRestriction
+                 * 
+                 * We initially support only DataOneOf.
+                 */
+                if(range instanceof OWLDataOneOf) {
+                    OWLDataOneOf doo = (OWLDataOneOf)range;
+                    Set<OWLLiteral> values = doo.getValues();
+                    if(values.size() != 1) {
+                        problems.add("Expected only a single literal in "+e);
+                        return;
+                    }
+                } else {
+                    problems.add("Only a data range of type OWLDataOneOf is " +
+                    	"supported in an OWLDataSomeValuesFrom expression. " +
+                    	"Found a different type in "+e);
+                    return;
+                }
+                
+                OWLDatatype type = range.asOWLDatatype();
+                checkInconsistentProperty(dp, type);
+                
+                Feature<String> f = new Feature<>(dp.toStringID());
+                push(new Datatype<>(f, Operator.EQUALS, getLiteral(l)));
             }
 
             public void visit(OWLObjectOneOf e) {
@@ -696,6 +727,18 @@ public class OWLImporter implements IImporter {
 
             public void visit(OWLObjectHasSelf e) {
                 // TODO: implement to support EL profile
+                
+                // There is no model object to support this.
+                
+                /*
+                 * A self-restriction ObjectHasSelf( OPE ) consists of an object
+                 * property expression OPE, and it contains all those 
+                 * individuals that are connected by OPE to themselves.
+                 */
+                
+                /*Role<String> r = new Role<>(
+                        e.getProperty().asOWLObjectProperty().toStringID());*/
+
                 unimplemented(e);
             }
 
@@ -713,6 +756,8 @@ public class OWLImporter implements IImporter {
 
             public void visit(OWLObjectHasValue e) {
                 // TODO: implement to support EL profile
+                
+                // We do not support individuals
                 unimplemented(e);
             }
 
