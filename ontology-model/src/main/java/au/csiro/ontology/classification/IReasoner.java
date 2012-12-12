@@ -1,5 +1,6 @@
 package au.csiro.ontology.classification;
 
+import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -75,6 +76,13 @@ public interface IReasoner<T extends Comparable<T>> {
      */
     public IOntology<T> getClassifiedOntology(boolean includeTaxonomy, 
             boolean includeStatedAxioms, boolean includeInferredAxioms);
+    
+    /**
+     * Saves this reasoner to the specified {@link OutputStream}.
+     * 
+     * @param out The {@link OutputStream}.
+     */
+    public void save(OutputStream out);
     
     /**
      * Returns the resulting {@link Taxonomy} after classification (or null if

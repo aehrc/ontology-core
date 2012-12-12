@@ -14,14 +14,19 @@ package au.csiro.ontology.model;
 public class Concept<T extends Comparable<T>> implements INamedConcept<T> {
     
     /**
+     * Serialisation version.
+     */
+    private static final long serialVersionUID = 1L;
+
+    /**
      * Represents the top concept.
      */
-    public final static IConcept TOP = new Concept<>();
+    public static IConcept TOP = new Concept<>();
     
     /**
      * Represents the bottom concept.
      */
-    public final static IConcept BOTTOM = new Concept<>();
+    public static IConcept BOTTOM = new Concept<>();
     
     /**
      * String identifier of this concept.
@@ -33,6 +38,15 @@ public class Concept<T extends Comparable<T>> implements INamedConcept<T> {
      */
     private Concept() {
         id = null;
+    }
+    
+    /**
+     * This method must be invoked after deserialising a reasoner because top
+     * and bottom are just plain object references.
+     */
+    public static void reconnectTopBottom(IConcept top, IConcept bottom) {
+        TOP = top;
+        BOTTOM = bottom;
     }
 
     /**

@@ -4,13 +4,15 @@
  */
 package au.csiro.ontology.model;
 
+import java.io.Serializable;
+
 /**
  * Defines the methods of a named concept.
  * 
  * @author Alejandro Metke
  *
  */
-public interface INamedConcept<T> extends IConcept {
+public interface INamedConcept<T> extends IConcept, Serializable {
     
     /**
      * Returns the id of this named concept.

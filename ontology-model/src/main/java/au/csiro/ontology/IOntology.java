@@ -57,6 +57,20 @@ public interface IOntology<T extends Comparable<T>> {
     public Node<T> getNode(T id);
     
     /**
+     * Returns the {@link Node} in the taxonomy that corresponds to top.
+     * 
+     * @return The top node.
+     */
+    public Node<T> getTopNode();
+    
+    /**
+     * Returns the {@link Node} in the taxonomy that correspond to bottom.
+     * 
+     * @return The bottom node.
+     */
+    public Node<T> getBottomNode();
+    
+    /**
      * Returns an {@link Iterator} for all the nodes in the taxonomy or null if
      * the ontology has not been classified.
      * 

@@ -133,5 +133,17 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
             au.csiro.ontology.IOntology.AxiomForm form) {
         return getDefiningAxioms(new Concept<T>(c), form);
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Node<T> getTopNode() {
+        return getNode((T)Concept.TOP);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Node<T> getBottomNode() {
+        return getNode((T)Concept.BOTTOM);
+    }
     
 }
