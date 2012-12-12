@@ -5,11 +5,8 @@
 package au.csiro.ontology.importer.rf2;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.zip.GZIPInputStream;
 
 import org.apache.log4j.Logger;
 
@@ -36,15 +33,10 @@ public class RefsetImporter {
      * @param refsetFile
      * @return
      */
-    public static IRefset importRefset(File refsetFile) {
+    public static IRefset importRefset(InputStream refsetFile, String id, String displayName) {
         BufferedReader br = null;
         try {
-            if(refsetFile.getName().endsWith(".gz")) {
-                br = new BufferedReader(new InputStreamReader(
-                        new GZIPInputStream(new FileInputStream(refsetFile)))); 
-            } else {
-                br = new BufferedReader(new FileReader(refsetFile));
-            }
+            br = new BufferedReader(new InputStreamReader(refsetFile)); 
             String line = br.readLine();
             
             String[] cols = line.split("[\t]");
@@ -56,7 +48,7 @@ public class RefsetImporter {
                         cols[7].equals("targetEffectiveTime")) {
                     
                     IModuleDependencyRefset res = new ModuleDependencyRefset(
-                            refsetFile.getName(), refsetFile.getName());
+                            id, displayName);
                     
                     while (null != (line = br.readLine())) {
                         cols = line.split("[\t]");

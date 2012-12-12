@@ -5,9 +5,7 @@
 package au.csiro.ontology.importer.rf1;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.zip.GZIPInputStream;
 
 import au.csiro.ontology.IOntology;
 import au.csiro.ontology.Ontology;
@@ -43,8 +40,8 @@ import au.csiro.ontology.model.Role;
  */
 public class RF1Importer implements IImporter {
 
-    protected final File conceptsFile;
-    protected final File relationshipsFile;
+    protected final InputStream conceptsFile;
+    protected final InputStream relationshipsFile;
     protected final String version;
 
     /**
@@ -68,7 +65,7 @@ public class RF1Importer implements IImporter {
      * @param relationshipsFile
      * @param version The version of this ontology.
      */
-    public RF1Importer(File conceptsFile, File relationshipsFile, 
+    public RF1Importer(InputStream conceptsFile, InputStream relationshipsFile, 
             String version) {
         this.conceptsFile = conceptsFile;
         this.relationshipsFile = relationshipsFile;
@@ -376,17 +373,13 @@ public class RF1Importer implements IImporter {
     /**
      * Processes the raw RF1 files and generates a {@link VersionRows}.
      */
+    @SuppressWarnings("resource")
     public VersionRows extractVersionRows() {
         // Read all the concepts from the raw data
         List<ConceptRow> crs = new ArrayList<>();
-        BufferedReader br = null;
-        try {
-            if(conceptsFile.getName().endsWith(".gz")) {
-                br = new BufferedReader(new InputStreamReader(
-                        new GZIPInputStream(new FileInputStream(conceptsFile))));
-            } else {
-                br = new BufferedReader(new FileReader(conceptsFile));
-            }
+        
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(conceptsFile))) {
             String line = br.readLine(); // Skip first line
 
             while (null != (line = br.readLine())) {
@@ -427,25 +420,12 @@ public class RF1Importer implements IImporter {
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (Exception e) {
-                }
-            }
         }
 
         // Read all the relationships from the raw data
         List<RelationshipRow> rrs = new ArrayList<>();
-        try {
-            if(relationshipsFile.getName().endsWith(".gz")) {
-                br = new BufferedReader(new InputStreamReader(
-                        new GZIPInputStream(
-                                new FileInputStream(relationshipsFile))));
-            } else {
-                br = new BufferedReader(new FileReader(relationshipsFile));
-            }
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(relationshipsFile))) {
             String line = br.readLine(); // Skip first line
             while (null != (line = br.readLine())) {
                 if (line.trim().length() < 1) {
@@ -488,14 +468,6 @@ public class RF1Importer implements IImporter {
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (Exception e) {
-                    
-                }
-            }
         }
 
         // In this case we know we are dealing with a single version so we need

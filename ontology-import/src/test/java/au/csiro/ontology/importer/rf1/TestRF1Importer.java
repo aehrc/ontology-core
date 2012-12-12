@@ -5,6 +5,7 @@
 package au.csiro.ontology.importer.rf1;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.Map;
 
 import junit.framework.Assert;
@@ -32,9 +33,9 @@ public class TestRF1Importer {
      */
     @Test
     public void testGetOntologyVersions() {
-        RF1Importer rf1i = new RF1Importer(new File(TEST_DIR
-                + "sct1_Concepts_Core_INT_20110731.txt.gz"), new File(
-                TEST_DIR + "sct1_Relationships_Core_INT_20110731.txt.gz"),
+        RF1Importer rf1i = new RF1Importer(
+                this.getClass().getResourceAsStream("/sct1_Concepts_Core_INT_20110731.txt"), 
+                this.getClass().getResourceAsStream("/sct1_Relationships_Core_INT_20110731.txt"),
                 "20110731");
 
         Map<String, Map<String, IOntology<String>>> ovs = 
@@ -49,14 +50,19 @@ public class TestRF1Importer {
      */
     @Test
     public void testExtractVersionRows() {
-        RF1Importer rf1i = new RF1Importer(new File(TEST_DIR
-                + "rf1_con_test.txt"), new File(TEST_DIR
-                + "rf1_rel_test.txt"), "20110731");
-
-        VersionRows vr1 = rf1i.extractVersionRows();
-        Assert.assertEquals("20110731", vr1.getVersionName());
-        Assert.assertEquals(11, vr1.getConceptRows().size());
-        Assert.assertEquals(13, vr1.getRelationshipRows().size());
+        try {
+            RF1Importer rf1i = new RF1Importer(
+                    new FileInputStream(new File(TEST_DIR + "rf1_con_test.txt")), 
+                    new FileInputStream(new File(TEST_DIR + "rf1_rel_test.txt")), 
+                    "20110731");
+            VersionRows vr1 = rf1i.extractVersionRows();
+            Assert.assertEquals("20110731", vr1.getVersionName());
+            Assert.assertEquals(11, vr1.getConceptRows().size());
+            Assert.assertEquals(13, vr1.getRelationshipRows().size());
+        } catch(Exception e) {
+            e.printStackTrace();
+            Assert.assertTrue(false);
+        }
     }
 
 }

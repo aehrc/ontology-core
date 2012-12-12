@@ -24,6 +24,7 @@
 	<modules>
 		<module>ontology-model</module>
 		<module>ontology-import</module>
+		<module>ontology-test-data</module>
 	</modules>
 	<dependencies>
 		<dependency>

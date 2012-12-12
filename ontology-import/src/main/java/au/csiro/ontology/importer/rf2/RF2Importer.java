@@ -5,9 +5,7 @@
 package au.csiro.ontology.importer.rf2;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,7 +21,6 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.zip.GZIPInputStream;
 
 import au.csiro.ontology.IOntology;
 import au.csiro.ontology.Ontology;
@@ -65,17 +62,17 @@ public class RF2Importer implements IImporter {
     /**
      * The concepts file.
      */
-    protected final File conceptsFile;
+    protected final InputStream conceptsFile;
 
     /**
      * The relationships file.
      */
-    protected final File relationshipsFile;
+    protected final InputStream relationshipsFile;
 
     /**
      * The module dependency refset.
      */
-    protected final File moduleDependencyFile;
+    protected final InputStream moduleDependencyFile;
 
     /**
      * Indicates the type of release that the input files represent.
@@ -110,11 +107,12 @@ public class RF2Importer implements IImporter {
      * @param moduleDependencyFile
      * @param type
      */
-    public RF2Importer(File conceptsFile, File relationshipsFile, 
-            File moduleDependencyFile, ReleaseType type) {
+    public RF2Importer(InputStream conceptsFile, InputStream relationshipsFile, 
+            InputStream moduleDependencyFile, ReleaseType type) {
         this.conceptsFile = conceptsFile;
         this.relationshipsFile = relationshipsFile;
         this.moduleDependencyFile = moduleDependencyFile;
+        this.type = type;
     }
     
     private VersionRows getVersionRows(Map<String, Module> modules, 
@@ -168,7 +166,8 @@ public class RF2Importer implements IImporter {
         if(moduleDependencyFile != null) {
             // Calculate the module dependencies
             IModuleDependencyRefset md = (IModuleDependencyRefset) 
-                    RefsetImporter.importRefset(moduleDependencyFile);
+                    RefsetImporter.importRefset(moduleDependencyFile, 
+                            "moduleDependency", "moduleDependency");
     
             // Each map entry contains a collection of modules, one for each 
             // version
@@ -436,12 +435,7 @@ public class RF2Importer implements IImporter {
         List<ConceptRow> crs = new ArrayList<>();
         BufferedReader br = null;
         try {
-            if(conceptsFile.getName().endsWith(".gz")) {
-                br = new BufferedReader(new InputStreamReader(
-                        new GZIPInputStream(new FileInputStream(conceptsFile))));
-            } else {
-                br = new BufferedReader(new FileReader(conceptsFile));
-            }
+            br = new BufferedReader(new InputStreamReader(conceptsFile));
             String line = br.readLine(); // Skip first line
 
             while (null != (line = br.readLine())) {
@@ -498,13 +492,7 @@ public class RF2Importer implements IImporter {
         // Read all the relationships from the raw data
         List<RelationshipRow> rrs = new ArrayList<>();
         try {
-            if(relationshipsFile.getName().endsWith(".gz")) {
-                br = new BufferedReader(new InputStreamReader(
-                        new GZIPInputStream(
-                                new FileInputStream(relationshipsFile)))); 
-            } else {
-                br = new BufferedReader(new FileReader(relationshipsFile));
-            }
+            br = new BufferedReader(new InputStreamReader(relationshipsFile)); 
             String line = br.readLine(); // Skip first line
             while (null != (line = br.readLine())) {
                 if (line.trim().length() < 1) {
