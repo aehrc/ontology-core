@@ -32,6 +32,8 @@ public interface IOntology<T extends Comparable<T>> {
      * either a named concept or a complex expression).
      * 
      * @param c A named concept.
+     * @param form Indicates if the axioms requested are the stated or the 
+     * inferred ones.
      * @return The set of axioms that define the concept.
      */
     public Set<IAxiom> getDefiningAxioms(Concept<T> c, AxiomForm form);
@@ -43,6 +45,8 @@ public interface IOntology<T extends Comparable<T>> {
      * either a named concept or a complex expression).
      * 
      * @param c The id of a named concept.
+     * @param form Indicates if the axioms requested are the stated or the 
+     * inferred ones.
      * @return The set of axioms that define the concept.
      */
     public Set<IAxiom> getDefiningAxioms(T c, AxiomForm form);
