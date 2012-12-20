@@ -156,14 +156,16 @@ public class RF1Importer implements IImporter {
 
             if (numElems == 0) {
                 // do nothing
-            } else if (numElems == 1) {
+            } else if (numElems == 1 && (prs != null && !prs.isEmpty())) {
                 axioms.add(new ConceptInclusion(new Concept<String>(c1), 
                         new Concept<String>(prs.iterator().next())));
             } else {
                 List<IConcept> conjs = new ArrayList<>();
-
-                for (String pr : prs) {
-                    conjs.add(new Concept<String>(pr));
+                
+                if(prs != null) {
+                    for (String pr : prs) {
+                        conjs.add(new Concept<String>(pr));
+                    }
                 }
 
                 if (relsVal != null) {
