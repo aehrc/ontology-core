@@ -29,6 +29,7 @@ import au.csiro.ontology.model.Conjunction;
 import au.csiro.ontology.model.Existential;
 import au.csiro.ontology.model.IConcept;
 import au.csiro.ontology.model.Role;
+import au.csiro.ontology.util.Statistics;
 
 /**
  * Transforms the native RF1 files used in SNOMED into the internal 
@@ -75,6 +76,9 @@ public class RF1Importer implements IImporter {
     @Override
     public Map<String, Map<String, IOntology<String>>> getOntologyVersions(
             IProgressMonitor monitor) {
+        
+        long start = System.currentTimeMillis();
+        
         monitor.taskStarted("Loading axioms");
         
         Map<String, Map<String, IOntology<String>>> res = new HashMap<>();
@@ -216,7 +220,9 @@ public class RF1Importer implements IImporter {
         Map<String, IOntology<String>> map = new HashMap<>();
         map.put(vr.getVersionName(), new Ontology<String>(axioms, null, null));
         res.put("snomed", map);
-
+        
+        Statistics.INSTANCE.setTime("rf1 loading", 
+                System.currentTimeMillis() - start);
         return res;
     }
 

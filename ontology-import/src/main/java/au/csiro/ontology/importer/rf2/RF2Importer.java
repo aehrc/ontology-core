@@ -40,6 +40,7 @@ import au.csiro.ontology.model.IRole;
 import au.csiro.ontology.model.Role;
 import au.csiro.ontology.snomed.refset.rf2.IModule;
 import au.csiro.ontology.snomed.refset.rf2.IModuleDependencyRefset;
+import au.csiro.ontology.util.Statistics;
 
 /**
  * Imports ontologies specified in RF2 format into the internal representation.
@@ -150,7 +151,9 @@ public class RF2Importer implements IImporter {
     @Override
     public Map<String, Map<String, IOntology<String>>> getOntologyVersions(
             IProgressMonitor monitor) {
-
+        
+        long start = System.currentTimeMillis();
+        
         // TODO: do something with the monitor
         // TODO: refactor this to avoid duplicate code in ExtendedRF2Importer
 
@@ -419,7 +422,9 @@ public class RF2Importer implements IImporter {
                         null));
             }
         }
-
+        
+        Statistics.INSTANCE.setTime("rf2 loading", 
+                System.currentTimeMillis() - start);
         return res;
     }
 
