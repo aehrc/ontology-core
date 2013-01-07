@@ -20,7 +20,10 @@
 	<artifactId>ontology-parent</artifactId>
 	<packaging>pom</packaging>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Internal Core Ontology Model - Parent Module</name>
+	<name>${branch}: (MMP) Core Model</name>
+          <properties>
+            <branch>sim-clx-internal</branch>
+          </properties>
 	<modules>
 		<module>ontology-model</module>
 		<module>ontology-import</module>
