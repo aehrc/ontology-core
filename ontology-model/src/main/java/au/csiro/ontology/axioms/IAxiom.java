@@ -10,7 +10,7 @@ package au.csiro.ontology.axioms;
  * @author Alejandro Metke
  *
  */
-public interface IAxiom {
+public interface IAxiom extends Comparable<IAxiom> {
     
     abstract public String toString();
     

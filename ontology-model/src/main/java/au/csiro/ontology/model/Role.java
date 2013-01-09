@@ -10,7 +10,7 @@ package au.csiro.ontology.model;
  * @author Alejandro Metke
  * 
  */
-public class Role<T> implements INamedRole<T> {
+public class Role<T extends Comparable<T>> implements INamedRole<T> {
     
     /**
      * Represents the role used to group related expressions in SNOMED.
@@ -80,6 +80,16 @@ public class Role<T> implements INamedRole<T> {
         } else if (!id.equals(other.id))
             return false;
         return true;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public int compareTo(IRole o) {
+        if(!(o instanceof INamedRole)) {
+            return -1;
+        } else {
+            return id.compareTo(((INamedRole<T>)o).getId());
+        }
     }
 
 }

@@ -10,7 +10,7 @@ package au.csiro.ontology.model;
  * @author Alejandro Metke
  *
  */
-public interface IRole {
+public interface IRole extends Comparable<IRole>{
     
     abstract public String toString();
 

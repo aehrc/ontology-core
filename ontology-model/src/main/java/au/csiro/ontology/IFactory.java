@@ -20,7 +20,7 @@ import au.csiro.ontology.model.Operator;
  * @author Alejandro Metke
  *
  */
-public interface IFactory<T> {
+public interface IFactory<T extends Comparable<T>> {
     
     /**
      * Creates a concept with the specified id.

@@ -97,5 +97,22 @@ public class ConceptInclusion implements IConceptInclusion {
             return false;
         return true;
     }
+
+    @Override
+    public int compareTo(IAxiom o) {
+        if(!(o instanceof IConceptInclusion)) {
+            return -1;
+        } else {
+            IConceptInclusion otherCi = (IConceptInclusion)o;
+            int lhsRes = lhs.compareTo(otherCi.lhs());
+            int rhsRes = rhs.compareTo(otherCi.rhs());
+            if(lhsRes == 0 && rhsRes == 0)
+                return 0;
+            else if(lhsRes != 0)
+                return lhsRes;
+            else
+                return rhsRes;
+        }
+    }
     
 }

@@ -4,6 +4,8 @@
  */
 package au.csiro.ontology.axioms;
 
+import java.util.Arrays;
+
 import au.csiro.ontology.model.IRole;
 
 /**
@@ -33,6 +35,7 @@ public class RoleInclusion implements IRoleInclusion {
      */
     public RoleInclusion(final IRole[] lhs, final IRole rhs) {
         this.lhs = lhs;
+        Arrays.sort(lhs);
         this.rhs = rhs;
     }
     
@@ -80,4 +83,41 @@ public class RoleInclusion implements IRoleInclusion {
         return sb.toString();
     }
 
+    @Override
+    public int compareTo(IAxiom o) {
+        if(!(o instanceof IRoleInclusion)) {
+            return 1;
+        } else {
+            IRoleInclusion otherRi = (IRoleInclusion)o;
+            int lhsRes = 0;
+            IRole[] oLhs = otherRi.lhs();
+            if(!Arrays.equals(lhs, oLhs)) {
+                // If length is different put the shortest one first
+                if(lhs.length < oLhs.length) {
+                    lhsRes = -1;
+                } else if(lhs.length > oLhs.length) {
+                    lhsRes = 1;
+                } else {
+                    for(int i = 0; i < lhs.length; i++) {
+                        int res = lhs[i].compareTo(oLhs[i]);
+                        if(res < 0) {
+                            lhsRes = -1;
+                            break;
+                        } else if(res > 0) {
+                            lhsRes = 1;
+                            break;
+                        }
+                    }
+                }
+            }
+            int rhsRes = rhs.compareTo(otherRi.rhs());
+            if(lhsRes == 0 && rhsRes == 0)
+                return 0;
+            else if(lhsRes != 0)
+                return lhsRes;
+            else
+                return rhsRes;
+        }
+    }
+    
 }
