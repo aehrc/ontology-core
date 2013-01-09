@@ -35,7 +35,6 @@ public class RoleInclusion implements IRoleInclusion {
      */
     public RoleInclusion(final IRole[] lhs, final IRole rhs) {
         this.lhs = lhs;
-        Arrays.sort(lhs);
         this.rhs = rhs;
     }
     
