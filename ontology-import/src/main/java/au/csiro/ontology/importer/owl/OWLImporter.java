@@ -895,7 +895,7 @@ public class OWLImporter implements IImporter {
         }
         
         // TODO: extract the additional information from the OWL ontology
-        Ontology<String> o = new Ontology<>(ont, null, null);
+        Ontology<String> o = new Ontology<>(ont, null);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
         Map<String, Map<String, IOntology<String>>> res = new HashMap<>();
         Map<String, IOntology<String>> map = new HashMap<>();

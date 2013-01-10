@@ -5,7 +5,10 @@
 package au.csiro.ontology.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import au.csiro.ontology.axioms.ConceptInclusion;
 import au.csiro.ontology.axioms.IAxiom;
@@ -298,6 +301,34 @@ public class AxiomUtils {
         }
         
         return start;
+    }
+    
+    /**
+     * Returns a {@link Set} of {@link IAxiom}s that define a concept.
+     * This includes the axioms of the form c [ x, x [ c, and c = x, where c is
+     * a named concept and x is an abstract concept (which means it can be
+     * either a named concept or a complex expression).
+     * 
+     * @param axioms
+     * @param concept
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    public static Set<IAxiom> findDefiningAxioms(Collection<IAxiom> axioms, 
+            Concept concept) {
+        Set<IAxiom> res = new HashSet<>();
+        for(IAxiom axiom : axioms) {
+            if(axiom instanceof IConceptInclusion) {
+                IConceptInclusion ci = (IConceptInclusion)axiom;
+                IConcept lhs = ci.lhs();
+                IConcept rhs = ci.rhs();
+                
+                if(concept.equals(lhs) || concept.equals(rhs)) {
+                    res.add(axiom);
+                }
+            }
+        }
+        return res;
     }
     
     /**

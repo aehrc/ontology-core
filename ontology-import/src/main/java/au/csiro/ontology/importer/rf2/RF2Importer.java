@@ -418,8 +418,7 @@ public class RF2Importer implements IImporter {
                     res.put(modId, ontVersions);
                 }
                 
-                ontVersions.put(version, new Ontology<String>(axioms, null, 
-                        null));
+                ontVersions.put(version, new Ontology<String>(axioms, null));
             }
         }
         

@@ -41,6 +41,16 @@ public interface IReasoner<T extends Comparable<T>> {
     public IReasoner<T> classify(Iterator<IAxiom> axioms);
     
     /**
+     * Classifies the stated axioms in the supplied ontology. The first time 
+     * this method is called it will perform a full classification. Subsequent 
+     * calls will trigger incremental classifications.
+     * 
+     * @param ont An ontology.
+     * @return IReasoner
+     */
+    public IReasoner<T> classify(IOntology<T> ont);
+    
+    /**
      * Removes all the state in the classifier except the taxonomy generated
      * after classification. If the classification process has not been run then
      * this method has no effect. Once pruned, it is no longer possible to run
@@ -52,30 +62,13 @@ public interface IReasoner<T extends Comparable<T>> {
     public void prune();
     
     /**
-     * Returns an {@link IOntology} that represents the current set of stated
-     * axioms, classified axioms, and the generated taxonomy. If no axioms have
-     * yet been classified it returns null.
+     * Returns an {@link IOntology} that represents the generated taxonomy. 
+     * If no axioms have yet been classified it throws a 
+     * {@link RuntimeException}.
      * 
      * @return The classified ontology.
      */
     public IOntology<T> getClassifiedOntology();
-    
-    /**
-     * Returns an {@link IOntology} that represents the current set of stated
-     * axioms, classified axioms, and the generated taxonomy. If no axioms have
-     * yet been classified it returns null.
-     * 
-     * @param includeTaxonomy Indicates if the taxonomy should be included in 
-     * the generated ontology.
-     * @param includeStatedAxioms Indicates if the stated axioms should be
-     * included in the generated ontology.
-     * @param includeInferredAxioms Indicates if the inferred axioms should be
-     * included in the generated ontology.
-     * 
-     * @return The classified ontology.
-     */
-    public IOntology<T> getClassifiedOntology(boolean includeTaxonomy, 
-            boolean includeStatedAxioms, boolean includeInferredAxioms);
     
     /**
      * Saves this reasoner to the specified {@link OutputStream}.

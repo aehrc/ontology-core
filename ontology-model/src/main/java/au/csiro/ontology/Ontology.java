@@ -13,9 +13,7 @@ import java.util.Map;
 import java.util.Set;
 
 import au.csiro.ontology.axioms.IAxiom;
-import au.csiro.ontology.axioms.IConceptInclusion;
 import au.csiro.ontology.model.Concept;
-import au.csiro.ontology.model.IConcept;
 
 /**
  * Represents an ontology in our internal format. Includes the DL
@@ -34,15 +32,10 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
     protected final Collection<IAxiom> statedAxioms;
     
     /**
-     * The collection of inferred axioms in distribution normal form.
-     */
-    protected final Collection<IAxiom> inferredAxioms;
-    
-    /**
      * A map that contains references to all the nodes in the taxonomy indexed
      * by id.
      */
-    protected final Map<T, Node<T>> nodeMap;
+    protected Map<T, Node<T>> nodeMap;
     
     /**
      * Builds a new ontology.
@@ -52,17 +45,11 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
      * DNF.
      * @param infoMap The additional information.
      */
-    public Ontology(Collection<IAxiom> statedAxioms, 
-            Collection<IAxiom> inferredAxioms, Map<T, Node<T>> nodeMap) {
+    public Ontology(Collection<IAxiom> statedAxioms, Map<T, Node<T>> nodeMap) {
         if(statedAxioms == null) {
             this.statedAxioms = new ArrayList<>();
         } else {
             this.statedAxioms = statedAxioms;
-        }
-        if(inferredAxioms == null) {
-            this.inferredAxioms = new ArrayList<>();
-        } else {
-            this.inferredAxioms = inferredAxioms;
         }
         if(nodeMap == null) {
             this.nodeMap = new HashMap<>();
@@ -72,44 +59,8 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
     }
 
     @Override
-    public Collection<IAxiom> getAxioms(AxiomForm form) {
-        if(form == AxiomForm.STATED) {
-            return statedAxioms;
-        } else if(form == AxiomForm.INFERRED) {
-            return inferredAxioms;
-        } else {
-            throw new RuntimeException("Unknown axiom form "+form);
-        }
-    }
-
-    @Override
-    public Set<IAxiom> getDefiningAxioms(Concept<T> c, AxiomForm form) {
-        if(form == AxiomForm.STATED) {
-            if(statedAxioms == null) return null;
-            return findDefiningAxioms(statedAxioms, c);
-        } else if(form == AxiomForm.INFERRED) {
-            if(inferredAxioms == null) return null;
-            return findDefiningAxioms(inferredAxioms, c);
-        } else {
-            throw new RuntimeException("Unknown axiom form "+form);
-        }
-    }
-    
-    private Set<IAxiom> findDefiningAxioms(Collection<IAxiom> axioms, 
-            Concept<T> concept) {
-        Set<IAxiom> res = new HashSet<>();
-        for(IAxiom axiom : axioms) {
-            if(axiom instanceof IConceptInclusion) {
-                IConceptInclusion ci = (IConceptInclusion)axiom;
-                IConcept lhs = ci.lhs();
-                IConcept rhs = ci.rhs();
-                
-                if(concept.equals(lhs) || concept.equals(rhs)) {
-                    res.add(axiom);
-                }
-            }
-        }
-        return res;
+    public Collection<IAxiom> getStatedAxioms() {
+        return statedAxioms;
     }
     
     @Override
@@ -128,12 +79,6 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
         return nodeMap;
     }
 
-    @Override
-    public Set<IAxiom> getDefiningAxioms(T c,
-            au.csiro.ontology.IOntology.AxiomForm form) {
-        return getDefiningAxioms(new Concept<T>(c), form);
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public Node<T> getTopNode() {
@@ -144,6 +89,11 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
     @Override
     public Node<T> getBottomNode() {
         return getNode((T)Concept.BOTTOM);
+    }
+
+    @Override
+    public void setNodeMap(Map<T, Node<T>> nodeMap) {
+        this.nodeMap = nodeMap;
     }
     
 }
