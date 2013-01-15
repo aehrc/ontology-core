@@ -24,6 +24,7 @@ import au.csiro.ontology.model.INamedFeature;
 import au.csiro.ontology.model.INamedRole;
 import au.csiro.ontology.model.IRole;
 import au.csiro.ontology.model.IntegerLiteral;
+import au.csiro.ontology.model.LongLiteral;
 import au.csiro.ontology.model.Operator;
 import au.csiro.ontology.model.Role;
 import au.csiro.ontology.model.StringLiteral;
@@ -105,6 +106,11 @@ public class Factory<T extends Comparable<T>> implements IFactory<T> {
     @Override
     public ILiteral createStringLiteral(String value) {
         return new StringLiteral(value);
+    }
+
+    @Override
+    public ILiteral createLongLiteral(long value) {
+        return new LongLiteral(value);
     }
 
 }

@@ -139,4 +139,12 @@ public interface IFactory<T extends Comparable<T>> {
      */
     public ILiteral createStringLiteral(String value);
     
+    /**
+     * Creates a long literal.
+     * 
+     * @param value
+     * @return
+     */
+    public ILiteral createLongLiteral(long value);
+    
 }
