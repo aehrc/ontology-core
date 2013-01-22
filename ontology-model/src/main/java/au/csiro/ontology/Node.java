@@ -4,6 +4,7 @@
  */
 package au.csiro.ontology;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -13,7 +14,12 @@ import java.util.Set;
  * @author Alejandro Metke
  * 
  */
-public class Node<T> {
+public class Node<T extends Comparable<T>> implements Serializable {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     /**
      * Set of equivalent concepts in this node.
      */
