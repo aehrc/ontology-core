@@ -14,7 +14,7 @@ import java.util.Map;
  * @deprecated Use {@link IOntology} instead.
  *
  */
-public class Taxonomy<T> {
+public class Taxonomy<T extends Comparable<T>> {
     
     /**
      * A map that contains references to all the nodes in the taxonomy indexed
