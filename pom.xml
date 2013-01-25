@@ -27,7 +27,6 @@
 	<modules>
 		<module>ontology-model</module>
 		<module>ontology-import</module>
-		<module>ontology-test-data</module>
 	</modules>
 	<dependencies>
 		<dependency>
@@ -49,17 +48,6 @@
       <url>scp://ict-ehrclf-cbr.vm.csiro.au/srv/aehrc.com/maven2</url>
     </snapshotRepository>
   </distributionManagement>
-
-  <repositories>
-    <repository>
-      <id>ehrc-public-repo</id>
-      <name>AeHRC Public</name>
-      <url>http://aehrc.com/maven2</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-    </repository>
-  </repositories>
 	
 	<build>
 	 <extensions>

@@ -3,6 +3,7 @@ package au.csiro.ontology;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import au.csiro.ontology.axioms.IAxiom;
 
@@ -67,5 +68,23 @@ public interface IOntology<T extends Comparable<T>> {
      * @param nodeMap The taxonomy.
      */
     public void setNodeMap(Map<T, Node<T>> nodeMap);
+    
+    /**
+     * Returns a {@link Set} with a subset of nodes in the taxonomy that have 
+     * been possibly affected after an incremental classification. If no 
+     * incremental classification has been done then it returns an empty 
+     * {@link Set}.
+     * 
+     * @return The subset of the taxonomy that has potentially changed.
+     */
+    public Set<Node<T>> getAffectedNodes();
+    
+    /**
+     * Sets the {@link Set} of nodes in the taxonomy that might have been 
+     * affected in an incremental classification.
+     * 
+     * @param cids The set of nodes to set.
+     */
+    public void setAffectedNodes(Set<Node<T>> nodes);
 
 }

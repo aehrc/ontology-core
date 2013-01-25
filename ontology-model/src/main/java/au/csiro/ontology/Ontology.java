@@ -35,27 +35,41 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
      * A map that contains references to all the nodes in the taxonomy indexed
      * by id.
      */
-    protected Map<T, Node<T>> nodeMap;
+    protected final Map<T, Node<T>> nodeMap = new HashMap<>();
+    
+    /**
+     * Set of {@link Node}s pontentially affected by the last incremental
+     * classification.
+     */
+    protected final Set<Node<T>> lastAffectedNodes = new HashSet<>();
     
     /**
      * Builds a new ontology.
      * 
-     * @param statedAxioms The stated axioms in the ontology.
-     * @param inferredAxioms The axioms in the ontology after classification in 
-     * DNF.
-     * @param infoMap The additional information.
+     * @param statedAxioms
+     * @param nodeMap
+     * @param lastAffectedNodes
      */
-    public Ontology(Collection<IAxiom> statedAxioms, Map<T, Node<T>> nodeMap) {
+    public Ontology(Collection<IAxiom> statedAxioms, Map<T, Node<T>> nodeMap, 
+    		Set<Node<T>> lastAffectedNodes) {
         if(statedAxioms == null) {
             this.statedAxioms = new ArrayList<>();
         } else {
             this.statedAxioms = statedAxioms;
         }
-        if(nodeMap == null) {
-            this.nodeMap = new HashMap<>();
-        } else {
-            this.nodeMap = nodeMap;
-        }
+        this.nodeMap.putAll(nodeMap);
+        if(lastAffectedNodes != null)
+        	this.lastAffectedNodes.addAll(lastAffectedNodes);
+    }
+    
+    /**
+     * Builds a new ontology.
+     * 
+     * @param statedAxioms
+     * @param nodeMap
+     */
+    public Ontology(Collection<IAxiom> statedAxioms, Map<T, Node<T>> nodeMap) {
+    	this(statedAxioms, nodeMap, null);
     }
 
     @Override
@@ -93,7 +107,19 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
 
     @Override
     public void setNodeMap(Map<T, Node<T>> nodeMap) {
-        this.nodeMap = nodeMap;
+        this.nodeMap.clear();
+        this.nodeMap.putAll(nodeMap);
     }
+
+	@Override
+	public Set<Node<T>> getAffectedNodes() {
+		return lastAffectedNodes;
+	}
+
+	@Override
+	public void setAffectedNodes(Set<Node<T>> nodes) {
+		lastAffectedNodes.clear();
+		lastAffectedNodes.addAll(nodes);
+	}
     
 }

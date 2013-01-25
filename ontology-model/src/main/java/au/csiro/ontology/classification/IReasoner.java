@@ -55,9 +55,7 @@ public interface IReasoner<T extends Comparable<T>> {
      * after classification. If the classification process has not been run then
      * this method has no effect. Once pruned, it is no longer possible to run
      * an incremental classification. Doing so will generate a 
-     * {@link RuntimeException}. It is also impossible to return the stated and
-     * inferred axioms. Calling the getClassifiedOntology method requesting
-     * any of these will also generate a {@link RuntimeException}.
+     * {@link RuntimeException}.
      */
     public void prune();
     
