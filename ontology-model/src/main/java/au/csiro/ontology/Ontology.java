@@ -57,7 +57,8 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
         } else {
             this.statedAxioms = statedAxioms;
         }
-        this.nodeMap.putAll(nodeMap);
+        if(nodeMap != null)
+        	this.nodeMap.putAll(nodeMap);
         if(lastAffectedNodes != null)
         	this.lastAffectedNodes.addAll(lastAffectedNodes);
     }
