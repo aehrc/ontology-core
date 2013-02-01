@@ -265,13 +265,21 @@ public class OWLImporter implements IImporter {
         set.add(OWL2Datatype.OWL_REAL);
         types.put(OWL2Datatype.OWL_REAL, set);
 
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.RDF_PLAIN_LITERAL);
-        types.put(OWL2Datatype.RDF_PLAIN_LITERAL, set);
+        try {
+            set = new HashSet<OWL2Datatype>();
+            set.add(OWL2Datatype.RDF_PLAIN_LITERAL);
+            types.put(OWL2Datatype.RDF_PLAIN_LITERAL, set);
+        } catch (NoSuchFieldError e) {
+            // ignore - this is throw when working with older versions of the OWL API
+        }
 
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.RDFS_LITERAL);
-        types.put(OWL2Datatype.RDFS_LITERAL, set);
+        try {
+            set = new HashSet<OWL2Datatype>();
+            set.add(OWL2Datatype.RDFS_LITERAL);
+            types.put(OWL2Datatype.RDFS_LITERAL, set);
+        } catch (NoSuchFieldError e) {
+            // ignore - this is throw when working with older versions of the OWL API
+        }
 
         set = new HashSet<OWL2Datatype>();
         set.add(OWL2Datatype.RDF_XML_LITERAL);
