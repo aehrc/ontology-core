@@ -76,6 +76,14 @@ public interface IReasoner<T extends Comparable<T>> {
     public void save(OutputStream out);
     
     /**
+     * Determines if the ontology has been classified.
+     * 
+     * @return boolean True if the ontology has been classified or false if it
+     * hasn't.
+     */
+    public boolean isClassified();
+    
+    /**
      * Returns the resulting {@link Taxonomy} after classification (or null if
      * the ontology has not been classified yet).
      * 
