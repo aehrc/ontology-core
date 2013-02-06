@@ -19,11 +19,12 @@
 	<groupId>au.csiro</groupId>
 	<artifactId>ontology-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>${branch}: (MMP) Core Model</name>
-          <properties>
-            <branch>sim-clx-internal</branch>
-          </properties>
+	<version>1.2-SNAPSHOT</version>
+	<name>Ontology Core Model</name>
+    <properties>
+      <branch>sim-clx-internal</branch>
+      <ontology-test-data.version>1.2-SNAPSHOT</ontology-test-data.version>
+    </properties>
 	<modules>
 		<module>ontology-model</module>
 		<module>ontology-import</module>

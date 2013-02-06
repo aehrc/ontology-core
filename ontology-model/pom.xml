@@ -3,7 +3,6 @@
 
   <groupId>au.csiro</groupId>
   <artifactId>ontology-model</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Internal Core Ontology Model</name>
@@ -12,7 +11,7 @@
   <parent>
     <groupId>au.csiro</groupId>
     <artifactId>ontology-parent</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
 
