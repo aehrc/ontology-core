@@ -4,9 +4,6 @@
  */
 package au.csiro.ontology.snomed.refset.rf2;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 /**
  * @author Alejandro Metke
@@ -16,7 +13,7 @@ public class Refset implements IRefset {
     
     protected String id;
     protected String displayName; 
-    protected final List<IRefsetMember> members = new ArrayList<>();
+    
     
     /**
      * 
@@ -34,12 +31,6 @@ public class Refset implements IRefset {
     @Override
     public String getDisplayName() {
         return displayName;
-    }
-
-    
-    @Override
-    public Collection<IRefsetMember> getMembers() {
-        return members;
     }
 
 }

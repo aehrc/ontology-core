@@ -16,15 +16,19 @@ import java.util.Set;
  */
 public class ModuleDependencyRefset extends Refset implements
         IModuleDependencyRefset {
-
+    
+    protected final Collection<IRefsetMember> members;
+    
     /**
      * Creates a new module dependency refset.
      * 
      * @param id
      * @param displayName
      */
-    public ModuleDependencyRefset(String id, String displayName) {
+    public ModuleDependencyRefset(String id, String displayName, 
+            Collection<IRefsetMember> members) {
         super(id, displayName);
+        this.members = members;
     }
 
     @Override
