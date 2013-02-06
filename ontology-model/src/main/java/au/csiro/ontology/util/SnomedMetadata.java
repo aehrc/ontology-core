@@ -2,7 +2,7 @@
  * Copyright CSIRO Australian e-Health Research Centre (http://aehrc.com).
  * All rights reserved. Use is subject to license terms and conditions.
  */
-package au.csiro.ontology.importer;
+package au.csiro.ontology.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,6 +22,8 @@ import org.apache.log4j.Logger;
  * 
  */
 public class SnomedMetadata {
+    
+    public static final SnomedMetadata INSTANCE = new SnomedMetadata();
 
     // Logger
     private final static Logger log = Logger.getLogger(SnomedMetadata.class);
@@ -35,7 +37,7 @@ public class SnomedMetadata {
     /**
      * Constructor.
      */
-    public SnomedMetadata() {
+    private SnomedMetadata() {
 
         try (BufferedReader br = new BufferedReader(new InputStreamReader(this
                 .getClass().getResourceAsStream("/metadata.txt")))) {
@@ -317,6 +319,18 @@ public class SnomedMetadata {
             return map.get("roleGroupId");
         }
         return null;
+    }
+    
+    /**
+     * Returns the SNOMED id for the concept that indicates that a term is a
+     * preferred term.
+     * 
+     * @param version
+     * @return
+     */
+    public String getPreferredId() {
+        // TODO: currently hard-coded and not version-aware.
+        return "900000000000548007";
     }
 
 }

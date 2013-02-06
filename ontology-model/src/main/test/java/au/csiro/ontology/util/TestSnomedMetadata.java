@@ -2,12 +2,14 @@
  * Copyright CSIRO Australian e-Health Research Centre (http://aehrc.com).
  * All rights reserved. Use is subject to license terms and conditions.
  */
-package au.csiro.ontology.importer;
+package au.csiro.ontology.util;
 
 import java.util.Map;
 import java.util.Set;
 
 import org.junit.Test;
+
+import au.csiro.ontology.util.SnomedMetadata;
 
 import junit.framework.Assert;
 
@@ -21,7 +23,7 @@ public class TestSnomedMetadata {
 
     @Test
     public void testGetConceptModelAttId() {
-        SnomedMetadata smd = new SnomedMetadata();
+        SnomedMetadata smd = SnomedMetadata.INSTANCE;
         String cmid = smd.getConceptModelAttId("20110731");
         Assert.assertEquals("410662002", cmid);
 
@@ -33,7 +35,7 @@ public class TestSnomedMetadata {
     }
 
     public void testGetNeverGroupedIds() {
-        SnomedMetadata smd = new SnomedMetadata();
+        SnomedMetadata smd = SnomedMetadata.INSTANCE;
         Set<String> ngids = smd.getNeverGroupedIds("20110731");
         Assert.assertEquals(4, ngids.size());
 
@@ -45,7 +47,7 @@ public class TestSnomedMetadata {
     }
 
     public void testGetRightIdentities() {
-        SnomedMetadata smd = new SnomedMetadata();
+        SnomedMetadata smd = SnomedMetadata.INSTANCE;
         Map<String, String> rids = smd.getRightIdentities("20110731");
         Assert.assertEquals("127489000", rids.get("363701004"));
 
