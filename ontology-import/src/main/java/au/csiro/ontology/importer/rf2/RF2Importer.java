@@ -27,7 +27,6 @@ import au.csiro.ontology.Ontology;
 import au.csiro.ontology.axioms.ConceptInclusion;
 import au.csiro.ontology.axioms.IAxiom;
 import au.csiro.ontology.axioms.RoleInclusion;
-import au.csiro.ontology.classification.IProgressMonitor;
 import au.csiro.ontology.importer.IImporter;
 import au.csiro.ontology.model.Concept;
 import au.csiro.ontology.model.Conjunction;
@@ -39,6 +38,7 @@ import au.csiro.ontology.model.IRole;
 import au.csiro.ontology.model.Role;
 import au.csiro.ontology.snomed.refset.rf2.IModule;
 import au.csiro.ontology.snomed.refset.rf2.IModuleDependencyRefset;
+import au.csiro.ontology.util.IProgressMonitor;
 import au.csiro.ontology.util.SnomedMetadata;
 import au.csiro.ontology.util.Statistics;
 

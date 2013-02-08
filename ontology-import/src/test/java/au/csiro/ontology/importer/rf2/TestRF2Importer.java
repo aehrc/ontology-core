@@ -13,8 +13,8 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import au.csiro.ontology.IOntology;
-import au.csiro.ontology.classification.NullProgressMonitor;
 import au.csiro.ontology.importer.rf2.RF2Importer.ReleaseType;
+import au.csiro.ontology.util.NullProgressMonitor;
 
 
 /**

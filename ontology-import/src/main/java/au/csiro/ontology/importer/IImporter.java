@@ -7,7 +7,7 @@ package au.csiro.ontology.importer;
 import java.util.Map;
 
 import au.csiro.ontology.IOntology;
-import au.csiro.ontology.classification.IProgressMonitor;
+import au.csiro.ontology.util.IProgressMonitor;
 
 /**
  * Defines the methods that must be implemented by classes used to import

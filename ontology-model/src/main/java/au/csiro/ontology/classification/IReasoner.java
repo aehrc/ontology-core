@@ -11,7 +11,8 @@ import au.csiro.ontology.axioms.IAxiom;
 
 /**
  * This interface represents the functionality of a reasoner. It uses the 
- * internal ontology model.
+ * internal ontology model. This interface is included in this package because
+ * it could have several implementations.
  * 
  * @author Alejandro Metke
  *

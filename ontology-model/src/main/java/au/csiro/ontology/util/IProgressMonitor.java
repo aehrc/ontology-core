@@ -2,11 +2,11 @@
  * Copyright CSIRO Australian e-Health Research Centre (http://aehrc.com).
  * All rights reserved. Use is subject to license terms and conditions.
  */
-package au.csiro.ontology.classification;
+package au.csiro.ontology.util;
 
 /**
  * This interface should be implemented by objects that wish to monitor the 
- * progress of a classification task.
+ * progress of a task.
  * 
  * @author Alejandro Metke
  *
