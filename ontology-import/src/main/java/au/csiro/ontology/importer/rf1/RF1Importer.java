@@ -321,7 +321,8 @@ public class RF1Importer implements IImporter {
         rels.clear();
         roles.clear();
     }
-
+    
+    @Override
     public List<String> getProblems() {
         return problems;
     }

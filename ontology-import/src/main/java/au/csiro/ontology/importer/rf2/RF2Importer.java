@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -28,6 +29,7 @@ import au.csiro.ontology.axioms.ConceptInclusion;
 import au.csiro.ontology.axioms.IAxiom;
 import au.csiro.ontology.axioms.RoleInclusion;
 import au.csiro.ontology.importer.IImporter;
+import au.csiro.ontology.importer.Inputs.ReleaseType;
 import au.csiro.ontology.model.Concept;
 import au.csiro.ontology.model.Conjunction;
 import au.csiro.ontology.model.Existential;
@@ -49,16 +51,6 @@ import au.csiro.ontology.util.Statistics;
  * 
  */
 public class RF2Importer implements IImporter {
-
-    /**
-     * Indicates the type of SNOMED release.
-     * 
-     * @author Alejandro Metke
-     * 
-     */
-    public enum ReleaseType {
-        FULL, SNAPSHOT, INCREMENTAL
-    };
 
     /**
      * The concepts file.
@@ -837,6 +829,11 @@ public class RF2Importer implements IImporter {
         private RF2Importer getOuterType() {
             return RF2Importer.this;
         }
+    }
+
+    @Override
+    public List<String> getProblems() {
+        return Collections.emptyList();
     }
 
 }

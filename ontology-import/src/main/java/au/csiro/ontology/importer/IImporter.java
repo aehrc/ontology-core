@@ -4,6 +4,7 @@
  */
 package au.csiro.ontology.importer;
 
+import java.util.List;
 import java.util.Map;
 
 import au.csiro.ontology.IOntology;
@@ -43,8 +44,19 @@ public interface IImporter {
      * 
      * @return A map of maps with ontologies represented as sets of axioms in 
      * the internal format.
+     * 
+     * @throws ImportException if a problem occurs when importing the ontology.
      */
     public Map<String, Map<String, IOntology<String>>> getOntologyVersions(
             IProgressMonitor monitor);
+    
+    /**
+     * Returns a list of problems that happened during the import process. This
+     * method should be called after an {@link ImportException} is thrown to
+     * get a detailed list of problems.
+     * 
+     * @return
+     */
+    public List<String> getProblems();
 
 }

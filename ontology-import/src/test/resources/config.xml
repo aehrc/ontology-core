@@ -1,0 +1,59 @@
+<!-- Test configuration file for SNOMED -->
+<inputs>
+  <input type="rf2">
+    <inputType>classpath</inputType>
+    <conceptsFile></conceptsFile>
+    <descriptionsFile></descriptionsFile>
+    <identifiersFile></identifiersFile>
+    <relationshipsFile></relationshipsFile>
+    <statedRelationshipsFile></statedRelationshipsFile>
+    <textDefinitionsFile></textDefinitionsFile>
+    <moduleDependenciesRefsetFile></moduleDependenciesRefsetFile>
+    
+    <languageRefsetFiles>
+      <languageRefsetFile name="English International">snomed-int-full-rf2/Terminology/sct2_Concept_Full_INT_20120131.txt</languageRefsetFile>
+    </languageRefsetFiles>
+    
+    <simpleRefsetFiles>
+      <simpleRefsetFile name="Non-Human">snomed-int-full-rf2/Refset/Content/der2_Refset_SimpleFull_INT_20120131.txt</simpleRefsetFile>
+    </simpleRefsetFiles>
+    
+    <!-- 
+    <orderedRefsetFiles>
+      <orderedRefsetFile></orderedRefsetFile>
+    </orderedRefsetFiles>
+    
+    <attributeValueRefsetFiles>
+      <attributeValueRefsetFile></attributeValueRefsetFile>
+    </attributeValueRefsetFiles>
+    
+    <simpleMapRefsetFiles>
+      <simpleMapRefsetFiles></simpleMapRefsetFiles>
+    </simpleMapRefsetFiles>
+    
+    <complexMapRefsetFiles>
+      <complexMapRefsetFile></complexMapRefsetFile>
+    </complexMapRefsetFiles>
+    
+    <querySpecificationRefsetFiles>
+      <querySpecificationRefsetFile></querySpecificationRefsetFile>
+    </querySpecificationRefsetFiles>
+    
+    <annotationRefsetFiles>
+      <annotationRefsetFile></annotationRefsetFile>
+    </annotationRefsetFiles>
+    
+    <associationRefsetFiles>
+      <associationRefsetFile></associationRefsetFile>
+    </associationRefsetFiles>
+    -->
+    
+    <releaseType>full</releaseType>
+    
+    <modules>
+      <module>
+      </module>
+    </modules>
+     
+  </input>
+</inputs>
