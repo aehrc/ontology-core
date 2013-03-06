@@ -2,56 +2,147 @@
 <inputs>
   <input type="rf2">
     <inputType>classpath</inputType>
-    <conceptsFile></conceptsFile>
-    <descriptionsFile></descriptionsFile>
-    <identifiersFile></identifiersFile>
-    <relationshipsFile></relationshipsFile>
-    <statedRelationshipsFile></statedRelationshipsFile>
-    <textDefinitionsFile></textDefinitionsFile>
-    <moduleDependenciesRefsetFile></moduleDependenciesRefsetFile>
     
-    <languageRefsetFiles>
-      <languageRefsetFile name="English International">snomed-int-full-rf2/Terminology/sct2_Concept_Full_INT_20120131.txt</languageRefsetFile>
-    </languageRefsetFiles>
+    <conceptsFile>snomed-int-full-rf2/Terminology/sct2_Concept_Full_INT_20120131.txt</conceptsFile>
+    <descriptionsFile>snomed-int-full-rf2/Terminology/sct2_Description_Full-en_INT_20120131.txt</descriptionsFile>
+    <identifiersFile>snomed-int-full-rf2/Terminology/sct2_Identifier_Full_INT_20120131.txt</identifiersFile>
+    <relationshipsFile>snomed-int-full-rf2/Terminology/sct2_Relationship_Full_INT_20120131.txt</relationshipsFile>
+    <statedRelationshipsFile>snomed-int-full-rf2/Terminology/sct2_StatedRelationship_Full_INT_20120131.txt</statedRelationshipsFile>
+    <textDefinitionsFile>snomed-int-full-rf2/Terminology/sct2_TextDefinition_Full-en_INT_20120131.txt</textDefinitionsFile>
+    
+    <refsetDescriptorRefsetFiles>
+      <refsetDescriptorRefsetFile name="">snomed-int-full-rf2/Refset/Metadata/der2_cciRefset_RefsetDescriptorFull_INT_20120131.txt</refsetDescriptorRefsetFile>
+    </refsetDescriptorRefsetFiles>
     
     <simpleRefsetFiles>
       <simpleRefsetFile name="Non-Human">snomed-int-full-rf2/Refset/Content/der2_Refset_SimpleFull_INT_20120131.txt</simpleRefsetFile>
     </simpleRefsetFiles>
     
-    <!-- 
     <orderedRefsetFiles>
-      <orderedRefsetFile></orderedRefsetFile>
     </orderedRefsetFiles>
     
     <attributeValueRefsetFiles>
-      <attributeValueRefsetFile></attributeValueRefsetFile>
     </attributeValueRefsetFiles>
     
     <simpleMapRefsetFiles>
-      <simpleMapRefsetFiles></simpleMapRefsetFiles>
     </simpleMapRefsetFiles>
     
     <complexMapRefsetFiles>
-      <complexMapRefsetFile></complexMapRefsetFile>
     </complexMapRefsetFiles>
     
+    <languageRefsetFiles>
+      <languageRefsetFile name="English International">snomed-int-full-rf2/Refset/Language/der2_cRefset_LanguageFull-en_INT_20120131.txt</languageRefsetFile>
+    </languageRefsetFiles>
+    
     <querySpecificationRefsetFiles>
-      <querySpecificationRefsetFile></querySpecificationRefsetFile>
     </querySpecificationRefsetFiles>
     
     <annotationRefsetFiles>
-      <annotationRefsetFile></annotationRefsetFile>
     </annotationRefsetFiles>
     
     <associationRefsetFiles>
-      <associationRefsetFile></associationRefsetFile>
     </associationRefsetFiles>
-    -->
+    
+    <moduleDependenciesRefsetFiles>
+      <moduleDependenciesRefsetFile name="">snomed-int-full-rf2/Refset/Metadata/der2_ssRefset_ModuleDependencyFull_INT_20120131.txt</moduleDependenciesRefsetFile>
+    </moduleDependenciesRefsetFiles>
+    
+    <descriptionFormatRefsetFiles>
+      <descriptionFormatRefsetFile name="">snomed-int-full-rf2/Refset/Metadata/der2_ciRefset_DescriptionTypeFull_INT_20120131.txt</descriptionFormatRefsetFile>
+    </descriptionFormatRefsetFiles>
     
     <releaseType>full</releaseType>
     
     <modules>
-      <module>
+      <module id="900000000000207008">
+        <versions>
+          <version id="20110731">
+            <metadata>
+              <entry>
+                <key>conceptModelAttId</key>
+                <values>
+                  <value>410662002</value>
+                </values>
+              </entry>
+              <entry>
+                <key>isAId</key>
+                <values>
+                  <value>116680003</value>
+                </values>
+              </entry>
+              <entry>
+                <key>coreModuleId</key>
+                <values>
+                  <value>900000000000207008</value>
+                </values>
+              </entry>
+              <entry>
+                <key>metadataModuleId</key>
+                <values>
+                  <value>900000000000012004</value>
+                </values>
+              </entry>
+              <entry>
+                <key>conceptDefinedId</key>
+                <values>
+                  <value>900000000000073002</value>
+                </values>
+              </entry>
+              <entry>
+                <key>someId</key>
+                <values>
+                  <value>900000000000451002</value>
+                </values>
+              </entry>
+              <entry>
+                <key>allId</key>
+                <values>
+                  <value>900000000000452009</value>
+                </values>
+              </entry>
+              <entry>
+                <key>fsnId</key>
+                <values>
+                  <value>900000000000003001</value>
+                </values>
+              </entry>
+              <entry>
+                <key>synonymId</key>
+                <values>
+                  <value>900000000000013009</value>
+                </values>
+              </entry>
+              <entry>
+                <key>definitionId</key>
+                <values>
+                  <value>900000000000550004</value>
+                </values>
+              </entry>
+              <entry>
+                <key>neverGroupedIds</key>
+                <values>
+                  <value>123005000</value>
+                  <value>127489000</value>
+                  <value>272741003</value>
+                  <value>411116001</value>
+                </values>
+              </entry>
+              <entry>
+                <key>rightIdentities</key>
+                <values>
+                  <value>363701004</value>
+                  <value>127489000</value>
+                </values>
+              </entry>
+              <entry>
+                <key>roleGroupId</key>
+                <values>
+                  <value>roleGroup</value>
+                </values>
+              </entry>
+            </metadata>
+          </version>
+        </versions>
       </module>
     </modules>
      

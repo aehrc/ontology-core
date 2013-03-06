@@ -118,7 +118,7 @@ public class Inputs {
      */
     class Version {
         protected final String id;
-        protected final Map<String, String> values = new HashMap<>();
+        protected final Map<String, String> metadata = new HashMap<>();
         
         public Version(String id) {
             super();
@@ -135,8 +135,8 @@ public class Inputs {
         /**
          * @return the values
          */
-        public Map<String, String> getValues() {
-            return values;
+        public Map<String, String> getMetadata() {
+            return metadata;
         }
         
     }
@@ -175,17 +175,18 @@ public class Inputs {
         protected String textDefinitionsFile;
         
         // Reference set files
-        protected String moduleDependenciesRefsetFile;
-        protected String refsetDescriptorRefsetFile;
-        protected final Map<String, String> languageRefsetFiles = new HashMap<>();
-        protected final Map<String, String> simpleRefsetFiles = new HashMap<>();
-        protected final Map<String, String> orderedRefsetFiles = new HashMap<>();
-        protected final Map<String, String> attributeValueRefsetFiles = new HashMap<>();
-        protected final Map<String, String> simpleMapRefsetFiles = new HashMap<>();
-        protected final Map<String, String> complexMapRefsetFiles = new HashMap<>();
-        protected final Map<String, String> querySpecificationRefsetFiles = new HashMap<>();
-        protected final Map<String, String> annotationRefsetFiles = new HashMap<>();
-        protected final Map<String, String> associationRefsetFiles = new HashMap<>();
+        protected List<Refset> refsetDescriptorRefsetFiles;
+        protected List<Refset> descriptionFormatRefsetFiles;
+        protected List<Refset> moduleDependenciesRefsetFiles;
+        protected List<Refset> languageRefsetFiles;
+        protected List<Refset> simpleRefsetFiles;
+        protected List<Refset> orderedRefsetFiles;
+        protected List<Refset> attributeValueRefsetFiles;
+        protected List<Refset> simpleMapRefsetFiles;
+        protected List<Refset> complexMapRefsetFiles;
+        protected List<Refset> querySpecificationRefsetFiles;
+        protected List<Refset> annotationRefsetFiles;
+        protected List<Refset> associationRefsetFiles;
         
         // The type of release - full, snapshot or incremental
         protected ReleaseType releaseType;
@@ -200,75 +201,19 @@ public class Inputs {
         public RF2Input() {
             
         }
-        
-        /**
-         * @param conceptsFile the conceptsFile to set
-         */
-        public void setConceptsFile(String conceptsFile) {
-            this.conceptsFile = conceptsFile;
-        }
-
-        /**
-         * @param descriptionsFile the descriptionsFile to set
-         */
-        public void setDescriptionsFile(String descriptionsFile) {
-            this.descriptionsFile = descriptionsFile;
-        }
-
-        /**
-         * @param identifiersFile the identifiersFile to set
-         */
-        public void setIdentifiersFile(String identifiersFile) {
-            this.identifiersFile = identifiersFile;
-        }
-
-        /**
-         * @param relationshipsFile the relationshipsFile to set
-         */
-        public void setRelationshipsFile(String relationshipsFile) {
-            this.relationshipsFile = relationshipsFile;
-        }
-
-        /**
-         * @param statedRelationshipsFile the statedRelationshipsFile to set
-         */
-        public void setStatedRelationshipsFile(String statedRelationshipsFile) {
-            this.statedRelationshipsFile = statedRelationshipsFile;
-        }
-
-        /**
-         * @param textDefinitionsFile the textDefinitionsFile to set
-         */
-        public void setTextDefinitionsFile(String textDefinitionsFile) {
-            this.textDefinitionsFile = textDefinitionsFile;
-        }
-
-        /**
-         * @param moduleDependenciesRefsetFile the moduleDependenciesRefsetFile to set
-         */
-        public void setModuleDependenciesRefsetFile(String moduleDependenciesRefsetFile) {
-            this.moduleDependenciesRefsetFile = moduleDependenciesRefsetFile;
-        }
-
-        /**
-         * @param refsetDescriptorRefsetFile the refsetDescriptorRefsetFile to set
-         */
-        public void setRefsetDescriptorRefsetFile(String refsetDescriptorRefsetFile) {
-            this.refsetDescriptorRefsetFile = refsetDescriptorRefsetFile;
-        }
-
-        /**
-         * @param releaseType the releaseType to set
-         */
-        public void setReleaseType(ReleaseType releaseType) {
-            this.releaseType = releaseType;
-        }
 
         /**
          * @return the conceptsFile
          */
         public String getConceptsFile() {
             return conceptsFile;
+        }
+
+        /**
+         * @param conceptsFile the conceptsFile to set
+         */
+        public void setConceptsFile(String conceptsFile) {
+            this.conceptsFile = conceptsFile;
         }
 
         /**
@@ -279,10 +224,24 @@ public class Inputs {
         }
 
         /**
+         * @param descriptionsFile the descriptionsFile to set
+         */
+        public void setDescriptionsFile(String descriptionsFile) {
+            this.descriptionsFile = descriptionsFile;
+        }
+
+        /**
          * @return the identifiersFile
          */
         public String getIdentifiersFile() {
             return identifiersFile;
+        }
+
+        /**
+         * @param identifiersFile the identifiersFile to set
+         */
+        public void setIdentifiersFile(String identifiersFile) {
+            this.identifiersFile = identifiersFile;
         }
 
         /**
@@ -293,10 +252,24 @@ public class Inputs {
         }
 
         /**
+         * @param relationshipsFile the relationshipsFile to set
+         */
+        public void setRelationshipsFile(String relationshipsFile) {
+            this.relationshipsFile = relationshipsFile;
+        }
+
+        /**
          * @return the statedRelationshipsFile
          */
         public String getStatedRelationshipsFile() {
             return statedRelationshipsFile;
+        }
+
+        /**
+         * @param statedRelationshipsFile the statedRelationshipsFile to set
+         */
+        public void setStatedRelationshipsFile(String statedRelationshipsFile) {
+            this.statedRelationshipsFile = statedRelationshipsFile;
         }
 
         /**
@@ -307,80 +280,182 @@ public class Inputs {
         }
 
         /**
-         * @return the moduleDependenciesRefsetFile
+         * @param textDefinitionsFile the textDefinitionsFile to set
          */
-        public String getModuleDependenciesRefsetFile() {
-            return moduleDependenciesRefsetFile;
+        public void setTextDefinitionsFile(String textDefinitionsFile) {
+            this.textDefinitionsFile = textDefinitionsFile;
         }
 
         /**
-         * @return the refsetDescriptorRefsetFile
+         * @return the refsetDescriptorRefsetFiles
          */
-        public String getRefsetDescriptorRefsetFile() {
-            return refsetDescriptorRefsetFile;
+        public List<Refset> getRefsetDescriptorRefsetFiles() {
+            return refsetDescriptorRefsetFiles;
+        }
+
+        /**
+         * @param refsetDescriptorRefsetFiles the refsetDescriptorRefsetFiles to set
+         */
+        public void setRefsetDescriptorRefsetFiles(
+                List<Refset> refsetDescriptorRefsetFiles) {
+            this.refsetDescriptorRefsetFiles = refsetDescriptorRefsetFiles;
+        }
+
+        /**
+         * @return the descriptionFormatRefsetFiles
+         */
+        public List<Refset> getDescriptionFormatRefsetFiles() {
+            return descriptionFormatRefsetFiles;
+        }
+
+        /**
+         * @param descriptionFormatRefsetFiles the descriptionFormatRefsetFiles to set
+         */
+        public void setDescriptionFormatRefsetFiles(
+                List<Refset> descriptionFormatRefsetFiles) {
+            this.descriptionFormatRefsetFiles = descriptionFormatRefsetFiles;
+        }
+
+        /**
+         * @return the moduleDependenciesRefsetFiles
+         */
+        public List<Refset> getModuleDependenciesRefsetFiles() {
+            return moduleDependenciesRefsetFiles;
+        }
+
+        /**
+         * @param moduleDependenciesRefsetFiles the moduleDependenciesRefsetFiles to set
+         */
+        public void setModuleDependenciesRefsetFiles(
+                List<Refset> moduleDependenciesRefsetFiles) {
+            this.moduleDependenciesRefsetFiles = moduleDependenciesRefsetFiles;
         }
 
         /**
          * @return the languageRefsetFiles
          */
-        public Map<String, String> getLanguageRefsetFiles() {
+        public List<Refset> getLanguageRefsetFiles() {
             return languageRefsetFiles;
+        }
+
+        /**
+         * @param languageRefsetFiles the languageRefsetFiles to set
+         */
+        public void setLanguageRefsetFiles(List<Refset> languageRefsetFiles) {
+            this.languageRefsetFiles = languageRefsetFiles;
         }
 
         /**
          * @return the simpleRefsetFiles
          */
-        public Map<String, String> getSimpleRefsetFiles() {
+        public List<Refset> getSimpleRefsetFiles() {
             return simpleRefsetFiles;
+        }
+
+        /**
+         * @param simpleRefsetFiles the simpleRefsetFiles to set
+         */
+        public void setSimpleRefsetFiles(List<Refset> simpleRefsetFiles) {
+            this.simpleRefsetFiles = simpleRefsetFiles;
         }
 
         /**
          * @return the orderedRefsetFiles
          */
-        public Map<String, String> getOrderedRefsetFiles() {
+        public List<Refset> getOrderedRefsetFiles() {
             return orderedRefsetFiles;
+        }
+
+        /**
+         * @param orderedRefsetFiles the orderedRefsetFiles to set
+         */
+        public void setOrderedRefsetFiles(List<Refset> orderedRefsetFiles) {
+            this.orderedRefsetFiles = orderedRefsetFiles;
         }
 
         /**
          * @return the attributeValueRefsetFiles
          */
-        public Map<String, String> getAttributeValueRefsetFiles() {
+        public List<Refset> getAttributeValueRefsetFiles() {
             return attributeValueRefsetFiles;
+        }
+
+        /**
+         * @param attributeValueRefsetFiles the attributeValueRefsetFiles to set
+         */
+        public void setAttributeValueRefsetFiles(List<Refset> attributeValueRefsetFiles) {
+            this.attributeValueRefsetFiles = attributeValueRefsetFiles;
         }
 
         /**
          * @return the simpleMapRefsetFiles
          */
-        public Map<String, String> getSimpleMapRefsetFiles() {
+        public List<Refset> getSimpleMapRefsetFiles() {
             return simpleMapRefsetFiles;
+        }
+
+        /**
+         * @param simpleMapRefsetFiles the simpleMapRefsetFiles to set
+         */
+        public void setSimpleMapRefsetFiles(List<Refset> simpleMapRefsetFiles) {
+            this.simpleMapRefsetFiles = simpleMapRefsetFiles;
         }
 
         /**
          * @return the complexMapRefsetFiles
          */
-        public Map<String, String> getComplexMapRefsetFiles() {
+        public List<Refset> getComplexMapRefsetFiles() {
             return complexMapRefsetFiles;
+        }
+
+        /**
+         * @param complexMapRefsetFiles the complexMapRefsetFiles to set
+         */
+        public void setComplexMapRefsetFiles(List<Refset> complexMapRefsetFiles) {
+            this.complexMapRefsetFiles = complexMapRefsetFiles;
         }
 
         /**
          * @return the querySpecificationRefsetFiles
          */
-        public Map<String, String> getQuerySpecificationRefsetFiles() {
+        public List<Refset> getQuerySpecificationRefsetFiles() {
             return querySpecificationRefsetFiles;
+        }
+
+        /**
+         * @param querySpecificationRefsetFiles the querySpecificationRefsetFiles to set
+         */
+        public void setQuerySpecificationRefsetFiles(
+                List<Refset> querySpecificationRefsetFiles) {
+            this.querySpecificationRefsetFiles = querySpecificationRefsetFiles;
         }
 
         /**
          * @return the annotationRefsetFiles
          */
-        public Map<String, String> getAnnotationRefsetFiles() {
+        public List<Refset> getAnnotationRefsetFiles() {
             return annotationRefsetFiles;
+        }
+
+        /**
+         * @param annotationRefsetFiles the annotationRefsetFiles to set
+         */
+        public void setAnnotationRefsetFiles(List<Refset> annotationRefsetFiles) {
+            this.annotationRefsetFiles = annotationRefsetFiles;
         }
 
         /**
          * @return the associationRefsetFiles
          */
-        public Map<String, String> getAssociationRefsetFiles() {
+        public List<Refset> getAssociationRefsetFiles() {
             return associationRefsetFiles;
+        }
+
+        /**
+         * @param associationRefsetFiles the associationRefsetFiles to set
+         */
+        public void setAssociationRefsetFiles(List<Refset> associationRefsetFiles) {
+            this.associationRefsetFiles = associationRefsetFiles;
         }
 
         /**
@@ -388,6 +463,13 @@ public class Inputs {
          */
         public ReleaseType getReleaseType() {
             return releaseType;
+        }
+
+        /**
+         * @param releaseType the releaseType to set
+         */
+        public void setReleaseType(ReleaseType releaseType) {
+            this.releaseType = releaseType;
         }
 
         /**
@@ -412,6 +494,50 @@ public class Inputs {
          */
         public String getOwlFile() {
             return owlFile;
+        }
+        
+    }
+    
+    /**
+     * Represents the name and the location of a reference set.
+     * 
+     * @author Alejandro Metke
+     *
+     */
+    class Refset {
+        protected String name;
+        protected String href;
+        
+        public Refset() {
+            
+        }
+
+        /**
+         * @return the name
+         */
+        public String getName() {
+            return name;
+        }
+
+        /**
+         * @param name the name to set
+         */
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        /**
+         * @return the href
+         */
+        public String getHref() {
+            return href;
+        }
+
+        /**
+         * @param href the href to set
+         */
+        public void setHref(String href) {
+            this.href = href;
         }
         
     }
