@@ -20,15 +20,17 @@
 	<artifactId>ontology-parent</artifactId>
 	<packaging>pom</packaging>
 	<version>1.3.0-SNAPSHOT</version>
-	<name>Ontology Core Model</name>
+	<name>Ontology Core</name>
+	
     <properties>
-      <branch>sim-clx-internal</branch>
-      <ontology-test-data.version>1.1</ontology-test-data.version>
+	   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+	
 	<modules>
 		<module>ontology-model</module>
 		<module>ontology-import</module>
 	</modules>
+	
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -36,18 +38,18 @@
 			<version>4.0</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+		  <groupId>log4j</groupId>
+		  <artifactId>log4j</artifactId>
+		  <version>1.2.16</version>
+		</dependency>
 	</dependencies>
 	
-  <!-- Temporary until we set up a parent POM -->
   <distributionManagement>
     <repository>
-      <id>maestro-deploy</id>
-      <url>https://va.maestrodev.com/archiva/repository/sim-releases</url>
-    </repository>
-    <snapshotRepository>
-      <id>ssh-repository</id>
+      <id>aehrc-repository</id>
       <url>scp://ict-ehrclf-cbr.vm.csiro.au/srv/aehrc.com/maven2</url>
-    </snapshotRepository>
+    </repository>
   </distributionManagement>
 	
 	<build>
@@ -71,18 +73,28 @@
 	  <plugin>
 	    <groupId>org.apache.maven.plugins</groupId>
 	    <artifactId>maven-release-plugin</artifactId>
-	    <version>2.3.2</version>
+	    <version>2.4</version>
 	    <configuration>
-              <autoVersionSubmodules>true</autoVersionSubmodules>
-              <preparationGoals>clean validate</preparationGoals>
+			<autoVersionSubmodules>true</autoVersionSubmodules>
+			<preparationGoals>clean validate</preparationGoals>
 	    </configuration>
 	  </plugin>
+	  <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+		  <argLine> 
+		    -server -Xmx3G
+		  </argLine>
+        </configuration>
+     </plugin>
 	</plugins>
   </build>
   
   <scm>
-    <connection>scm:svn:https://csfe.aceworkspace.net/svn/repos/sim-classifier/trunk/ontology-core</connection>
-    <developerConnection>scm:svn:https://csfe.aceworkspace.net/svn/repos/sim-classifier/trunk/ontology-core</developerConnection>
-    <url>https://csfe.aceworkspace.net/integration/viewvc/viewvc.cgi/trunk/ontology-core/?root=sim-classifier&amp;system=exsy1002</url>
+    <connection>scm:git:git@github.com:aehrc/ontology-core.git</connection>
+    <developerConnection>scm:git:git@github.com:aehrc/ontology-core.git</developerConnection>
+    <url>https://github.com/aehrc/ontology-core.git</url>
+    <tag>HEAD</tag>
   </scm>
 </project>

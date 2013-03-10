@@ -4,8 +4,6 @@
  */
 package au.csiro.ontology.importer.rf2;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.util.Map;
 
 import junit.framework.Assert;
@@ -24,8 +22,6 @@ import au.csiro.ontology.util.NullProgressMonitor;
  * 
  */
 public class TestRF2Importer {
-
-    final static String TEST_DIR = "src/test/resources/";
     
     /**
      * Tests the main functionality of the importer. The results are based on
@@ -35,9 +31,15 @@ public class TestRF2Importer {
     @Test
     public void testGetOntologyVersions() {
         RF2Importer rf2i = new RF2Importer(
-            this.getClass().getResourceAsStream("/sct2_Concept_Full_INT_20120131.txt"), 
-            this.getClass().getResourceAsStream("/sct2_StatedRelationship_Full_INT_20120131.txt"),
-            this.getClass().getResourceAsStream("/der2_ssRefset_ModuleDependencyFull_INT_20120131.txt"),
+            this.getClass().getResourceAsStream(
+                    "/snomed_int_full_rf2/Terminology/" +
+                    "sct2_Concept_Full_INT_20120131.txt"), 
+            this.getClass().getResourceAsStream(
+                    "/snomed_int_full_rf2/Terminology/" +
+                    "sct2_StatedRelationship_Full_INT_20120131.txt"),
+            this.getClass().getResourceAsStream(
+                    "/snomed_int_full_rf2/Terminology/" +
+                    "der2_ssRefset_ModuleDependencyFull_INT_20120131.txt"),
             ReleaseType.FULL);
         Map<String, Map<String, IOntology<String>>> ovs = 
                 rf2i.getOntologyVersions(new NullProgressMonitor());
@@ -53,8 +55,10 @@ public class TestRF2Importer {
     public void testExtractVersionRows() {
         try {
             RF2Importer rf2i = new RF2Importer(
-                    new FileInputStream(new File(TEST_DIR + "rf2_full_con_test.txt")), 
-                    new FileInputStream(new File(TEST_DIR + "rf2_full_rel_test.txt")), 
+                    this.getClass().getResourceAsStream(
+                            "/rf2_full_con_test.txt"), 
+                    this.getClass().getResourceAsStream(
+                            "/rf2_full_rel_test.txt"), 
                     null,
                     ReleaseType.FULL);
             

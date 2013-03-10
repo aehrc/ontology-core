@@ -4,8 +4,6 @@
  */
 package au.csiro.ontology.importer.rf1;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.util.Map;
 
 import junit.framework.Assert;
@@ -24,8 +22,6 @@ import au.csiro.ontology.util.NullProgressMonitor;
  */
 public class TestRF1Importer {
 
-    final static String TEST_DIR = "src/test/resources/";
-
     /**
      * Tests the main functionality of the importer. The results are based on
      * the meta data file which contains information only for the 20110731 and
@@ -34,8 +30,12 @@ public class TestRF1Importer {
     @Test
     public void testGetOntologyVersions() {
         RF1Importer rf1i = new RF1Importer(
-                this.getClass().getResourceAsStream("/sct1_Concepts_Core_INT_20110731.txt"), 
-                this.getClass().getResourceAsStream("/sct1_Relationships_Core_INT_20110731.txt"),
+                this.getClass().getResourceAsStream(
+                        "/SnomedCT_INT_20110731/Terminology/Content/" +
+                        "sct1_Concepts_Core_INT_20110731.txt"), 
+                this.getClass().getResourceAsStream(
+                        "/SnomedCT_INT_20110731/Terminology/Content/" +
+                        "sct1_Relationships_Core_INT_20110731.txt"),
                 "20110731");
 
         Map<String, Map<String, IOntology<String>>> ovs = 
@@ -52,8 +52,8 @@ public class TestRF1Importer {
     public void testExtractVersionRows() {
         try {
             RF1Importer rf1i = new RF1Importer(
-                    new FileInputStream(new File(TEST_DIR + "rf1_con_test.txt")), 
-                    new FileInputStream(new File(TEST_DIR + "rf1_rel_test.txt")), 
+                    this.getClass().getResourceAsStream("/rf1_con_test.txt"), 
+                    this.getClass().getResourceAsStream("/rf1_rel_test.txt"), 
                     "20110731");
             VersionRows vr1 = rf1i.extractVersionRows();
             Assert.assertEquals("20110731", vr1.getVersionName());
