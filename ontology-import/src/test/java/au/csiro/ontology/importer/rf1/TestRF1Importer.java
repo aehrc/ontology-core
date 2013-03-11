@@ -31,10 +31,10 @@ public class TestRF1Importer {
     public void testGetOntologyVersions() {
         RF1Importer rf1i = new RF1Importer(
                 this.getClass().getResourceAsStream(
-                        "/SnomedCT_INT_20110731/Terminology/Content/" +
+                        "/snomed_int_rf1/Terminology/Content/" +
                         "sct1_Concepts_Core_INT_20110731.txt"), 
                 this.getClass().getResourceAsStream(
-                        "/SnomedCT_INT_20110731/Terminology/Content/" +
+                        "/snomed_int_rf1/Terminology/Content/" +
                         "sct1_Relationships_Core_INT_20110731.txt"),
                 "20110731");
 
