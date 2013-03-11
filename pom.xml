@@ -51,6 +51,17 @@
       <url>scp://ict-ehrclf-cbr.vm.csiro.au/srv/aehrc.com/maven2</url>
     </repository>
   </distributionManagement>
+
+  <repositories>
+    <repository>
+      <id>ehrc-public-repo</id>
+      <name>AeHRC Public</name>
+      <url>http://aehrc.com/maven2</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+    </repository>
+  </repositories>
 	
 	<build>
 	 <extensions>
@@ -64,7 +75,7 @@
 	  <plugin>
 	    <groupId>org.apache.maven.plugins</groupId>
 	    <artifactId>maven-compiler-plugin</artifactId>
-		 <version>2.3.2</version>
+		 <version>2.5.1</version>
 	    <configuration>
 	      <source>1.7</source>
 	      <target>1.7</target>
