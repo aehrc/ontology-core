@@ -9,7 +9,7 @@ package au.csiro.ontology.snomed.refset.rf2;
  * @author Alejandro Metke
  *
  */
-public class Refset implements IRefset {
+public abstract class Refset implements IRefset {
     
     protected String id;
     protected String displayName; 

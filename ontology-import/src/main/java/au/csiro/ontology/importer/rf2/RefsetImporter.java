@@ -7,9 +7,9 @@ package au.csiro.ontology.importer.rf2;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -47,9 +47,9 @@ public class RefsetImporter {
      */
     public static IRefset importRefset(InputStream refsetFile, String id, 
             String displayName) {
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new InputStreamReader(refsetFile)); 
+        
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(refsetFile))){
             String line = br.readLine();
             
             String[] cols = line.split("[\t]");
@@ -59,7 +59,7 @@ public class RefsetImporter {
                 // Test if it is a language refset
                 if(cols[6].equals("acceptabilityId")) {
                     
-                    List<IRefsetMember> members = new ArrayList<>();
+                    Set<IRefsetMember> members = new HashSet<>();
                     while (null != (line = br.readLine())) {
                         cols = line.split("[\t]");
                         boolean active = cols[2].equals("1") ? true : false;
@@ -82,7 +82,7 @@ public class RefsetImporter {
                 if(cols[6].equals("sourceEffectiveTime") && 
                         cols[7].equals("targetEffectiveTime")) {
 
-                    List<IRefsetMember> members = new ArrayList<>();
+                    Set<IRefsetMember> members = new HashSet<>();
                     while (null != (line = br.readLine())) {
                         cols = line.split("[\t]");
                         boolean active = cols[2].equals("1") ? true : false;
@@ -108,13 +108,6 @@ public class RefsetImporter {
         } catch (Exception e) {
             log.error("Problem reading refset file "+refsetFile, e);
             throw new RuntimeException(e);
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (Exception e) {
-                }
-            }
         }
     }
 

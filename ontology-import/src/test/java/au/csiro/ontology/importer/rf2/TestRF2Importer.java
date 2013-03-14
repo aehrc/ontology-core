@@ -11,7 +11,6 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import au.csiro.ontology.IOntology;
-import au.csiro.ontology.importer.Inputs.ReleaseType;
 import au.csiro.ontology.util.NullProgressMonitor;
 
 
@@ -28,22 +27,19 @@ public class TestRF2Importer {
      * the meta data file which contains information only for the 20110731 and
      * 20120131 releases.
      */
-    @Test
+    //@Test
     public void testGetOntologyVersions() {
         RF2Importer rf2i = new RF2Importer(
-            this.getClass().getResourceAsStream(
-                    "/snomed_int_full_rf2/Terminology/" +
-                    "sct2_Concept_Full_INT_20120131.txt"), 
-            this.getClass().getResourceAsStream(
-                    "/snomed_int_full_rf2/Terminology/" +
-                    "sct2_StatedRelationship_Full_INT_20120131.txt"),
-            this.getClass().getResourceAsStream(
-                    "/snomed_int_full_rf2/Terminology/" +
-                    "der2_ssRefset_ModuleDependencyFull_INT_20120131.txt"),
-            ReleaseType.FULL);
+                this.getClass().getResourceAsStream("/config-snomed.xml"));
+
         Map<String, Map<String, IOntology<String>>> ovs = 
                 rf2i.getOntologyVersions(new NullProgressMonitor());
         Assert.assertEquals(1, ovs.keySet().size());
+        
+        for(String key : ovs.keySet()) {
+            Map<String, IOntology<String>> versions = ovs.get(key);
+            Assert.assertEquals(2, versions.keySet().size());
+        }
     }
 
     /**
@@ -56,11 +52,7 @@ public class TestRF2Importer {
         try {
             RF2Importer rf2i = new RF2Importer(
                     this.getClass().getResourceAsStream(
-                            "/rf2_full_con_test.txt"), 
-                    this.getClass().getResourceAsStream(
-                            "/rf2_full_rel_test.txt"), 
-                    null,
-                    ReleaseType.FULL);
+                            "/config-rf2-test.xml"));
             
             Map<String, Module> res = rf2i.extractModules();
             

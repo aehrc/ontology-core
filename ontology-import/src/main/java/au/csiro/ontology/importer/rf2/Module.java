@@ -4,8 +4,8 @@
  */
 package au.csiro.ontology.importer.rf2;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * Represents an RF2 module.
@@ -21,9 +21,10 @@ public class Module {
     protected final String id;
     
     /**
-     * The collection of rows form the RF2 tables that define this module.
+     * A collection of rows from the RF2 tables for each version of this module.
+     * The map is indexed by version.
      */
-    protected final Map<String, VersionRows> versions = new HashMap<>();
+    protected final SortedMap<String, VersionRows> versions = new TreeMap<>();
     
     /**
      * Creates a new module.
@@ -44,7 +45,7 @@ public class Module {
     /**
      * @return the versions
      */
-    public Map<String, VersionRows> getVersions() {
+    public SortedMap<String, VersionRows> getVersions() {
         return versions;
     }
     

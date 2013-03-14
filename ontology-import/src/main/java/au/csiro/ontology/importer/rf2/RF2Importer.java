@@ -5,6 +5,9 @@
 package au.csiro.ontology.importer.rf2;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -20,8 +23,11 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
-import java.util.TreeMap;
 import java.util.TreeSet;
+
+import javax.xml.bind.JAXBException;
+
+import org.apache.log4j.Logger;
 
 import au.csiro.ontology.IOntology;
 import au.csiro.ontology.Ontology;
@@ -29,7 +35,12 @@ import au.csiro.ontology.axioms.ConceptInclusion;
 import au.csiro.ontology.axioms.IAxiom;
 import au.csiro.ontology.axioms.RoleInclusion;
 import au.csiro.ontology.importer.IImporter;
-import au.csiro.ontology.importer.Inputs.ReleaseType;
+import au.csiro.ontology.importer.ImportException;
+import au.csiro.ontology.importer.input.Input.InputType;
+import au.csiro.ontology.importer.input.Inputs;
+import au.csiro.ontology.importer.input.ModuleInfo;
+import au.csiro.ontology.importer.input.RF2Input;
+import au.csiro.ontology.importer.input.Version;
 import au.csiro.ontology.model.Concept;
 import au.csiro.ontology.model.Conjunction;
 import au.csiro.ontology.model.Existential;
@@ -41,7 +52,6 @@ import au.csiro.ontology.model.Role;
 import au.csiro.ontology.snomed.refset.rf2.IModule;
 import au.csiro.ontology.snomed.refset.rf2.IModuleDependencyRefset;
 import au.csiro.ontology.util.IProgressMonitor;
-import au.csiro.ontology.util.SnomedMetadata;
 import au.csiro.ontology.util.Statistics;
 
 /**
@@ -51,32 +61,13 @@ import au.csiro.ontology.util.Statistics;
  * 
  */
 public class RF2Importer implements IImporter {
-
+    
+    private final static Logger log = Logger.getLogger(RF2Importer.class);
+    
     /**
-     * The concepts file.
+     * The object that contains the information about the input files to use.
      */
-    protected final InputStream conceptsFile;
-
-    /**
-     * The relationships file.
-     */
-    protected final InputStream relationshipsFile;
-
-    /**
-     * The module dependency refset.
-     */
-    protected final InputStream moduleDependencyFile;
-
-    /**
-     * Indicates the type of release that the input files represent.
-     */
-    protected ReleaseType type;
-
-    /**
-     * Contains the meta-data necessary to transform the distribution form of
-     * SNOMED into a DL model.
-     */
-    protected SnomedMetadata metadata = SnomedMetadata.INSTANCE;
+    protected final Inputs inputs;
 
     protected final List<String> problems = new ArrayList<>();
     protected final Map<String, String> primitive = new HashMap<>();
@@ -86,184 +77,210 @@ public class RF2Importer implements IImporter {
     protected final Map<String, Map<String, String>> roles = new HashMap<>();
 
     /**
-     * Stores the processed ontologies.
-     */
-    protected final List<Set<IAxiom>> ontologies = new ArrayList<>();
-
-    /**
-     * Imports an ontology in RF2 format. The type parameter indicates the type
-     * of release (full, snapshot or incremental).
+     * Imports a set of ontologies.
      * 
-     * @param conceptsFile
-     * @param descriptionsFile
-     * @param relationshipsFile
-     * @param moduleDependencyFile
-     * @param type
+     * @param inputsStream An input stream with the contents of the XML 
+     * configuration file.
      */
-    public RF2Importer(InputStream conceptsFile, InputStream relationshipsFile, 
-            InputStream moduleDependencyFile, ReleaseType type) {
-        this.conceptsFile = conceptsFile;
-        this.relationshipsFile = relationshipsFile;
-        this.moduleDependencyFile = moduleDependencyFile;
-        this.type = type;
+    public RF2Importer(InputStream inputsStream) {
+        try {
+            inputs = Inputs.load(inputsStream);
+        } catch (JAXBException e) {
+            log.error("Malformed input file.", e);
+            throw new ImportException("Malformed input file.", e);
+        }
     }
     
-    private VersionRows getVersionRows(Map<String, Module> modules, 
-            IModule module, String version) {
-        VersionRows vr = modules.get(module.getId()).getVersions()
-                .get(module.getVersion());
-        if(vr == null) {
-            // vr might be null when using this importer if the
-            // only changes in the dependency are in the 
-            // descriptions, because the descriptions are not
-            // loaded. In this case we need to find the previous
-            // version.
-            Map<String, VersionRows> m = modules.get(
-                    module.getId()).getVersions();
-            Set<String> keys = m.keySet();
-            String[] keysArr = keys.toArray(
-                    new String[keys.size()]);
-            Arrays.sort(keysArr);
-            
-            // Find previous version in sorted array
-            int index = Arrays.binarySearch(keysArr, 0, 
-                    keysArr.length, module.getVersion());
-            assert(index < 0);
-            // x = (-(insertion point) - 1)
-            // x + 1 = -insertionPoint
-            // -x - 1 = insertionPoint
-            index = (index * -1) - 1;
-            vr = modules.get(module.getId()).getVersions()
-                    .get(keysArr[index - 1]);
-            assert(vr != null);
+    /**
+     * Imports a set of ontologies. Loads the configuration file from the class
+     * path.
+     */
+    public RF2Importer() {
+        try {
+            inputs = Inputs.load(
+                    this.getClass().getResourceAsStream("/config.xml"));
+        } catch (JAXBException e) {
+            log.error("Malformed input file.", e);
+            throw new ImportException("Malformed input file.", e);
         }
-        return vr;
     }
-
-    @Override
-    public Map<String, Map<String, IOntology<String>>> getOntologyVersions(
-            IProgressMonitor monitor) {
+    
+    /**
+     * Imports a set of ontologies using the supplied configuration object.
+     * 
+     * @param inputs
+     */
+    public RF2Importer(Inputs inputs) {
+        this.inputs = inputs;
+    }
+    
+    /**
+     * Loads all the module dependency information from all RF2 inputs into a
+     * single {@link IModuleDependencyRefset}.
+     * 
+     * @return
+     */
+    protected IModuleDependencyRefset loadModuleDependencies() {
+        IModuleDependencyRefset res = null;
+        for(RF2Input input : inputs.getRf2Inputs()) {
+            InputType inputType = input.getInputType();
+            for(String md : input.getModuleDependenciesRefsetFiles()) {
+                InputStream is = null;
+                if(inputType.equals(InputType.EXTERNAL)) {
+                    try {
+                        is = new FileInputStream(md);
+                    } catch (FileNotFoundException e) {
+                        is = null;
+                    }
+                } else if(inputType.equals(InputType.CLASSPATH)) {
+                    is = this.getClass().getResourceAsStream(md);
+                } else {
+                    throw new RuntimeException("Unexpected input type "+
+                            inputType);
+                }
+                
+                if(is == null) {
+                    throw new ImportException("Unable to load module " +
+                    	"dependencias. Please check your input configuration " +
+                    	"file. (input type = "+inputType+", file="+md+")");
+                }
+                
+                if(res == null) {
+                    res = (IModuleDependencyRefset)RefsetImporter.importRefset(
+                            is, "", "");
+                } else {
+                    IModuleDependencyRefset other = 
+                        (IModuleDependencyRefset)RefsetImporter.importRefset(
+                                is, "", "");
+                    res.merge(other);
+                }
+            }
+        }
         
-        long start = System.currentTimeMillis();
+        return res;
+    }
+    
+    /**
+     * Determines which modules and versions should be loaded based on the
+     * {@link Inputs} object. Returns a {@link Map} with the module ids as keys 
+     * and the set of versions to import as values.
+     * 
+     * @return
+     */
+    protected Map<String, Set<Version>> getModuleVersionsToLoad() {
+        Map<String, Set<Version>> res = new HashMap<>();
+        for(RF2Input in : inputs.getRf2Inputs()) {
+            for(ModuleInfo mi : in.getModules()) {
+                String moduleId = mi.getId();
+                Set<Version> versionsToLoad = res.get(moduleId);
+                if(versionsToLoad == null) {
+                    versionsToLoad = new HashSet<>();
+                    res.put(moduleId, versionsToLoad);
+                }
+                for(Version v : mi.getVersions()) {
+                    versionsToLoad.add(v);
+                }
+            }
+        }
         
-        // TODO: do something with the monitor
-        // TODO: refactor this to avoid duplicate code in ExtendedRF2Importer
-
-        Map<String, IConcept> ci = new HashMap<>();
-        Map<String, INamedRole<String>> ri = new HashMap<>();
-        // No need for feature index because plain RF2 does not support concrete
-        // domains
-
-        // Extract the (versioned) modules
-        Map<String, Module> modules = extractModules();
+        return res;
+    }
+    
+    /**
+     * Assembles bundles based on the module dependency information. Returns a
+     * {@link Map} of {@link Map}s indexed by module id and version, containing
+     * a {@link Set} of {@link VersionRows} of all the modules in the bundle.
+     * 
+     * @param toLoad
+     * @param deps
+     * @param modules
+     * @return
+     */
+    protected Map<String, Map<String, VersionRows>> getBundles(
+            Map<String, Set<Version>> toLoad, 
+            Map<String, Map<String, IModule>> deps, 
+            Map<String, Module> modules) {
         Map<String, Map<String, Set<VersionRows>>> bundles = new HashMap<>();
         
-        if(moduleDependencyFile != null) {
-            // Calculate the module dependencies
-            IModuleDependencyRefset md = (IModuleDependencyRefset) 
-                    RefsetImporter.importRefset(moduleDependencyFile, 
-                            "moduleDependency", "moduleDependency");
-    
-            // Each map entry contains a collection of modules, one for each 
-            // version
-            Map<String, Collection<IModule>> deps = md.getModuleDependencies();
-    
-            // Bundle the modules based on the dependency information
-            for (String moduleId : deps.keySet()) {
-    
-                Map<String, Set<VersionRows>> vMap = bundles.get(moduleId);
-                if (vMap == null) {
-                    vMap = new HashMap<>();
-                    bundles.put(moduleId, vMap);
-                }
-    
-                // Each im is a version of the module
-                for (IModule im : deps.get(moduleId)) {
-                    Set<VersionRows> bundle = new HashSet<>();
-    
-                    // Add the root module to the bundle
-                    String version = im.getVersion();
-                    VersionRows vr = getVersionRows(modules, im, version);
+        for(String moduleId : toLoad.keySet()) {
+            Map<String, Set<VersionRows>> vMap = bundles.get(moduleId);
+            if (vMap == null) {
+                vMap = new HashMap<>();
+                bundles.put(moduleId, vMap);
+            }
+            
+            for(Version v : toLoad.get(moduleId)) {
+                log.info("Importing module "+moduleId+" ("+v.getId()+")");
+                IModule mod = deps.get(moduleId).get(v.getId());
+                
+                Set<VersionRows> bundle = new HashSet<>();
+
+                // Add the root module to the bundle
+                String version = mod.getVersion();
+                VersionRows vr = getVersionRows(modules, mod, version);
+                bundle.add(vr);
+
+                // Add all the dependencies to the bundle
+                Queue<IModule> depends = new LinkedList<>();
+                depends.addAll(mod.getDependencies());
+
+                while (!depends.isEmpty()) {
+                    IModule depend = depends.poll();
+                    vr = getVersionRows(modules, depend, version);
+                    
                     bundle.add(vr);
-    
-                    // Add all the dependencies to the bundle
-                    Queue<IModule> depends = new LinkedList<>();
-                    depends.addAll(im.getDependencies());
-    
-                    while (!depends.isEmpty()) {
-                        IModule depend = depends.poll();
-                        vr = getVersionRows(modules, depend, version);
-                        bundle.add(vr);
-                        depends.addAll(depend.getDependencies());
-                    }
-    
-                    // Add the bundle to the bundles map
-                    vMap.put(version, bundle);
+                    depends.addAll(depend.getDependencies());
                 }
-            }
-        } else {
-            // Deal with the case of no module dependency information
-            // TODO: should we assume all modules are independent or related?
-            // For now we'll assume all are related and the root module is
-            // selected arbitrarily
-            Map<String, Set<VersionRows>> versionsMap = new HashMap<>();
-            List<Module> modList = new ArrayList<>(modules.values());
-            assert(modList.size() > 0);
-            
-            // Add the first module as the root
-            Module first = modList.get(0);
-            bundles.put(first.getId(), versionsMap);
-            Map<String, VersionRows> fvMap = first.getVersions();
-            for(String key : fvMap.keySet()) {
-                Set<VersionRows> set = versionsMap.get(key);
-                if(set == null) {
-                    set = new HashSet<>();
-                    versionsMap.put(key,  set);
-                }
-                set.add(fvMap.get(key));
-            }
-            
-            // Add the rest of the modules to the same entry
-            for(int i = 1; i < modList.size(); i++) {
-                Module m = modList.get(i);
-                Map<String, VersionRows> vMap = m.getVersions();
-                for(String key : vMap.keySet()) {
-                    Set<VersionRows> set = versionsMap.get(key);
-                    if(set == null) {
-                        set = new HashSet<>();
-                        versionsMap.put(key,  set);
-                    }
-                    set.add(vMap.get(key));
-                }
+
+                // Add the bundle to the bundles map
+                vMap.put(version, bundle);
             }
         }
-
-        Map<String, Map<String, IOntology<String>>> res = new HashMap<>();
-
-        // Transform each set of modules
-        for (String modId : bundles.keySet()) {
-            Map<String, Set<VersionRows>> map = bundles.get(modId);
-            for (String version : map.keySet()) {
-                Set<VersionRows> rows = map.get(version);
+        
+        Map<String, Map<String, VersionRows>> res = new HashMap<>();
+        
+        for(String modId : bundles.keySet()) {
+            Map<String, VersionRows> val = new HashMap<>();
+            res.put(modId, val);
+            Map<String, Set<VersionRows>> dateVerMap = bundles.get(modId);
+            for(String date : dateVerMap.keySet()) {
                 VersionRows vr = new VersionRows();
-                for (VersionRows row : rows)
-                    vr.merge(row);
-
-                // If no meta-data is available for this version then we skip it
-                // TODO: can we assume we have metadata per version regardless
-                // of the module?
-                if (!metadata.hasVersionMetadata(version))
-                    continue;
-
+                for(VersionRows vrs : dateVerMap.get(date)) {
+                    vr.merge(vrs);
+                }
+                val.put(date, vr);
+            }
+        }
+        
+        return res;
+    }
+    
+    protected Map<String, Map<String, IOntology<String>>> transform(
+            Map<String, Set<Version>> toLoad, 
+            Map<String, Map<String, VersionRows>> bundles, 
+            Map<String, IConcept> ci, Map<String, INamedRole<String>> ri) {
+        Map<String, Map<String, IOntology<String>>> res = new HashMap<>();
+        
+        // Transform each set of modules
+        for(String modId : toLoad.keySet()) {
+            for(Version v : toLoad.get(modId)) {
+                String version = v.getId();
+                Map<String, String> metadata = v.getMetadata();
+                String conceptDefinedId = metadata.get("conceptDefinedId");
+                String someId = metadata.get("someId");
+                String isAId = metadata.get("isAId");
+                String conceptModelAttId = metadata.get("conceptModelAttId");
+                String neverGroupedIds = metadata.get("neverGroupedIds");
+                
+                // TODO: if version don't match the root module's version then
+                // this will throw a NullPoinerException. Can this be smarter?
+                VersionRows vr = bundles.get(modId).get(version);
                 Collection<IAxiom> axioms = new ArrayList<>();
 
                 // Process concept rows
                 for (ConceptRow cr : vr.getConceptRows()) {
-
-                    // TODO: this code is excluding inactive concepts. Do we
-                    // need to keep these for ontoserver?
                     if ("1".equals(cr.getActive())) {
-                        if (!metadata.getConceptDefinedId(version).equals(
+                        if (!conceptDefinedId.equals(
                                 cr.getDefinitionStatusId())) {
                             primitive.put(cr.getId(), "1");
                         } else {
@@ -274,8 +291,7 @@ public class RF2Importer implements IImporter {
 
                 // Process relationship rows
                 for (RelationshipRow rr : vr.getRelationshipRows()) {
-                    if (!metadata.getSomeId(version).equals(
-                            rr.getModifierId())) {
+                    if (!someId.equals(rr.getModifierId())) {
                         throw new RuntimeException("Only existentials are "
                                 + "supported.");
                     }
@@ -285,7 +301,7 @@ public class RF2Importer implements IImporter {
                         String type = rr.getTypeId();
                         String src = rr.getSourceId();
                         String dest = rr.getDestinationId();
-                        if (metadata.getIsAId(version).equals(type)) {
+                        if (isAId.equals(type)) {
                             populateParent(src, dest);
                             populateChildren(dest, src);
                         } else {
@@ -296,10 +312,8 @@ public class RF2Importer implements IImporter {
                     }
                 }
 
-                // FIXME: deal with nulls!
-                populateRoles(
-                        children.get(metadata.getConceptModelAttId(version)),
-                        "", version);
+                populateRoles(children.get(conceptModelAttId), "", version, 
+                        metadata);
 
                 // Add role axioms
                 for (String r1 : roles.keySet()) {
@@ -376,8 +390,7 @@ public class RF2Importer implements IImporter {
                                     IExistential<String> exis = 
                                             new Existential<>(
                                             role, filler);
-                                    if (metadata.getNeverGroupedIds(version)
-                                            .contains(first.role)) {
+                                    if (neverGroupedIds.contains(first.role)) {
                                         // Does not need a role group
                                         conjs.add(exis);
                                     } else {
@@ -413,161 +426,229 @@ public class RF2Importer implements IImporter {
                 ontVersions.put(version, new Ontology<String>(axioms, null));
             }
         }
+
+        return res;
+    }
+    
+    /**
+     * Returns all the rows for a specific bundle.
+     * 
+     * @param moduleId
+     * @param version
+     * @param bundles
+     * @return
+     */
+    protected VersionRows getRowsForBundle(String moduleId, String version, 
+            Map<String, Map<String, Set<VersionRows>>> bundles) {
+        Set<VersionRows> rows = bundles.get(moduleId).get(version);
+        VersionRows vr = new VersionRows();
+        for (VersionRows row : rows) {
+            vr.merge(row);
+        }
+        return vr;
+    }
+    
+    /**
+     * Returns a snapshot for a version.
+     * 
+     * @param version
+     * @return
+     */
+    public VersionRows getSnapshot(String rootModuleId, String version) {
+        log.info("Extracting modules");
+        Map<String, Module> modules = extractModules();
+
+        log.info("Loading module dependencies");
+        IModuleDependencyRefset md = loadModuleDependencies();
+        
+        if(md == null) {
+            throw new ImportException("Couldn't load module dependency " +
+                        "reference set for RF2 input files.");
+        }
+        
+        Map<String, Map<String, IModule>> deps = md.getModuleDependencies();
+        Map<String, Set<Version>> toLoad = getModuleVersionsToLoad();
+        Map<String, Map<String, VersionRows>> bundles = getBundles(toLoad, 
+                deps, modules);
+        
+        return bundles.get(rootModuleId).get(version);
+    }
+
+    @Override
+    public Map<String, Map<String, IOntology<String>>> getOntologyVersions(
+            IProgressMonitor monitor) {
+        
+        long start = System.currentTimeMillis();
+
+        Map<String, IConcept> ci = new HashMap<>();
+        Map<String, INamedRole<String>> ri = new HashMap<>();
+        // No need for feature index because plain RF2 does not support concrete
+        // domains
+
+        // 1. Extract the modules - this is just the collection of raw data from
+        // the RF2 tables
+        log.info("Extracting modules");
+        Map<String, Module> modules = extractModules();
+        
+        // 2. Load module dependencies
+        log.info("Loading module dependencies");
+        IModuleDependencyRefset md = loadModuleDependencies();
+        
+        if(md == null) {
+            throw new ImportException("Couldn't load module dependency " +
+            		"reference set for RF2 input files.");
+        }
+        
+        // Each map entry contains a map of modules indexed by version
+        Map<String, Map<String, IModule>> deps = md.getModuleDependencies();
+        
+        // 3. Determine which modules and versions must be loaded
+        log.info("Determining which modules and versions to load");
+        Map<String, Set<Version>> toLoad = getModuleVersionsToLoad();
+        
+        // 4. Assemble the bundles based on the module dependencies
+        log.info("Assembling bundles based on module dependencies");
+        Map<String, Map<String, VersionRows>> bundles = getBundles(toLoad, 
+                deps, modules);
+        
+        // 5. Up to this point we have the raw bundled data - we need to keep 
+        // only the latest version of each entity
+        log.info("Filtering bundles");
+        filterBundles(bundles);
+        
+        // 6. Transform into axioms
+        log.info("Transforming into axioms");
+        Map<String, Map<String, IOntology<String>>> res = transform(toLoad, 
+                bundles, ci, ri);
         
         Statistics.INSTANCE.setTime("rf2 loading", 
                 System.currentTimeMillis() - start);
         return res;
     }
-
+    
     /**
-     * Processes the raw RF2 files and generates a map of {@link Module}s, 
-     * indexed by module id.
+     * Removes all previous versions of the same entity in a bundle.
+     * 
+     * @param bundles
      */
-    protected Map<String, Module> extractModules() {
-        // Store a map between module ids and a sorted set of effective times
-        SortedMap<String, SortedSet<String>> moduleTimesMap = new TreeMap<>();
-
-        // Read all the concepts from the raw data
-        List<ConceptRow> crs = new ArrayList<>();
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new InputStreamReader(conceptsFile));
-            String line = br.readLine(); // Skip first line
-
-            while (null != (line = br.readLine())) {
-                line = new String(line.getBytes(), "UTF8");
-                if (line.trim().length() < 1) {
-                    continue;
-                }
-                int idx1 = line.indexOf('\t');
-                int idx2 = line.indexOf('\t', idx1 + 1);
-                int idx3 = line.indexOf('\t', idx2 + 1);
-                int idx4 = line.indexOf('\t', idx3 + 1);
-
-                // 0..idx1 == id
-                // idx1+1..idx2 == effectiveTime
-                // idx2+1..idx3 == active
-                // idx3+1..idx4 == moduleId
-                // idx4+1..end == definitionStatusId
-
-                if (idx1 < 0 || idx2 < 0 || idx3 < 0 || idx4 < 0) {
-                    br.close();
-                    throw new RuntimeException(
-                        "Concepts: Mis-formatted "
-                            + "line, expected at least 5 tab-separated fields, "
-                            + "got: " + line);
-                }
-
-                final String id = line.substring(0, idx1);
-                final String effectiveTime = line.substring(idx1 + 1, idx2);
-                final String active = line.substring(idx2 + 1, idx3);
-                final String moduleId = line.substring(idx3 + 1, idx4);
-                final String definitionStatusId = line.substring(idx4 + 1);
-
-                SortedSet<String> times = moduleTimesMap.get(moduleId);
-                if (times == null) {
-                    times = new TreeSet<>();
-                    moduleTimesMap.put(moduleId, times);
-                }
-                times.add(effectiveTime);
-
-                crs.add(new ConceptRow(id, effectiveTime, active, moduleId,
-                        definitionStatusId));
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (Exception e) {
-                }
-            }
-        }
-
-        // Read all the relationships from the raw data
-        List<RelationshipRow> rrs = new ArrayList<>();
-        try {
-            br = new BufferedReader(new InputStreamReader(relationshipsFile)); 
-            String line = br.readLine(); // Skip first line
-            while (null != (line = br.readLine())) {
-                if (line.trim().length() < 1) {
-                    continue;
-                }
-                int idx1 = line.indexOf('\t');
-                int idx2 = line.indexOf('\t', idx1 + 1);
-                int idx3 = line.indexOf('\t', idx2 + 1);
-                int idx4 = line.indexOf('\t', idx3 + 1);
-                int idx5 = line.indexOf('\t', idx4 + 1);
-                int idx6 = line.indexOf('\t', idx5 + 1);
-                int idx7 = line.indexOf('\t', idx6 + 1);
-                int idx8 = line.indexOf('\t', idx7 + 1);
-                int idx9 = line.indexOf('\t', idx8 + 1);
-
-                // 0..idx1 == id
-                // idx1+1..idx2 == effectiveTime
-                // idx2+1..idx3 == active
-                // idx3+1..idx4 == moduleId
-                // idx4+1..idx5 == sourceId
-                // idx5+1..idx6 == destinationId
-                // idx6+1..idx7 == relationshipGroup
-                // idx7+1..idx8 == typeId
-                // idx8+1..idx9 == characteristicTypeId
-                // idx9+1..end == modifierId
-
-                if (idx1 < 0 || idx2 < 0 || idx3 < 0 || idx4 < 0 || idx5 < 0
-                        || idx6 < 0 || idx7 < 0 || idx8 < 0 || idx9 < 0) {
-                    br.close();
-                    throw new RuntimeException("Concepts: Mis-formatted "
-                            + "line, expected 10 tab-separated fields, "
-                            + "got: " + line);
-                }
-
-                final String id = line.substring(0, idx1);
-                final String effectiveTime = line.substring(idx1 + 1, idx2);
-                final String active = line.substring(idx2 + 1, idx3);
-                final String moduleId = line.substring(idx3 + 1, idx4);
-                final String sourceId = line.substring(idx4 + 1, idx5);
-                final String destinationId = line.substring(idx5 + 1, idx6);
-                final String relationshipGroup = line.substring(idx6 + 1, idx7);
-                final String typeId = line.substring(idx7 + 1, idx8);
-                final String characteristicTypeId = line.substring(idx8 + 1,
-                        idx9);
-                final String modifierId = line.substring(idx9 + 1);
+    protected void filterBundles(Map<String, Map<String, VersionRows>> 
+        bundles) {
+        for(String modId : bundles.keySet()) {
+            Map<String, VersionRows> dateVerMap = bundles.get(modId);
+            for(String date : dateVerMap.keySet()) {
+                VersionRows vr = dateVerMap.get(date);
                 
-                SortedSet<String> times = moduleTimesMap.get(moduleId);
-                if (times == null) {
-                    times = new TreeSet<>();
-                    moduleTimesMap.put(moduleId, times);
+                Map<String, Object[]> map = new HashMap<>();
+                for(ConceptRow cr : vr.getConceptRows()) {
+                    String id = cr.getId();
+                    String et = cr.getEffectiveTime();
+                    Object[] obj = map.get(id);
+                    if(obj == null) {
+                        obj = new Object[2];
+                        map.put(id, obj);
+                    }
+                    if(obj[0] != null) {
+                        String currDate = (String)obj[0];
+                        if(et.compareTo(currDate) > 0) {
+                            obj[0] = et;
+                            obj[1] = cr;
+                        }
+                    } else {
+                        obj[0] = et;
+                        obj[1] = cr;
+                    }
                 }
-                times.add(effectiveTime);
-
-                rrs.add(new RelationshipRow(id, effectiveTime, active,
-                        moduleId, sourceId, destinationId, relationshipGroup,
-                        typeId, characteristicTypeId, modifierId));
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (Exception e) {
+                
+                VersionRows nvr = new VersionRows();
+                for(String key : map.keySet()) {
+                    Object[] val = map.get(key);
+                    nvr.getConceptRows().add((ConceptRow)val[1]);
                 }
+                map.clear();
+                
+                for(RelationshipRow cr : vr.getRelationshipRows()) {
+                    String id = cr.getId();
+                    String et = cr.getEffectiveTime();
+                    Object[] obj = map.get(id);
+                    if(obj == null) {
+                        obj = new Object[2];
+                        map.put(id, obj);
+                    }
+                    if(obj[0] != null) {
+                        String currDate = (String)obj[0];
+                        if(et.compareTo(currDate) > 0) {
+                            obj[0] = et;
+                            obj[1] = cr;
+                        }
+                    } else {
+                        obj[0] = et;
+                        obj[1] = cr;
+                    }
+                }
+                
+                for(String key : map.keySet()) {
+                    Object[] val = map.get(key);
+                    nvr.getRelationshipRows().add((RelationshipRow)val[1]);
+                }
+                map.clear();
+                
+                // Replace with filtered map
+                dateVerMap.put(date, nvr);
             }
         }
-
-        // Groups concepts, descriptions, and relationships by module
-        Map<String, Map<String, SortedSet<ConceptRow>>> moduleConceptMap = 
+    }
+    
+    protected VersionRows getVersionRows(Map<String, Module> modules, 
+            IModule module, String version) {
+        VersionRows vr = modules.get(module.getId()).getVersions()
+                .get(module.getVersion());
+        if(vr == null) {
+            // vr might be null when using this importer if the
+            // only changes in the dependency are in the 
+            // descriptions, because the descriptions are not
+            // loaded. In this case we need to find the previous
+            // version.
+            Map<String, VersionRows> m = modules.get(
+                    module.getId()).getVersions();
+            Set<String> keys = m.keySet();
+            String[] keysArr = keys.toArray(
+                    new String[keys.size()]);
+            Arrays.sort(keysArr);
+            
+            // Find previous version in sorted array
+            int index = Arrays.binarySearch(keysArr, 0, 
+                    keysArr.length, module.getVersion());
+            assert(index < 0);
+            // x = (-(insertion point) - 1)
+            // x + 1 = -insertionPoint
+            // -x - 1 = insertionPoint
+            index = (index * -1) - 1;
+            vr = modules.get(module.getId()).getVersions()
+                    .get(keysArr[index - 1]);
+            assert(vr != null);
+        }
+        return vr;
+    }
+    
+    /**
+     * Groups concepts by module.
+     * 
+     * @param crs
+     * @return
+     */
+    protected Map<String, Map<String, SortedSet<ConceptRow>>> groupConcepts(
+            List<ConceptRow> crs) {
+        // Groups concepts and relationships by module
+        Map<String, Map<String, SortedSet<ConceptRow>>> res = 
                 new HashMap<>();
         for (ConceptRow cr : crs) {
             String id = cr.getId();
             String module = cr.getModuleId();
             Map<String, SortedSet<ConceptRow>> conceptMap = 
-                    moduleConceptMap.get(module);
+                    res.get(module);
             if (conceptMap == null) {
                 conceptMap = new HashMap<>();
-                moduleConceptMap.put(module, conceptMap);
+                res.put(module, conceptMap);
             }
             SortedSet<ConceptRow> set = conceptMap.get(id);
             if (set == null) {
@@ -576,17 +657,27 @@ public class RF2Importer implements IImporter {
             }
             set.add(cr);
         }
-
-        Map<String, Map<String, SortedSet<RelationshipRow>>> moduleRelMap = 
+        return res;
+    }
+    
+    /**
+     * Groups relationships by module.
+     * 
+     * @param rrs
+     * @return
+     */
+    protected Map<String, Map<String, SortedSet<RelationshipRow>>> groupRels(
+            List<RelationshipRow> rrs) {
+        Map<String, Map<String, SortedSet<RelationshipRow>>> res = 
                 new HashMap<>();
         for (RelationshipRow rr : rrs) {
             String id = rr.getId();
             String module = rr.getModuleId();
             Map<String, SortedSet<RelationshipRow>> relMap = 
-                    moduleRelMap.get(module);
+                    res.get(module);
             if(relMap == null) {
                 relMap = new HashMap<>();
-                moduleRelMap.put(module, relMap);
+                res.put(module, relMap);
             }
             SortedSet<RelationshipRow> set = relMap.get(id);
             if (set == null) {
@@ -595,45 +686,216 @@ public class RF2Importer implements IImporter {
             }
             set.add(rr);
         }
-        
-        // Create modules and index by module id
-        Map<String, Module> res = new HashMap<>();
-
-        for (String module : moduleTimesMap.keySet()) {
-            Module m = new Module(module);
-            SortedSet<String> dates = moduleTimesMap.get(module);
-            for (String date : dates) {
-                VersionRows vr = new VersionRows();
-                for (String moduleId : moduleConceptMap.keySet()) {
-                    Map<String, SortedSet<ConceptRow>> idConceptRowMap = 
-                            moduleConceptMap.get(moduleId);
-                    for(String id : idConceptRowMap.keySet()) {
-                        ConceptRow cr = getConceptRowForDate(
-                                idConceptRowMap.get(id), date);
-                        if (cr != null)
-                            vr.getConceptRows().add(cr);
-                    }
-                }
-
-                for (String moduleId : moduleRelMap.keySet()) {
-                    Map<String, SortedSet<RelationshipRow>> idRelRowMap = 
-                            moduleRelMap.get(moduleId);
-                    for(String id : idRelRowMap.keySet()) {
-                        RelationshipRow rr = getRelationshipRowForDate(
-                                idRelRowMap.get(id), date);
-                        if (rr != null)
-                            vr.getRelationshipRows().add(rr);
-                    }
-                }
-                m.getVersions().put(date, vr);
-            }
-            res.put(module, m);
-        }
-
         return res;
     }
 
-    protected ConceptRow getConceptRowForDate(Set<ConceptRow> conceptSet,
+    /**
+     * Processes the raw RF2 files and generates a map of {@link Module}s, 
+     * indexed by module id.
+     */
+    protected Map<String, Module> extractModules() {
+        
+        // Map of module ids to modules
+        Map<String, Module> moduleMap = new HashMap<>();
+        
+        for(RF2Input input : inputs.getRf2Inputs()) {
+            String conceptsFile = input.getConceptsFile();
+            InputType inputType = input.getInputType();
+            InputStream in = null;
+            if(inputType.equals(InputType.EXTERNAL)) {
+                try {
+                    in = new FileInputStream(conceptsFile);
+                } catch (FileNotFoundException e) {
+                    in = null;
+                }
+            } else if(inputType.equals(InputType.CLASSPATH)) {
+                in = this.getClass().getResourceAsStream(conceptsFile);
+            } else {
+                throw new RuntimeException("Unexpected input type "+inputType);
+            }
+            
+            if(in == null) {
+                throw new ImportException("Unable to load concepts file. " +
+                        "Please check your input configuration file. " +
+                        "(input type = "+inputType+", file="+conceptsFile+")");
+            }
+            
+            try (BufferedReader br = new BufferedReader(
+                    new InputStreamReader(in))) {
+                String line = br.readLine(); // Skip first line
+    
+                while (null != (line = br.readLine())) {
+                    line = new String(line.getBytes(), "UTF8");
+                    if (line.trim().length() < 1) {
+                        continue;
+                    }
+                    int idx1 = line.indexOf('\t');
+                    int idx2 = line.indexOf('\t', idx1 + 1);
+                    int idx3 = line.indexOf('\t', idx2 + 1);
+                    int idx4 = line.indexOf('\t', idx3 + 1);
+    
+                    // 0..idx1 == id
+                    // idx1+1..idx2 == effectiveTime
+                    // idx2+1..idx3 == active
+                    // idx3+1..idx4 == moduleId
+                    // idx4+1..end == definitionStatusId
+    
+                    if (idx1 < 0 || idx2 < 0 || idx3 < 0 || idx4 < 0) {
+                        br.close();
+                        throw new RuntimeException(
+                            "Concepts: Mis-formatted "
+                            + "line, expected at least 5 tab-separated fields, "
+                            + "got: " + line);
+                    }
+    
+                    final String id = line.substring(0, idx1);
+                    final String effectiveTime = line.substring(idx1 + 1, idx2);
+                    final String active = line.substring(idx2 + 1, idx3);
+                    final String moduleId = line.substring(idx3 + 1, idx4);
+                    final String definitionStatusId = line.substring(idx4 + 1);
+    
+                    ConceptRow cr = new ConceptRow(id, effectiveTime, active, 
+                            moduleId, definitionStatusId);
+                    
+                    Module m = moduleMap.get(moduleId);
+                    if(m == null) {
+                        m = new Module(moduleId);
+                        moduleMap.put(moduleId, m);
+                    }
+                    Map<String, VersionRows> vMap = m.getVersions();
+                    VersionRows vr = vMap.get(effectiveTime);
+                    if(vr == null) {
+                        vr = new VersionRows();
+                        vMap.put(effectiveTime, vr);
+                    }
+                    vr.getConceptRows().add(cr);
+                }
+            } catch (IOException e) {
+                log.error(e);
+                throw new ImportException("Problem while loading concepts.", e);
+            } 
+            
+            // Load relationships
+            String relationshipsFile = input.getStatedRelationshipsFile();
+            if(inputType.equals(InputType.EXTERNAL)) {
+                try {
+                    in = new FileInputStream(relationshipsFile);
+                } catch (FileNotFoundException e) {
+                    in = null;
+                }
+            } else if(inputType.equals(InputType.CLASSPATH)) {
+                in = this.getClass().getResourceAsStream(relationshipsFile);
+            } else {
+                throw new RuntimeException("Unexpected input type "+inputType);
+            }
+            
+            if(in == null) {
+                throw new ImportException("Unable to load realtionships " +
+                        "file. Please check your input configuration file. " +
+                        "(input type = "+inputType+
+                        ", file="+relationshipsFile+")");
+            }
+            
+            try (BufferedReader br = new BufferedReader(
+                    new InputStreamReader(in))) {
+                String line = br.readLine(); // Skip first line
+                while (null != (line = br.readLine())) {
+                    if (line.trim().length() < 1) {
+                        continue;
+                    }
+                    int idx1 = line.indexOf('\t');
+                    int idx2 = line.indexOf('\t', idx1 + 1);
+                    int idx3 = line.indexOf('\t', idx2 + 1);
+                    int idx4 = line.indexOf('\t', idx3 + 1);
+                    int idx5 = line.indexOf('\t', idx4 + 1);
+                    int idx6 = line.indexOf('\t', idx5 + 1);
+                    int idx7 = line.indexOf('\t', idx6 + 1);
+                    int idx8 = line.indexOf('\t', idx7 + 1);
+                    int idx9 = line.indexOf('\t', idx8 + 1);
+    
+                    // 0..idx1 == id
+                    // idx1+1..idx2 == effectiveTime
+                    // idx2+1..idx3 == active
+                    // idx3+1..idx4 == moduleId
+                    // idx4+1..idx5 == sourceId
+                    // idx5+1..idx6 == destinationId
+                    // idx6+1..idx7 == relationshipGroup
+                    // idx7+1..idx8 == typeId
+                    // idx8+1..idx9 == characteristicTypeId
+                    // idx9+1..end == modifierId
+    
+                    if (idx1 < 0 || idx2 < 0 || idx3 < 0 || idx4 < 0 || idx5 < 0
+                            || idx6 < 0 || idx7 < 0 || idx8 < 0 || idx9 < 0) {
+                        br.close();
+                        throw new RuntimeException("Concepts: Mis-formatted "
+                                + "line, expected 10 tab-separated fields, "
+                                + "got: " + line);
+                    }
+    
+                    final String id = line.substring(0, idx1);
+                    final String effectiveTime = line.substring(idx1 + 1, idx2);
+                    final String active = line.substring(idx2 + 1, idx3);
+                    final String moduleId = line.substring(idx3 + 1, idx4);
+                    final String sourceId = line.substring(idx4 + 1, idx5);
+                    final String destinationId = line.substring(idx5 + 1, idx6);
+                    final String relationshipGroup = line.substring(idx6 + 1, 
+                            idx7);
+                    final String typeId = line.substring(idx7 + 1, idx8);
+                    final String characteristicTypeId = line.substring(idx8 + 1,
+                            idx9);
+                    final String modifierId = line.substring(idx9 + 1);
+                    
+                    RelationshipRow rr = new RelationshipRow(id, effectiveTime, 
+                            active, moduleId, sourceId, destinationId, 
+                            relationshipGroup, typeId, characteristicTypeId, 
+                            modifierId);
+                    
+                    Module m = moduleMap.get(moduleId);
+                    if(m == null) {
+                        m = new Module(moduleId);
+                        moduleMap.put(moduleId, m);
+                    }
+                    Map<String, VersionRows> vMap = m.getVersions();
+                    VersionRows vr = vMap.get(effectiveTime);
+                    if(vr == null) {
+                        vr = new VersionRows();
+                        vMap.put(effectiveTime, vr);
+                    }
+                    vr.getRelationshipRows().add(rr);
+                }
+            } catch (IOException e) {
+                log.error(e);
+                throw new ImportException(
+                        "Problem while loading Relationships.", e);
+            } 
+        }
+        
+        for(String key : moduleMap.keySet()) {
+            Module m = moduleMap.get(key);
+            VersionRows last = null;
+            SortedMap<String, VersionRows> vMap = m.getVersions();
+            for(String version : vMap.keySet()) {
+                VersionRows vr = vMap.get(version);
+                if(last != null) {
+                    vr.merge(last);
+                }
+                last = vr;
+            }
+        }
+        
+        return moduleMap;
+    }
+    
+    /**
+     * Merges two {@link VersionRows} considering that 
+     * @param tgt
+     * @param src
+     */
+    protected void smartMerge(VersionRows tgt, VersionRows src) {
+        
+    }
+
+    protected ConceptRow getConceptRowForDate(SortedSet<ConceptRow> conceptSet,
             String date) {
         if(conceptSet == null) return null;
         // We need to find the concept with matching date or the previous
@@ -656,7 +918,7 @@ public class RF2Importer implements IImporter {
     }
     
     protected RelationshipRow getRelationshipRowForDate(
-            Set<RelationshipRow> relationshipSet, String date) {
+            SortedSet<RelationshipRow> relationshipSet, String date) {
         if(relationshipSet == null) return null;
         RelationshipRow prev = null;
 
@@ -723,14 +985,15 @@ public class RF2Importer implements IImporter {
     }
 
     protected void populateRoles(Set<String> roles, String parentSCTID,
-            String version) {
+            String version, Map<String, String> metadata) {
         if(roles == null) return;
         for (String role : roles) {
             Set<String> cs = children.get(role);
             if (cs != null) {
-                populateRoles(cs, role, version);
+                populateRoles(cs, role, version, metadata);
             }
-            String ri = metadata.getRightIdentities(version).get(role);
+            String[] ris = metadata.get("rightIdentityIds").split("[,]");
+            String ri = (ris[0].equals(role)) ? ris[1] : null;
             if (ri != null) {
                 populateRoleDef(role, ri, parentSCTID);
             } else {

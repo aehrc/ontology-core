@@ -4,7 +4,6 @@
  */
 package au.csiro.ontology.snomed.refset.rf2;
 
-import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -14,12 +13,21 @@ import java.util.Map;
 public interface IModuleDependencyRefset extends IRefset {
     
     /**
-     * Returns a {@link Map} of root module ids and a {@link Collection} of 
-     * {@link IModule}s. Each {@link IModule} represents a versioned module and 
-     * its dependencies.
+     * Returns a {@link Map} of root module ids and a {@link Map} of 
+     * {@link IModule}s indexed by version. Each {@link IModule} represents a 
+     * versioned module and its dependencies. Every module can be seen as a root
+     * module.
      * 
      * @return
      */
-    public Map<String, Collection<IModule>> getModuleDependencies();
+    public Map<String, Map<String,IModule>> getModuleDependencies();
+    
+    /**
+     * Merges the content of another module dependency reference set into this 
+     * reference set.
+     * 
+     * @param other The other {@link IModuleDependencyRefset}.
+     */
+    public void merge(IModuleDependencyRefset other);
     
 }

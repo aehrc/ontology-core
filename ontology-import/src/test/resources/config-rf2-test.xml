@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<inputs>
+  <rf2Inputs>
+    <inputType>CLASSPATH</inputType>
+    <conceptsFile>/rf2_full_con_test.txt</conceptsFile>
+    <relationshipsFile>/rf2_full_rel_test.txt</relationshipsFile>
+    <releaseType>FULL</releaseType>
+  </rf2Inputs>
+</inputs>

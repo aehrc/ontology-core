@@ -4,7 +4,6 @@
  */
 package au.csiro.ontology.snomed.refset.rf2;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,7 +20,7 @@ public class LanguageRefset extends Refset implements ILanguageRefset {
     protected SnomedMetadata metadata = SnomedMetadata.INSTANCE;
     
     public LanguageRefset(String id, String displayName, 
-            Collection<IRefsetMember> members) {
+            Set<IRefsetMember> members) {
         super(id, displayName);
         
         String prefId = metadata.getPreferredId();
@@ -39,6 +38,11 @@ public class LanguageRefset extends Refset implements ILanguageRefset {
     @Override
     public boolean isPreferred(String descId) {
         return prefSet.contains(descId);
+    }
+
+    @Override
+    public Set<IRefsetMember> getMembers() {
+        throw new UnsupportedOperationException();
     }
 
 }

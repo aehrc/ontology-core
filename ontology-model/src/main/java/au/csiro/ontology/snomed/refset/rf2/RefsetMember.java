@@ -66,4 +66,68 @@ public class RefsetMember implements IRefsetMember {
         return referencedComponentId;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (active ? 1231 : 1237);
+        result = prime * result
+                + ((effectiveTime == null) ? 0 : effectiveTime.hashCode());
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        result = prime * result
+                + ((moduleId == null) ? 0 : moduleId.hashCode());
+        result = prime
+                * result
+                + ((referencedComponentId == null) ? 0 : referencedComponentId
+                        .hashCode());
+        result = prime * result
+                + ((refsetId == null) ? 0 : refsetId.hashCode());
+        return result;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        RefsetMember other = (RefsetMember) obj;
+        if (active != other.active)
+            return false;
+        if (effectiveTime == null) {
+            if (other.effectiveTime != null)
+                return false;
+        } else if (!effectiveTime.equals(other.effectiveTime))
+            return false;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        if (moduleId == null) {
+            if (other.moduleId != null)
+                return false;
+        } else if (!moduleId.equals(other.moduleId))
+            return false;
+        if (referencedComponentId == null) {
+            if (other.referencedComponentId != null)
+                return false;
+        } else if (!referencedComponentId.equals(other.referencedComponentId))
+            return false;
+        if (refsetId == null) {
+            if (other.refsetId != null)
+                return false;
+        } else if (!refsetId.equals(other.refsetId))
+            return false;
+        return true;
+    }
+
 }

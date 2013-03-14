@@ -4,7 +4,6 @@
  */
 package au.csiro.ontology.snomed.refset.rf2;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -17,7 +16,7 @@ import java.util.Set;
 public class ModuleDependencyRefset extends Refset implements
         IModuleDependencyRefset {
     
-    protected final Collection<IRefsetMember> members;
+    protected final Set<IRefsetMember> members;
     
     /**
      * Creates a new module dependency refset.
@@ -26,15 +25,15 @@ public class ModuleDependencyRefset extends Refset implements
      * @param displayName
      */
     public ModuleDependencyRefset(String id, String displayName, 
-            Collection<IRefsetMember> members) {
+            Set<IRefsetMember> members) {
         super(id, displayName);
         this.members = members;
     }
 
     @Override
-    public Map<String, Collection<IModule>> getModuleDependencies() {
+    public Map<String, Map<String, IModule>> getModuleDependencies() {
         Map<String, Map<String, Set<IModule>>> map = new HashMap<>();
-        Set<String> dependencies = new HashSet<>();
+        
         Set<String> all = new HashSet<>();
         for(IRefsetMember im : members) {
             IModuleDependencyRefsetMember rf = 
@@ -46,7 +45,7 @@ public class ModuleDependencyRefset extends Refset implements
             
             all.add(moduleId);
             all.add(referencedComponentId);
-            dependencies.add(referencedComponentId);
+            //dependencies.add(referencedComponentId);
             
             Map<String, Set<IModule>> m1 = map.get(moduleId);
             if(m1 == null) {
@@ -63,32 +62,39 @@ public class ModuleDependencyRefset extends Refset implements
             m2.add(new Module(referencedComponentId, targetEffectiveTime));
         }
         
-        // The root modules are the ones that are not dependencies of other 
-        // modules
-        all.removeAll(dependencies);
-        
-        if(all.isEmpty()) {
-            throw new RuntimeException("Found cyclic dependencies in modules");
-        }
-        
-        Map<String, Collection<IModule>> res = new HashMap<>();
+        Map<String, Map<String, IModule>> res = new HashMap<>();
         
         // Build the collection of module dependencies
         for(String id : all) {
             Map<String, Set<IModule>> versions = map.get(id);
-            for(String version : versions.keySet()) {
-                IModule m = new Module(id, version);
-                Set<IModule> deps = versions.get(version);
-                m.getDependencies().addAll(deps);
-                Collection<IModule> c = res.get(id);
-                if(c == null) {
-                    c = new HashSet<>();
-                    res.put(id, c);
+            if(versions != null) {
+                for(String version : versions.keySet()) {
+                    IModule m = new Module(id, version);
+                    Set<IModule> deps = versions.get(version);
+                    m.getDependencies().addAll(deps);
+                    Map<String, IModule> c = res.get(id);
+                    if(c == null) {
+                        c = new HashMap<>();
+                        res.put(id, c);
+                    }
+                    c.put(version, m);
                 }
-                c.add(m);
-            }
+            }  
         }
         return res;
+    }
+
+    /**
+     * @return the members
+     */
+    @Override
+    public Set<IRefsetMember> getMembers() {
+        return members;
+    }
+
+    @Override
+    public void merge(IModuleDependencyRefset other) {
+        members.addAll(other.getMembers());
     }
 
 }

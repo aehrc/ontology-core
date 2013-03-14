@@ -4,6 +4,8 @@
  */
 package au.csiro.ontology.snomed.refset.rf2;
 
+import java.util.Set;
+
 
 /**
  * An RF2 reference set.
@@ -26,5 +28,12 @@ public interface IRefset {
      * @return
      */
     public String getDisplayName();
+    
+    /**
+     * Returns the raw members of the reference set.
+     * 
+     * @return
+     */
+    public Set<IRefsetMember> getMembers();
     
 }
