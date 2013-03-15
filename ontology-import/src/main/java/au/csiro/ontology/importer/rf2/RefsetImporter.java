@@ -13,19 +13,15 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import au.csiro.ontology.snomed.refset.rf2.ILanguageRefset;
-import au.csiro.ontology.snomed.refset.rf2.ILanguageRefsetMember;
+import au.csiro.ontology.importer.ImportException;
 import au.csiro.ontology.snomed.refset.rf2.IModuleDependencyRefset;
 import au.csiro.ontology.snomed.refset.rf2.IModuleDependencyRefsetMember;
-import au.csiro.ontology.snomed.refset.rf2.IRefset;
 import au.csiro.ontology.snomed.refset.rf2.IRefsetMember;
-import au.csiro.ontology.snomed.refset.rf2.LanguageRefset;
-import au.csiro.ontology.snomed.refset.rf2.LanguageRefsetMember;
 import au.csiro.ontology.snomed.refset.rf2.ModuleDependencyRefset;
 import au.csiro.ontology.snomed.refset.rf2.ModuleDependencyRefsetMember;
 
 /**
- * Imports RF2 refsets.
+ * Imports RF2 reference sets.
  * 
  * @author Alejandro Metke
  *
@@ -36,79 +32,56 @@ public class RefsetImporter {
     private final static Logger log = Logger.getLogger(RefsetImporter.class);
     
     /**
-     * Imports a refset from a file. This method closes the {@link InputStream}
-     * after loading the refset.
+     * Imports a module dependency reference set from a {@link Set} of 
+     * {@link InputStream}s. This method closes the {@link InputStream}s after 
+     * loading the reference sets.
      * 
-     * @param refsetFile The input stream.
-     * @param id The id of the refset
-     * @param displayName The display name of the refset
-     * @param version The version of the release that the refset belongs to
+     * @param refsetFiles The input streams.
      * @return
      */
-    public static IRefset importRefset(InputStream refsetFile, String id, 
-            String displayName) {
+    public static IModuleDependencyRefset importModuleDependencyRefset(
+            Set<InputStream> refsetFiles) {
         
-        try (BufferedReader br = new BufferedReader(
-                new InputStreamReader(refsetFile))){
-            String line = br.readLine();
-            
-            String[] cols = line.split("[\t]");
-            assert(cols.length >= 6);
-            
-            if(cols.length == 7) {
-                // Test if it is a language refset
-                if(cols[6].equals("acceptabilityId")) {
-                    
-                    Set<IRefsetMember> members = new HashSet<>();
-                    while (null != (line = br.readLine())) {
-                        cols = line.split("[\t]");
-                        boolean active = cols[2].equals("1") ? true : false;
-                        ILanguageRefsetMember m = 
-                                new LanguageRefsetMember(cols[0], 
-                                        cols[1], active , cols[3], cols[4], 
-                                        cols[5], cols[6]);
-                        members.add(m);
-                    }
-                    
-                    ILanguageRefset res = new LanguageRefset(id, displayName, 
-                            members);
-                    return res;
-                } else {
-                    throw new RuntimeException("Unsupported refset type with " +
-                            "columns "+Arrays.asList(cols));
-                }
-            } else if(cols.length == 8) {
-                // Test if it is a module dependency refset
-                if(cols[6].equals("sourceEffectiveTime") && 
-                        cols[7].equals("targetEffectiveTime")) {
+        Set<IRefsetMember> members = new HashSet<>();
+        for(InputStream refsetFile : refsetFiles) {
+            try (BufferedReader br = new BufferedReader(
+                    new InputStreamReader(refsetFile))){
+                String line = br.readLine();
+                
+                String[] cols = line.split("[\t]");
+                assert(cols.length >= 6);
+                
+                if(cols.length == 8) {
+                    // Test if it is a module dependency refset
+                    if(cols[6].equals("sourceEffectiveTime") && 
+                            cols[7].equals("targetEffectiveTime")) {
 
-                    Set<IRefsetMember> members = new HashSet<>();
-                    while (null != (line = br.readLine())) {
-                        cols = line.split("[\t]");
-                        boolean active = cols[2].equals("1") ? true : false;
-                        IModuleDependencyRefsetMember m = 
-                                new ModuleDependencyRefsetMember(cols[0], 
-                                        cols[1], active , cols[3], cols[4], 
-                                        cols[5], cols[6], cols[7]);
-                        members.add(m);
+                        while (null != (line = br.readLine())) {
+                            cols = line.split("[\t]");
+                            boolean active = cols[2].equals("1") ? true : false;
+                            IModuleDependencyRefsetMember m = 
+                                    new ModuleDependencyRefsetMember(cols[0], 
+                                            cols[1], active , cols[3], cols[4], 
+                                            cols[5], cols[6], cols[7]);
+                            members.add(m);
+                        }
+                    } else {
+                        throw new ImportException("Malformed module " +
+                        	"dependency reference set with columns "+
+                                Arrays.asList(cols));
                     }
-                    
-                    IModuleDependencyRefset res = new ModuleDependencyRefset(
-                            id, displayName, members);
-                    
-                    return res;
                 } else {
-                    throw new RuntimeException("Unsupported refset type with " +
-                    		"columns "+Arrays.asList(cols));
+                    throw new ImportException("Malformed module dependency " +
+                    	"reference set with columns "+Arrays.asList(cols));
                 }
-            } else {
-                throw new RuntimeException("Only module dependency refsets " +
-                		"are currently supported.");
+            } catch (Exception e) {
+                log.error("Problem reading refset file "+refsetFile, e);
+                throw new ImportException("Problem reading refset file ", e);
             }
-        } catch (Exception e) {
-            log.error("Problem reading refset file "+refsetFile, e);
-            throw new RuntimeException(e);
         }
+        
+        IModuleDependencyRefset res = new ModuleDependencyRefset(members);
+        return res;
     }
 
 }

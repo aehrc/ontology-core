@@ -19,14 +19,12 @@ public class ModuleDependencyRefset extends Refset implements
     protected final Set<IRefsetMember> members;
     
     /**
-     * Creates a new module dependency refset.
+     * Creates a new module dependency reference set.
      * 
      * @param id
      * @param displayName
      */
-    public ModuleDependencyRefset(String id, String displayName, 
-            Set<IRefsetMember> members) {
-        super(id, displayName);
+    public ModuleDependencyRefset(Set<IRefsetMember> members) {
         this.members = members;
     }
 

@@ -23,11 +23,17 @@ public interface IRefset {
     public String getId();
     
     /**
-     * Returns the name of this refset.
+     * Returns the name of this reference set.
      * 
      * @return
      */
     public String getDisplayName();
+    
+    /**
+     * Sets the display name for this reference set.
+     * @param displayName
+     */
+    public void setDisplayName(String displayName);
     
     /**
      * Returns the raw members of the reference set.

@@ -18,9 +18,8 @@ public abstract class Refset implements IRefset {
     /**
      * 
      */
-    public Refset(String id, String displayName) {
-        this.id = id;
-        this.displayName = displayName;
+    public Refset() {
+        
     }
 
     @Override
@@ -31,6 +30,13 @@ public abstract class Refset implements IRefset {
     @Override
     public String getDisplayName() {
         return displayName;
+    }
+
+    /**
+     * @param displayName the displayName to set
+     */
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
 }

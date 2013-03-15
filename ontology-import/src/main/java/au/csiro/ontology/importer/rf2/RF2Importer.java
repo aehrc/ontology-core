@@ -121,7 +121,7 @@ public class RF2Importer implements IImporter {
      * @return
      */
     protected IModuleDependencyRefset loadModuleDependencies() {
-        IModuleDependencyRefset res = null;
+        Set<InputStream> iss = new HashSet<>();
         for(RF2Input input : inputs.getRf2Inputs()) {
             InputType inputType = input.getInputType();
             for(String md : input.getModuleDependenciesRefsetFiles()) {
@@ -141,22 +141,16 @@ public class RF2Importer implements IImporter {
                 
                 if(is == null) {
                     throw new ImportException("Unable to load module " +
-                    	"dependencias. Please check your input configuration " +
-                    	"file. (input type = "+inputType+", file="+md+")");
+                        "dependencias. Please check your input configuration " +
+                        "file. (input type = "+inputType+", file="+md+")");
                 }
                 
-                if(res == null) {
-                    res = (IModuleDependencyRefset)RefsetImporter.importRefset(
-                            is, "", "");
-                } else {
-                    IModuleDependencyRefset other = 
-                        (IModuleDependencyRefset)RefsetImporter.importRefset(
-                                is, "", "");
-                    res.merge(other);
-                }
+                iss.add(is);
             }
         }
         
+        IModuleDependencyRefset res = 
+                RefsetImporter.importModuleDependencyRefset(iss);
         return res;
     }
     
@@ -196,7 +190,7 @@ public class RF2Importer implements IImporter {
      * @param modules
      * @return
      */
-    protected Map<String, Map<String, VersionRows>> getBundles(
+    protected Map<String, Map<String, ? extends VersionRows>> getBundles(
             Map<String, Set<Version>> toLoad, 
             Map<String, Map<String, IModule>> deps, 
             Map<String, Module> modules) {
@@ -237,7 +231,7 @@ public class RF2Importer implements IImporter {
             }
         }
         
-        Map<String, Map<String, VersionRows>> res = new HashMap<>();
+        Map<String, Map<String, ? extends VersionRows>> res = new HashMap<>();
         
         for(String modId : bundles.keySet()) {
             Map<String, VersionRows> val = new HashMap<>();
@@ -257,7 +251,7 @@ public class RF2Importer implements IImporter {
     
     protected Map<String, Map<String, IOntology<String>>> transform(
             Map<String, Set<Version>> toLoad, 
-            Map<String, Map<String, VersionRows>> bundles, 
+            Map<String, Map<String, ? extends VersionRows>> bundles, 
             Map<String, IConcept> ci, Map<String, INamedRole<String>> ri) {
         Map<String, Map<String, IOntology<String>>> res = new HashMap<>();
         
@@ -468,8 +462,8 @@ public class RF2Importer implements IImporter {
         
         Map<String, Map<String, IModule>> deps = md.getModuleDependencies();
         Map<String, Set<Version>> toLoad = getModuleVersionsToLoad();
-        Map<String, Map<String, VersionRows>> bundles = getBundles(toLoad, 
-                deps, modules);
+        Map<String, Map<String, ? extends VersionRows>> bundles = 
+                getBundles(toLoad, deps, modules);
         
         return bundles.get(rootModuleId).get(version);
     }
@@ -479,7 +473,8 @@ public class RF2Importer implements IImporter {
             IProgressMonitor monitor) {
         
         long start = System.currentTimeMillis();
-
+        monitor.taskStarted("Importing ontologies");
+        
         Map<String, IConcept> ci = new HashMap<>();
         Map<String, INamedRole<String>> ri = new HashMap<>();
         // No need for feature index because plain RF2 does not support concrete
@@ -489,37 +484,44 @@ public class RF2Importer implements IImporter {
         // the RF2 tables
         log.info("Extracting modules");
         Map<String, Module> modules = extractModules();
+        mergeRows(modules);
+        monitor.step(1, 6);
         
         // 2. Load module dependencies
         log.info("Loading module dependencies");
         IModuleDependencyRefset md = loadModuleDependencies();
+        monitor.step(2, 6);
         
         if(md == null) {
             throw new ImportException("Couldn't load module dependency " +
-            		"reference set for RF2 input files.");
+                        "reference set for RF2 input files.");
         }
         
         // Each map entry contains a map of modules indexed by version
         Map<String, Map<String, IModule>> deps = md.getModuleDependencies();
         
         // 3. Determine which modules and versions must be loaded
-        log.info("Determining which modules and versions to load");
+        log.info("Determining which root modules and versions to load");
         Map<String, Set<Version>> toLoad = getModuleVersionsToLoad();
+        monitor.step(3, 6);
         
         // 4. Assemble the bundles based on the module dependencies
         log.info("Assembling bundles based on module dependencies");
-        Map<String, Map<String, VersionRows>> bundles = getBundles(toLoad, 
-                deps, modules);
+        Map<String, Map<String, ? extends VersionRows>> bundles = 
+                getBundles(toLoad, deps, modules);
+        monitor.step(4, 6);
         
         // 5. Up to this point we have the raw bundled data - we need to keep 
         // only the latest version of each entity
         log.info("Filtering bundles");
         filterBundles(bundles);
+        monitor.step(5, 6);
         
         // 6. Transform into axioms
         log.info("Transforming into axioms");
         Map<String, Map<String, IOntology<String>>> res = transform(toLoad, 
                 bundles, ci, ri);
+        monitor.step(6, 6);
         
         Statistics.INSTANCE.setTime("rf2 loading", 
                 System.currentTimeMillis() - start);
@@ -531,10 +533,10 @@ public class RF2Importer implements IImporter {
      * 
      * @param bundles
      */
-    protected void filterBundles(Map<String, Map<String, VersionRows>> 
+    protected void filterBundles(Map<String, Map<String, ? extends VersionRows>> 
         bundles) {
         for(String modId : bundles.keySet()) {
-            Map<String, VersionRows> dateVerMap = bundles.get(modId);
+            Map<String, ? extends VersionRows> dateVerMap = bundles.get(modId);
             for(String date : dateVerMap.keySet()) {
                 VersionRows vr = dateVerMap.get(date);
                 
@@ -559,11 +561,12 @@ public class RF2Importer implements IImporter {
                     }
                 }
                 
-                VersionRows nvr = new VersionRows();
+                vr.getConceptRows().clear();
                 for(String key : map.keySet()) {
                     Object[] val = map.get(key);
-                    nvr.getConceptRows().add((ConceptRow)val[1]);
+                    vr.getConceptRows().add((ConceptRow)val[1]);
                 }
+                
                 map.clear();
                 
                 for(RelationshipRow cr : vr.getRelationshipRows()) {
@@ -586,14 +589,12 @@ public class RF2Importer implements IImporter {
                     }
                 }
                 
+                vr.getRelationshipRows().clear();
                 for(String key : map.keySet()) {
                     Object[] val = map.get(key);
-                    nvr.getRelationshipRows().add((RelationshipRow)val[1]);
+                    vr.getRelationshipRows().add((RelationshipRow)val[1]);
                 }
                 map.clear();
-                
-                // Replace with filtered map
-                dateVerMap.put(date, nvr);
             }
         }
     }
@@ -870,6 +871,10 @@ public class RF2Importer implements IImporter {
             } 
         }
         
+        return moduleMap;
+    }
+    
+    protected void mergeRows(Map<String, Module> moduleMap) {
         for(String key : moduleMap.keySet()) {
             Module m = moduleMap.get(key);
             VersionRows last = null;
@@ -882,17 +887,6 @@ public class RF2Importer implements IImporter {
                 last = vr;
             }
         }
-        
-        return moduleMap;
-    }
-    
-    /**
-     * Merges two {@link VersionRows} considering that 
-     * @param tgt
-     * @param src
-     */
-    protected void smartMerge(VersionRows tgt, VersionRows src) {
-        
     }
 
     protected ConceptRow getConceptRowForDate(SortedSet<ConceptRow> conceptSet,
