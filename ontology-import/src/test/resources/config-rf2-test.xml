@@ -3,7 +3,7 @@
   <rf2Inputs>
     <inputType>CLASSPATH</inputType>
     <conceptsFile>/rf2_full_con_test.txt</conceptsFile>
-    <relationshipsFile>/rf2_full_rel_test.txt</relationshipsFile>
+    <statedRelationshipsFile>/rf2_full_rel_test.txt</statedRelationshipsFile>
     <releaseType>FULL</releaseType>
   </rf2Inputs>
 </inputs>

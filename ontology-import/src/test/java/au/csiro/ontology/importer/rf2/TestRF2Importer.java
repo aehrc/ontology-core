@@ -27,7 +27,7 @@ public class TestRF2Importer {
      * the meta data file which contains information only for the 20110731 and
      * 20120131 releases.
      */
-    //@Test
+    @Test
     public void testGetOntologyVersions() {
         RF2Importer rf2i = new RF2Importer(
                 this.getClass().getResourceAsStream("/config-snomed.xml"));
@@ -67,16 +67,16 @@ public class TestRF2Importer {
             Assert.assertEquals(1, vr1.getRelationshipRows().size());
     
             VersionRows vr2 = vMap.get("20030131");
-            Assert.assertEquals(3, vr2.getConceptRows().size());
-            Assert.assertEquals(3, vr2.getRelationshipRows().size());
+            Assert.assertEquals(1, vr2.getConceptRows().size());
+            Assert.assertEquals(2, vr2.getRelationshipRows().size());
     
             VersionRows vr3 = vMap.get("20110731");
-            Assert.assertEquals(3, vr3.getConceptRows().size());
-            Assert.assertEquals(3, vr3.getRelationshipRows().size());
+            Assert.assertEquals(0, vr3.getConceptRows().size());
+            Assert.assertEquals(1, vr3.getRelationshipRows().size());
     
             VersionRows vr4 = vMap.get("20120131");
-            Assert.assertEquals(3, vr4.getConceptRows().size());
-            Assert.assertEquals(3, vr4.getRelationshipRows().size());
+            Assert.assertEquals(1, vr4.getConceptRows().size());
+            Assert.assertEquals(1, vr4.getRelationshipRows().size());
         } catch(Exception e) {
             e.printStackTrace();
             Assert.assertTrue(false);
