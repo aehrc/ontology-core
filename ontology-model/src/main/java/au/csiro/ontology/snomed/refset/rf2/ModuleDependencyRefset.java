@@ -16,7 +16,8 @@ import java.util.Set;
 public class ModuleDependencyRefset extends Refset implements
         IModuleDependencyRefset {
     
-    protected final Set<IRefsetMember> members;
+    protected final Map<String, Map<String, ModuleDependency>> dependencies = 
+            new HashMap<>();
     
     /**
      * Creates a new module dependency reference set.
@@ -24,18 +25,11 @@ public class ModuleDependencyRefset extends Refset implements
      * @param id
      * @param displayName
      */
-    public ModuleDependencyRefset(Set<IRefsetMember> members) {
-        this.members = members;
-    }
-
-    @Override
-    public Map<String, Map<String, IModule>> getModuleDependencies() {
-        Map<String, Map<String, Set<IModule>>> map = new HashMap<>();
+    public ModuleDependencyRefset(Set<ModuleDependencyRow> members) {
+        Map<String, Map<String, Set<ModuleDependency>>> map = new HashMap<>();
         
         Set<String> all = new HashSet<>();
-        for(IRefsetMember im : members) {
-            IModuleDependencyRefsetMember rf = 
-                    (IModuleDependencyRefsetMember)im;
+        for(ModuleDependencyRow rf : members) {
             String moduleId = rf.getModuleId();
             String sourceEffectiveTime = rf.getSourceEffectiveTime();
             String referencedComponentId = rf.getReferencedComponentId();
@@ -45,54 +39,43 @@ public class ModuleDependencyRefset extends Refset implements
             all.add(referencedComponentId);
             //dependencies.add(referencedComponentId);
             
-            Map<String, Set<IModule>> m1 = map.get(moduleId);
+            Map<String, Set<ModuleDependency>> m1 = map.get(moduleId);
             if(m1 == null) {
                 m1 = new HashMap<>();
                 map.put(moduleId, m1);
             }
             
-            Set<IModule> m2 = m1.get(sourceEffectiveTime);
+            Set<ModuleDependency> m2 = m1.get(sourceEffectiveTime);
             if(m2 == null) {
                 m2 = new HashSet<>();
                 m1.put(sourceEffectiveTime, m2);
             }
             
-            m2.add(new Module(referencedComponentId, targetEffectiveTime));
+            m2.add(new ModuleDependency(referencedComponentId, targetEffectiveTime));
         }
-        
-        Map<String, Map<String, IModule>> res = new HashMap<>();
         
         // Build the collection of module dependencies
         for(String id : all) {
-            Map<String, Set<IModule>> versions = map.get(id);
+            Map<String, Set<ModuleDependency>> versions = map.get(id);
             if(versions != null) {
                 for(String version : versions.keySet()) {
-                    IModule m = new Module(id, version);
-                    Set<IModule> deps = versions.get(version);
+                    ModuleDependency m = new ModuleDependency(id, version);
+                    Set<ModuleDependency> deps = versions.get(version);
                     m.getDependencies().addAll(deps);
-                    Map<String, IModule> c = res.get(id);
+                    Map<String, ModuleDependency> c = dependencies.get(id);
                     if(c == null) {
                         c = new HashMap<>();
-                        res.put(id, c);
+                        dependencies.put(id, c);
                     }
                     c.put(version, m);
                 }
             }  
         }
-        return res;
-    }
-
-    /**
-     * @return the members
-     */
-    @Override
-    public Set<IRefsetMember> getMembers() {
-        return members;
     }
 
     @Override
-    public void merge(IModuleDependencyRefset other) {
-        members.addAll(other.getMembers());
+    public Map<String, Map<String, ModuleDependency>> getModuleDependencies() {
+        return dependencies;
     }
 
 }

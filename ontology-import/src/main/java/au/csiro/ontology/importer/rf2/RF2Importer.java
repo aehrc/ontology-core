@@ -49,8 +49,8 @@ import au.csiro.ontology.model.IExistential;
 import au.csiro.ontology.model.INamedRole;
 import au.csiro.ontology.model.IRole;
 import au.csiro.ontology.model.Role;
-import au.csiro.ontology.snomed.refset.rf2.IModule;
 import au.csiro.ontology.snomed.refset.rf2.IModuleDependencyRefset;
+import au.csiro.ontology.snomed.refset.rf2.ModuleDependency;
 import au.csiro.ontology.util.IProgressMonitor;
 import au.csiro.ontology.util.Statistics;
 
@@ -192,7 +192,7 @@ public class RF2Importer implements IImporter {
      */
     protected Map<String, Map<String, ? extends VersionRows>> getBundles(
             Map<String, Set<Version>> toLoad, 
-            Map<String, Map<String, IModule>> deps, 
+            Map<String, Map<String, ModuleDependency>> deps, 
             Map<String, Module> modules) {
         Map<String, Map<String, Set<VersionRows>>> bundles = new HashMap<>();
         
@@ -205,7 +205,7 @@ public class RF2Importer implements IImporter {
             
             for(Version v : toLoad.get(moduleId)) {
                 log.info("Importing module "+moduleId+" ("+v.getId()+")");
-                IModule mod = deps.get(moduleId).get(v.getId());
+                ModuleDependency mod = deps.get(moduleId).get(v.getId());
                 
                 Set<VersionRows> bundle = new HashSet<>();
 
@@ -215,11 +215,11 @@ public class RF2Importer implements IImporter {
                 bundle.add(vr);
 
                 // Add all the dependencies to the bundle
-                Queue<IModule> depends = new LinkedList<>();
+                Queue<ModuleDependency> depends = new LinkedList<>();
                 depends.addAll(mod.getDependencies());
 
                 while (!depends.isEmpty()) {
-                    IModule depend = depends.poll();
+                    ModuleDependency depend = depends.poll();
                     vr = getVersionRows(modules, depend, version);
                     
                     bundle.add(vr);
@@ -265,6 +265,7 @@ public class RF2Importer implements IImporter {
                 String isAId = metadata.get("isAId");
                 String conceptModelAttId = metadata.get("conceptModelAttId");
                 String neverGroupedIds = metadata.get("neverGroupedIds");
+                String rightIdentityIds = metadata.get("rightIdentityIds");
                 
                 // TODO: if version don't match the root module's version then
                 // this will throw a NullPoinerException. Can this be smarter?
@@ -306,8 +307,8 @@ public class RF2Importer implements IImporter {
                     }
                 }
 
-                populateRoles(children.get(conceptModelAttId), "", version, 
-                        metadata);
+                populateRoles(children.get(conceptModelAttId), "", 
+                        rightIdentityIds);
 
                 // Add role axioms
                 for (String r1 : roles.keySet()) {
@@ -460,7 +461,8 @@ public class RF2Importer implements IImporter {
                         "reference set for RF2 input files.");
         }
         
-        Map<String, Map<String, IModule>> deps = md.getModuleDependencies();
+        Map<String, Map<String, ModuleDependency>> deps = 
+                md.getModuleDependencies();
         Map<String, Set<Version>> toLoad = getModuleVersionsToLoad();
         Map<String, Map<String, ? extends VersionRows>> bundles = 
                 getBundles(toLoad, deps, modules);
@@ -498,7 +500,7 @@ public class RF2Importer implements IImporter {
         }
         
         // Each map entry contains a map of modules indexed by version
-        Map<String, Map<String, IModule>> deps = md.getModuleDependencies();
+        Map<String, Map<String, ModuleDependency>> deps = md.getModuleDependencies();
         
         // 3. Determine which modules and versions must be loaded
         log.info("Determining which root modules and versions to load");
@@ -600,7 +602,7 @@ public class RF2Importer implements IImporter {
     }
     
     protected VersionRows getVersionRows(Map<String, Module> modules, 
-            IModule module, String version) {
+            ModuleDependency module, String version) {
         VersionRows vr = modules.get(module.getId()).getVersions()
                 .get(module.getVersion());
         if(vr == null) {
@@ -978,15 +980,15 @@ public class RF2Importer implements IImporter {
         val.add(new String[] { role, tgt, group });
     }
 
-    protected void populateRoles(Set<String> roles, String parentSCTID,
-            String version, Map<String, String> metadata) {
+    protected void populateRoles(Set<String> roles, String parentSCTID, 
+            String rightIdentityIds) {
         if(roles == null) return;
         for (String role : roles) {
             Set<String> cs = children.get(role);
             if (cs != null) {
-                populateRoles(cs, role, version, metadata);
+                populateRoles(cs, role, rightIdentityIds);
             }
-            String[] ris = metadata.get("rightIdentityIds").split("[,]");
+            String[] ris = rightIdentityIds.split("[,]");
             String ri = (ris[0].equals(role)) ? ris[1] : null;
             if (ri != null) {
                 populateRoleDef(role, ri, parentSCTID);

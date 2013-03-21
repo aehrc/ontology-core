@@ -20,14 +20,6 @@ public interface IModuleDependencyRefset extends IRefset {
      * 
      * @return
      */
-    public Map<String, Map<String,IModule>> getModuleDependencies();
-    
-    /**
-     * Merges the content of another module dependency reference set into this 
-     * reference set.
-     * 
-     * @param other The other {@link IModuleDependencyRefset}.
-     */
-    public void merge(IModuleDependencyRefset other);
+    public Map<String, Map<String, ModuleDependency>> getModuleDependencies();
     
 }

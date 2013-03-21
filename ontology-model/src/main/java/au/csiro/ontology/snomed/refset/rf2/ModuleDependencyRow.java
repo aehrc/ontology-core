@@ -5,70 +5,99 @@
 package au.csiro.ontology.snomed.refset.rf2;
 
 /**
+ * Simple implementation of a module dependency refset member.
+ * 
  * @author Alejandro Metke
  *
  */
-public class RefsetMember implements IRefsetMember {
+public class ModuleDependencyRow {
     
-    protected String id;
+    protected final String id;
     
-    protected String effectiveTime;
+    protected final String effectiveTime;
     
-    protected boolean active;
+    protected final boolean active;
     
-    protected String moduleId;
+    protected final String moduleId;
     
-    protected String refsetId;
+    protected final String refsetId;
     
-    protected String referencedComponentId;
+    protected final String referencedComponentId;
     
-    /**
-     * Constructor.
-     */
-    public RefsetMember(String id, String effectiveTime, boolean active, 
-            String moduleId, String refsetId, String referencedComponentId) {
+    protected final String sourceEffectiveTime;
+    
+    protected final String targetEffectiveTime;
+
+    public ModuleDependencyRow(String id, String effectiveTime, boolean active,
+            String moduleId, String refsetId, String referencedComponentId,
+            String sourceEffectiveTime, String targetEffectiveTime) {
+        super();
         this.id = id;
         this.effectiveTime = effectiveTime;
         this.active = active;
         this.moduleId = moduleId;
         this.refsetId = refsetId;
         this.referencedComponentId = referencedComponentId;
+        this.sourceEffectiveTime = sourceEffectiveTime;
+        this.targetEffectiveTime = targetEffectiveTime;
     }
 
-    @Override
+    /**
+     * @return the id
+     */
     public String getId() {
         return id;
     }
 
-    @Override
+    /**
+     * @return the effectiveTime
+     */
     public String getEffectiveTime() {
         return effectiveTime;
     }
 
-    @Override
+    /**
+     * @return the active
+     */
     public boolean isActive() {
         return active;
     }
 
-    @Override
+    /**
+     * @return the moduleId
+     */
     public String getModuleId() {
         return moduleId;
     }
 
-    
-    @Override
+    /**
+     * @return the refsetId
+     */
     public String getRefsetId() {
         return refsetId;
     }
 
-    @Override
+    /**
+     * @return the referencedComponentId
+     */
     public String getReferencedComponentId() {
         return referencedComponentId;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
+    /**
+     * @return the sourceEffectiveTime
      */
+    public String getSourceEffectiveTime() {
+        return sourceEffectiveTime;
+    }
+
+    /**
+     * @return the targetEffectiveTime
+     */
+    public String getTargetEffectiveTime() {
+        return targetEffectiveTime;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -85,12 +114,17 @@ public class RefsetMember implements IRefsetMember {
                         .hashCode());
         result = prime * result
                 + ((refsetId == null) ? 0 : refsetId.hashCode());
+        result = prime
+                * result
+                + ((sourceEffectiveTime == null) ? 0 : sourceEffectiveTime
+                        .hashCode());
+        result = prime
+                * result
+                + ((targetEffectiveTime == null) ? 0 : targetEffectiveTime
+                        .hashCode());
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -99,7 +133,7 @@ public class RefsetMember implements IRefsetMember {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        RefsetMember other = (RefsetMember) obj;
+        ModuleDependencyRow other = (ModuleDependencyRow) obj;
         if (active != other.active)
             return false;
         if (effectiveTime == null) {
@@ -127,7 +161,17 @@ public class RefsetMember implements IRefsetMember {
                 return false;
         } else if (!refsetId.equals(other.refsetId))
             return false;
+        if (sourceEffectiveTime == null) {
+            if (other.sourceEffectiveTime != null)
+                return false;
+        } else if (!sourceEffectiveTime.equals(other.sourceEffectiveTime))
+            return false;
+        if (targetEffectiveTime == null) {
+            if (other.targetEffectiveTime != null)
+                return false;
+        } else if (!targetEffectiveTime.equals(other.targetEffectiveTime))
+            return false;
         return true;
     }
-
+    
 }

@@ -9,16 +9,16 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Simple module implementation.
+ * Contains information about modules and their dependencies.
  * 
  * @author Alejandro Metke
  *
  */
-public class Module implements IModule {
+public class ModuleDependency {
 
     protected String id;
     protected String version;
-    protected final Set<IModule> dependencies = new HashSet<>();
+    protected final Set<ModuleDependency> dependencies = new HashSet<>();
     
     /**
      * Creates a new module.
@@ -26,23 +26,20 @@ public class Module implements IModule {
      * @param id
      * @param version
      */
-    public Module(String id, String version) {
+    public ModuleDependency(String id, String version) {
         this.id = id;
         this.version = version;
     }
 
-    @Override
     public String getId() {
         return id;
     }
 
-    @Override
     public String getVersion() {
         return version;
     }
 
-    @Override
-    public Collection<IModule> getDependencies() {
+    public Collection<ModuleDependency> getDependencies() {
         return dependencies;
     }
 

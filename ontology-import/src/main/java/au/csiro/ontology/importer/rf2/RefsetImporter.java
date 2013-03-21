@@ -15,10 +15,8 @@ import org.apache.log4j.Logger;
 
 import au.csiro.ontology.importer.ImportException;
 import au.csiro.ontology.snomed.refset.rf2.IModuleDependencyRefset;
-import au.csiro.ontology.snomed.refset.rf2.IModuleDependencyRefsetMember;
-import au.csiro.ontology.snomed.refset.rf2.IRefsetMember;
 import au.csiro.ontology.snomed.refset.rf2.ModuleDependencyRefset;
-import au.csiro.ontology.snomed.refset.rf2.ModuleDependencyRefsetMember;
+import au.csiro.ontology.snomed.refset.rf2.ModuleDependencyRow;
 
 /**
  * Imports RF2 reference sets.
@@ -42,7 +40,7 @@ public class RefsetImporter {
     public static IModuleDependencyRefset importModuleDependencyRefset(
             Set<InputStream> refsetFiles) {
         
-        Set<IRefsetMember> members = new HashSet<>();
+        Set<ModuleDependencyRow> members = new HashSet<>();
         for(InputStream refsetFile : refsetFiles) {
             try (BufferedReader br = new BufferedReader(
                     new InputStreamReader(refsetFile))){
@@ -59,8 +57,8 @@ public class RefsetImporter {
                         while (null != (line = br.readLine())) {
                             cols = line.split("[\t]");
                             boolean active = cols[2].equals("1") ? true : false;
-                            IModuleDependencyRefsetMember m = 
-                                    new ModuleDependencyRefsetMember(cols[0], 
+                            ModuleDependencyRow m = 
+                                    new ModuleDependencyRow(cols[0], 
                                             cols[1], active , cols[3], cols[4], 
                                             cols[5], cols[6], cols[7]);
                             members.add(m);

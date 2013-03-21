@@ -22,11 +22,6 @@ public class VersionRows {
     protected final List<ConceptRow> conceptRows = new ArrayList<>();
 
     /**
-     * The description rows in this version.
-     */
-    protected final List<DescriptionRow> descriptionRows = new ArrayList<>();
-
-    /**
      * The relationship rows in this version.
      */
     protected final List<RelationshipRow> relationshipRows = new ArrayList<>();
@@ -46,13 +41,6 @@ public class VersionRows {
     }
 
     /**
-     * @return the descriptionRows
-     */
-    public List<DescriptionRow> getDescriptionRows() {
-        return descriptionRows;
-    }
-
-    /**
      * @return the relationshipRows
      */
     public List<RelationshipRow> getRelationshipRows() {
@@ -66,7 +54,6 @@ public class VersionRows {
      */
     public void merge(VersionRows other) {
         conceptRows.addAll(other.conceptRows);
-        descriptionRows.addAll(other.descriptionRows);
         relationshipRows.addAll(other.relationshipRows);
     }
 
