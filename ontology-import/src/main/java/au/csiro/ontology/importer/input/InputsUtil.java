@@ -55,8 +55,6 @@ public class InputsUtil {
         Map<String, String> md = new HashMap<>();
         md.put("conceptModelAttId", "410662002");
         md.put("isAId", "116680003");
-        md.put("coreModuleId", "900000000000207008");
-        md.put("metadataModuleId", "900000000000012004");
         md.put("conceptDefinedId", "900000000000073002");
         md.put("someId", "900000000000451002");
         md.put("allId", "900000000000452009");
@@ -66,6 +64,7 @@ public class InputsUtil {
         md.put("neverGroupedIds", "123005000,127489000,272741003,411116001");
         md.put("rightIdentityIds", "363701004,127489000");
         md.put("roleGroupId", "roleGroup");
+        md.put("preferredId", "900000000000548007");
         
         ModuleInfo m900000000000207008 = new ModuleInfo("900000000000207008");
         

@@ -16,7 +16,8 @@ import org.apache.log4j.Logger;
 
 /**
  * This class contains the meta-data that is necessary to successfully import
- * the SNOMED distribution files into a DL model.
+ * the SNOMED distribution files into a DL model. This class is currently used
+ * only in the RF1 importer.
  * 
  * @author Alejandro Metke
  * 

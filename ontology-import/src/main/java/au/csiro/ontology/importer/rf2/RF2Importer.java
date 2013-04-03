@@ -266,6 +266,7 @@ public class RF2Importer implements IImporter {
                 String conceptModelAttId = metadata.get("conceptModelAttId");
                 String neverGroupedIds = metadata.get("neverGroupedIds");
                 String rightIdentityIds = metadata.get("rightIdentityIds");
+                String roleGroupId = metadata.get("roleGroupId");
                 
                 // TODO: if version don't match the root module's version then
                 // this will throw a NullPoinerException. Can this be smarter?
@@ -374,7 +375,7 @@ public class RF2Importer implements IImporter {
                                     }
                                     // Wrap with a role group
                                     conjs.add(new Existential<String>(getRole(
-                                            "RoleGroup", ri), new Conjunction(
+                                            roleGroupId, ri), new Conjunction(
                                             innerConjs)));
                                 } else {
                                     RoleValuePair first = rvs.iterator().next();
@@ -391,7 +392,7 @@ public class RF2Importer implements IImporter {
                                     } else {
                                         // Needs a role group
                                         conjs.add(new Existential<String>(
-                                            getRole("RoleGroup", ri), exis));
+                                            getRole(roleGroupId, ri), exis));
                                     }
                                 }
                             }
