@@ -33,12 +33,12 @@ public class InputsUtil {
         in.getRf2Inputs().add(in1);
         
         in1.setInputType(InputType.CLASSPATH);
-        in1.setConceptsFile("/snomed_int_full_rf2/Terminology/sct2_Concept_Full_INT_20120131.txt");
-        in1.setDescriptionsFile("/snomed_int_full_rf2/Terminology/sct2_Description_Full-en_INT_20120131.txt");
-        in1.setRelationshipsFile("/snomed_int_full_rf2/Terminology/sct2_Relationship_Full_INT_20120131.txt");
-        in1.setStatedRelationshipsFile("/snomed_int_full_rf2/Terminology/sct2_StatedRelationship_Full_INT_20120131.txt");
-        in1.setTextDefinitionsFile("/snomed_int_full_rf2/Terminology/sct2_TextDefinition_Full_INT_20120131.txt");
-        in1.setIdentifiersFile("/snomed_int_full_rf2/Terminology/sct2_Identifier_Full_INT_20120131.txt");
+        in1.getConceptsFiles().add("/snomed_int_full_rf2/Terminology/sct2_Concept_Full_INT_20120131.txt");
+        in1.getDescriptionsFiles().add("/snomed_int_full_rf2/Terminology/sct2_Description_Full-en_INT_20120131.txt");
+        in1.getRelationshipsFiles().add("/snomed_int_full_rf2/Terminology/sct2_Relationship_Full_INT_20120131.txt");
+        in1.getStatedRelationshipsFiles().add("/snomed_int_full_rf2/Terminology/sct2_StatedRelationship_Full_INT_20120131.txt");
+        in1.getTextDefinitionsFiles().add("/snomed_int_full_rf2/Terminology/sct2_TextDefinition_Full_INT_20120131.txt");
+        in1.getIdentifiersFiles().add("/snomed_int_full_rf2/Terminology/sct2_Identifier_Full_INT_20120131.txt");
         
         in1.getRefsetDescriptorRefsetFiles().add("/snomed_int_full_rf2/Refset/Metadata/der2_cciRefset_RefsetDescriptorFull_INT_20120131.txt");
         in1.getDescriptionFormatRefsetFiles().add("/snomed_int_full_rf2/Refset/Metadata/der2_ciRefset_DescriptionTypeFull_INT_20120131.txt");
@@ -84,12 +84,12 @@ public class InputsUtil {
         in.getRf2Inputs().add(in2);
         
         in2.setInputType(InputType.CLASSPATH);
-        in2.setConceptsFile("/SnomedCT_GB1000000_20121001/RF2Release/Full/Terminology/xsct2_Concept_Full_GB1000000_20121001.txt");
-        in2.setDescriptionsFile("/SnomedCT_GB1000000_20121001/RF2Release/Full/Terminology/xsct2_Description_Full-en-GB_GB1000000_20121001.txt");
-        in2.setRelationshipsFile("/SnomedCT_GB1000000_20121001/RF2Release/Full/Terminology/xsct2_Relationship_Full_GB1000000_20121001.txt");
-        in2.setStatedRelationshipsFile("/SnomedCT_GB1000000_20121001/RF2Release/Full/Terminology/xsct2_StatedRelationship_Full_GB1000000_20121001.txt");
-        in2.setTextDefinitionsFile("/SnomedCT_GB1000000_20121001/RF2Release/Full/Terminology/xsct2_TextDefinition_Full_GB1000000_20121001.txt");
-        in2.setIdentifiersFile("/SnomedCT_GB1000000_20121001/RF2Release/Full/Terminology/xsct2_Identifier_Full_GB1000000_20121001.txt");
+        in2.getConceptsFiles().add("/SnomedCT_GB1000000_20121001/RF2Release/Full/Terminology/xsct2_Concept_Full_GB1000000_20121001.txt");
+        in2.getDescriptionsFiles().add("/SnomedCT_GB1000000_20121001/RF2Release/Full/Terminology/xsct2_Description_Full-en-GB_GB1000000_20121001.txt");
+        in2.getRelationshipsFiles().add("/SnomedCT_GB1000000_20121001/RF2Release/Full/Terminology/xsct2_Relationship_Full_GB1000000_20121001.txt");
+        in2.getStatedRelationshipsFiles().add("/SnomedCT_GB1000000_20121001/RF2Release/Full/Terminology/xsct2_StatedRelationship_Full_GB1000000_20121001.txt");
+        in2.getTextDefinitionsFiles().add("/SnomedCT_GB1000000_20121001/RF2Release/Full/Terminology/xsct2_TextDefinition_Full_GB1000000_20121001.txt");
+        in2.getIdentifiersFiles().add("/SnomedCT_GB1000000_20121001/RF2Release/Full/Terminology/xsct2_Identifier_Full_GB1000000_20121001.txt");
         
         // No refset descriptor in UK release!
         // Meta-data language file present in UK release but not in international release. What is it? Is it important?

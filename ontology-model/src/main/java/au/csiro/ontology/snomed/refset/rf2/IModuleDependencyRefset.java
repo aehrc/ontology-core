@@ -14,9 +14,8 @@ public interface IModuleDependencyRefset extends IRefset {
     
     /**
      * Returns a {@link Map} of root module ids and a {@link Map} of 
-     * {@link IModule}s indexed by version. Each {@link IModule} represents a 
-     * versioned module and its dependencies. Every module can be seen as a root
-     * module.
+     * {@link IModule}s indexed by version. Each {@link ModuleDependency} 
+     * represents a versioned module and its dependencies.
      * 
      * @return
      */

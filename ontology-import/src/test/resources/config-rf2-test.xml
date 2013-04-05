@@ -2,8 +2,8 @@
 <inputs>
   <rf2Inputs>
     <inputType>CLASSPATH</inputType>
-    <conceptsFile>/rf2_full_con_test.txt</conceptsFile>
-    <statedRelationshipsFile>/rf2_full_rel_test.txt</statedRelationshipsFile>
+    <conceptsFiles>/rf2_full_con_test.txt</conceptsFiles>
+    <statedRelationshipsFiles>/rf2_full_rel_test.txt</statedRelationshipsFiles>
     <releaseType>FULL</releaseType>
   </rf2Inputs>
 </inputs>
