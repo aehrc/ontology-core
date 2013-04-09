@@ -4,20 +4,17 @@
  */
 package au.csiro.ontology.util;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-
 /**
- * This class contains the meta-data that is necessary to successfully import
- * the SNOMED distribution files into a DL model. This class is currently used
- * only in the RF1 importer.
+ * This class contains the default meta-data that is necessary to successfully 
+ * import the SNOMED distribution files into a DL model.
  * 
  * @author Alejandro Metke
  * 
@@ -26,269 +23,131 @@ public class SnomedMetadata {
     
     public static final SnomedMetadata INSTANCE = new SnomedMetadata();
 
-    // Logger
-    private final static Logger log = Logger.getLogger(SnomedMetadata.class);
+    protected Properties props = new Properties();
 
-    protected Map<String, Map<String, String>> metadata = new HashMap<>();
+    protected Set<String> neverGroupedIds = new HashSet<>();
 
-    protected Map<String, Set<String>> neverGroupedIds = new HashMap<>();
-
-    protected Map<String, Map<String, String>> rightIdentities = new HashMap<>();
+    protected Map<String, String> rightIdentities = new HashMap<>();
 
     /**
      * Constructor.
      */
     private SnomedMetadata() {
-
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(this
-                .getClass().getResourceAsStream("/metadata.txt")))) {
-            String line;
-
-            // Keep track of releases that use the same meta-data
-            Map<String, String[]> equivs = new HashMap<>();
-            while ((line = br.readLine()) != null) {
-                // Skip blank lines
-                if (line.trim().equals(""))
-                    continue;
-                String[] parts = line.split("[.=]");
-                if (parts.length != 3) {
-                    log.warn("Invalid line found: " + line);
-                    continue;
-                }
-                if (parts[1].equals("equivs")) {
-                    String[] dates = parts[2].split("[,]");
-                    equivs.put(parts[0], dates);
-                } else if (parts[1].equals("neverGroupedIds")) {
-                    String[] ids = parts[2].split("[,]");
-                    Set<String> ngis = new HashSet<>();
-                    for (String id : ids) {
-                        ngis.add(id);
-                    }
-                    neverGroupedIds.put(parts[0], ngis);
-                } else if (parts[1].equals("rightIdentities")) {
-                    String[] ids = parts[2].split("[,]");
-                    if (ids.length != 2) {
-                        log.warn("Invalid right identities found: " + line);
-                    } else {
-                        Map<String, String> ri = rightIdentities.get(parts[0]);
-                        if (ri == null) {
-                            ri = new HashMap<>();
-                            rightIdentities.put(parts[0], ri);
-                        }
-                        ri.put(ids[0], ids[1]);
-                    }
-                } else {
-                    Map<String, String> map = metadata.get(parts[0]);
-                    if (map == null) {
-                        map = new HashMap<>();
-                        metadata.put(parts[0], map);
-                    }
-                    map.put(parts[1], parts[2]);
-                }
-            }
-
-            // Copy equivalent values
-            for (String key : equivs.keySet()) {
-                Map<String, String> meta = metadata.get(key);
-                Set<String> neverGrouped = neverGroupedIds.get(key);
-                Map<String, String> rightIdents = rightIdentities.get(key);
-                for (String equiv : equivs.get(key)) {
-                    metadata.put(equiv, meta);
-                    neverGroupedIds.put(equiv, neverGrouped);
-                    rightIdentities.put(equiv, rightIdents);
-                }
-            }
+        try {
+            props.load(this.getClass().getResourceAsStream("/metadata.txt"));
         } catch (IOException e) {
-            throw new RuntimeException("Unable to load metadata!", e);
+            throw new RuntimeException(e);
         }
-    }
-
-    /**
-     * Returns true if there is meta data available for a particular version.
-     * 
-     * @param version
-     *            The version.
-     * @return
-     */
-    public boolean hasVersionMetadata(String version) {
-        return metadata.keySet().contains(version)
-                && neverGroupedIds.keySet().contains(version)
-                && rightIdentities.keySet().contains(version);
     }
 
     /**
      * Returns the root concept id for roles.
      * 
-     * @param version
-     *            The SNOMED version.
      * @return The root concept id for roles.
      */
-    public String getConceptModelAttId(String version) {
-        Map<String, String> map = metadata.get(version);
-        if (map != null) {
-            return map.get("conceptModelAttId");
-        }
-        return null;
+    public String getConceptModelAttId() {
+        return props.getProperty("conceptModelAttId");
     }
 
     /**
      * Returns the role id for is-a relationships.
      * 
-     * @param version
-     *            The SNOMED version.
      * @return The role id for is-a relationships.
      */
-    public String getIsAId(String version) {
-        Map<String, String> map = metadata.get(version);
-        if (map != null) {
-            return map.get("isAId");
-        }
-        return null;
-    }
-
-    /**
-     * Returns the id of SNOMED's core module.
-     * 
-     * @param version
-     *            The SNOMED version.
-     * @return Id of SNOMED's core module.
-     */
-    public String getCoreModuleId(String version) {
-        Map<String, String> map = metadata.get(version);
-        if (map != null) {
-            return map.get("coreModuleId");
-        }
-        return null;
-    }
-
-    /**
-     * Returns the Id of SNOMED's meta-data module.
-     * 
-     * @param version
-     *            The SNOMED version.
-     * @return Id of SNOMED's meta-data module.
-     */
-    public String getMetadataModuleId(String version) {
-        Map<String, String> map = metadata.get(version);
-        if (map != null) {
-            return map.get("metadataModuleId");
-        }
-        return null;
+    public String getIsAId() {
+        return props.getProperty("isAId");
     }
 
     /**
      * Returns the id of the enumeration in SNOMED used to indicate that a
      * concept is fully defined.
      * 
-     * @param version
-     *            The SNOMED version.
      * @return Id of the enumeration in SNOMED used to indicate that a concept
      *         is fully defined.
      */
-    public String getConceptDefinedId(String version) {
-        Map<String, String> map = metadata.get(version);
-        if (map != null) {
-            return map.get("conceptDefinedId");
-        }
-        return null;
+    public String getConceptDefinedId() {
+        return props.getProperty("conceptDefinedId");
     }
 
     /**
      * Returns the id of the enumeration in SNOMED used to represent an
      * existential quantification.
      * 
-     * @param version
-     *            The SNOMED version.
      * @return Id of enumeration in SNOMED used to represent an existential
      *         quantification.
      */
-    public String getSomeId(String version) {
-        Map<String, String> map = metadata.get(version);
-        if (map != null) {
-            return map.get("someId");
-        }
-        return null;
-    }
-
-    /**
-     * Returns the id of the enumeration in SNOMED used to represent a universal
-     * quantification.
-     * 
-     * @param version
-     *            The SNOMED version.
-     * @return Id of the enumeration in SNOMED used to represent a universal
-     *         quantification.
-     */
-    public String getAllId(String version) {
-        Map<String, String> map = metadata.get(version);
-        if (map != null) {
-            return map.get("allId");
-        }
-        return null;
+    public String getSomeId() {
+        return props.getProperty("someId");
     }
 
     /**
      * Returns the id of the enumeration in SNOMED used to indicate that a
      * description is a fully specified name.
      * 
-     * @param version
-     *            The SNOMED version.
      * @return The id of the enumeration in SNOMED used to indicate that a
      *         description is a fully specified name.
      */
-    public String getFsnId(String version) {
-        Map<String, String> map = metadata.get(version);
-        if (map != null) {
-            return map.get("fsnId");
-        }
-        return null;
+    public String getFsnId() {
+        return props.getProperty("fsnId");
     }
 
     /**
      * Returns the id of the enumeration in SNOMED used to indicate that a
      * description is a synonym.
      * 
-     * @param version
-     *            The SNOMED version.
      * @return Id of the enumeration in SNOMED used to indicate that a
      *         description is a synonym.
      */
-    public String getSynonymId(String version) {
-        Map<String, String> map = metadata.get(version);
-        if (map != null) {
-            return map.get("synonymId");
-        }
-        return null;
+    public String getSynonymId() {
+        return props.getProperty("synonymId");
     }
 
     /**
      * Returns the id of the enumeration in SNOMED used to indicate that a
      * description is a definition.
      * 
-     * @param version
-     *            The SNOMED version.
      * @return Id of enumeration in SNOMED used to indicate that a description
      *         is a definition.
      */
-    public String getDefinitionId(String version) {
-        Map<String, String> map = metadata.get(version);
-        if (map != null) {
-            return map.get("definitionId");
-        }
-        return null;
+    public String getDefinitionId() {
+        return props.getProperty("definitionId");
+    }
+    
+    /**
+     * Returns the raw property value for the never grouped ids.
+     * 
+     * @return
+     */
+    public String getNeverGroupedIdsString() {
+        return props.getProperty("neverGroupedIds");
     }
 
     /**
      * Returns the set of ids of SNOMED roles that should never be placed in a
      * role group.
      * 
-     * @param version
-     *            The SNOMED version.
      * @return Set of ids of SNOMED roles that should never be placed in a role
      *         group.
      */
-    public Set<String> getNeverGroupedIds(String version) {
-        return neverGroupedIds.get(version);
+    public Set<String> getNeverGroupedIds() {
+        String s = props.getProperty("neverGroupedIds");
+        if(s == null) return Collections.emptySet();
+        
+        Set<String> res = new HashSet<>();
+        String[] parts = s.split("[,]");
+        for(String part : parts) {
+            res.add(part);
+        }
+        return res;
+    }
+    
+    /**
+     * Returns the raw property value for the right identity ids.
+     * 
+     * @return
+     */
+    public String getRightIdentityIdsString() {
+        return props.getProperty("rightIdentityIds");
     }
 
     /**
@@ -299,39 +158,25 @@ public class SnomedMetadata {
      * is a right identity axiom, is always the same as the first element in the
      * LHS.
      * 
-     * @param version
-     *            The SNOMED version.
      * @return The right identity axioms.
      */
-    public Map<String, String> getRightIdentities(String version) {
-        return rightIdentities.get(version);
+    public Map<String, String> getRightIdentityIds() {
+        String s = props.getProperty("rightIdentityIds");
+        if(s == null) return Collections.emptyMap();
+        
+        Map<String, String> res = new HashMap<>();
+        String[] parts = s.split("[,]");
+        res.put(parts[0], parts[1]);
+        return res;
     }
 
     /**
      * Returns the id for the "role group" role.
      * 
-     * @param version
-     *            The SNOMED version.
      * @return The id for the "role group" role.
      */
-    public String getRoleGroupId(String version) {
-        Map<String, String> map = metadata.get(version);
-        if (map != null) {
-            return map.get("roleGroupId");
-        }
-        return null;
-    }
-    
-    /**
-     * Returns the SNOMED id for the concept that indicates that a term is a
-     * preferred term.
-     * 
-     * @param version
-     * @return
-     */
-    public String getPreferredId() {
-        // TODO: currently hard-coded and not version-aware.
-        return "900000000000548007";
+    public String getRoleGroupId() {
+        return props.getProperty("roleGroupId");
     }
 
 }

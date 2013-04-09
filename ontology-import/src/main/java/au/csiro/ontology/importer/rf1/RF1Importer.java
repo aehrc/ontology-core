@@ -85,13 +85,6 @@ public class RF1Importer implements IImporter {
 
         // Extract the version rows
         VersionRows vr = extractVersionRows();
-        
-        // Transform the group of rows
-        String version = vr.getVersionName();
-
-        // If no meta-data is available for this version then we skip it
-        if (!metadata.hasVersionMetadata(version))
-            return null;
 
         Collection<IAxiom> axioms = new ArrayList<>();
 
@@ -109,7 +102,7 @@ public class RF1Importer implements IImporter {
             // only process active concepts and defining relationships
             if (!"RELATIONSHIPID".equals(rr.getRelationshipId())
                     && "0".equals(rr.getCharacteristicType())) {
-                if (metadata.getIsAId(version).equals(rr.getRelationshipType())) {
+                if (metadata.getIsAId().equals(rr.getRelationshipType())) {
                     populateParent(rr.getConceptId1(), rr.getConceptId2());
                     populateChildren(rr.getConceptId2(), rr.getConceptId1());
                 } else {
@@ -122,7 +115,7 @@ public class RF1Importer implements IImporter {
         }
         
         Set<String> conceptModelChildren = children.get(
-                metadata.getConceptModelAttId(version));
+                metadata.getConceptModelAttId());
         if (conceptModelChildren != null)
             populateRoles(conceptModelChildren, "");
 
@@ -194,8 +187,8 @@ public class RF1Importer implements IImporter {
                             Concept<String> filler = new Concept<>(first.value);
                             Existential<String> exis = new Existential<>(role, 
                                     filler);
-                            if (metadata.getNeverGroupedIds(
-                                    version).contains(first.role)) {
+                            if (metadata.getNeverGroupedIds().contains(
+                                    first.role)) {
                                 // Does not need a role group
                                 conjs.add(exis);
                             } else {
@@ -259,7 +252,7 @@ public class RF1Importer implements IImporter {
             if (cs != null) {
                 populateRoles(cs, role);
             }
-            String ri = metadata.getRightIdentities(version).get(role);
+            String ri = metadata.getRightIdentityIds().get(role);
             if (ri != null) {
                 populateRoleDef(role, ri, parentSCTID);
             } else {
