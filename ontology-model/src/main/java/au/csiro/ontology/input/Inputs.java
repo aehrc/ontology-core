@@ -2,7 +2,7 @@
  * Copyright CSIRO Australian e-Health Research Centre (http://aehrc.com).
  * All rights reserved. Use is subject to license terms and conditions.
  */
-package au.csiro.ontology.importer.input;
+package au.csiro.ontology.input;
 
 import java.io.InputStream;
 import java.util.ArrayList;

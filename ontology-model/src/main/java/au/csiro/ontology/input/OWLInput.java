@@ -1,4 +1,4 @@
-package au.csiro.ontology.importer.input;
+package au.csiro.ontology.input;
 
 public class OWLInput extends Input {
     protected String owlFile;

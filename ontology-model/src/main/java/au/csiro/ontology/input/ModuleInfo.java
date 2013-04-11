@@ -1,4 +1,4 @@
-package au.csiro.ontology.importer.input;
+package au.csiro.ontology.input;
 
 import java.util.ArrayList;
 import java.util.List;

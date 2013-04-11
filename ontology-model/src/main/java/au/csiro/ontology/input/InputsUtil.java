@@ -2,7 +2,7 @@
  * Copyright CSIRO Australian e-Health Research Centre (http://aehrc.com).
  * All rights reserved. Use is subject to license terms and conditions.
  */
-package au.csiro.ontology.importer.input;
+package au.csiro.ontology.input;
 
 import java.io.StringWriter;
 import java.util.HashMap;
@@ -11,8 +11,8 @@ import java.util.Map;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 
-import au.csiro.ontology.importer.input.Input.InputType;
-import au.csiro.ontology.importer.input.Inputs.ReleaseType;
+import au.csiro.ontology.input.Input.InputType;
+import au.csiro.ontology.input.Inputs.ReleaseType;
 
 /**
  * Utility class to create XML input file programmatically.

@@ -1,11 +1,11 @@
-package au.csiro.ontology.importer.input;
+package au.csiro.ontology.input;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import au.csiro.ontology.importer.input.Inputs.ReleaseType;
+import au.csiro.ontology.input.Inputs.ReleaseType;
 
 /**
  * An RF set of input files.
