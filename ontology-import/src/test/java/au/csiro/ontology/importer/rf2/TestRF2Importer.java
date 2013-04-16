@@ -10,9 +10,6 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import au.csiro.ontology.IOntology;
-import au.csiro.ontology.util.NullProgressMonitor;
-
 
 /**
  * Unit tests for {@link RF2Importer}.
@@ -21,26 +18,6 @@ import au.csiro.ontology.util.NullProgressMonitor;
  * 
  */
 public class TestRF2Importer {
-    
-    /**
-     * Tests the main functionality of the importer. The results are based on
-     * the meta data file which contains information only for the 20110731 and
-     * 20120131 releases.
-     */
-    @Test
-    public void testGetOntologyVersions() {
-        RF2Importer rf2i = new RF2Importer(
-                this.getClass().getResourceAsStream("/config-snomed.xml"));
-
-        Map<String, Map<String, IOntology<String>>> ovs = 
-                rf2i.getOntologyVersions(new NullProgressMonitor());
-        Assert.assertEquals(1, ovs.keySet().size());
-        
-        for(String key : ovs.keySet()) {
-            Map<String, IOntology<String>> versions = ovs.get(key);
-            Assert.assertEquals(2, versions.keySet().size());
-        }
-    }
 
     /**
      * Tests the assembly of versions from the raw data. The results are based

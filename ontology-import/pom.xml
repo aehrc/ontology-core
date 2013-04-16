@@ -31,18 +31,6 @@
       <artifactId>owlapi-api</artifactId>
       <version>3.3</version>
     </dependency>
-    <dependency>
-      <groupId>au.csiro</groupId>
-      <artifactId>snomed-int-rf1</artifactId>
-      <version>20110731</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>au.csiro</groupId>
-      <artifactId>snomed-int-full-rf2</artifactId>
-      <version>20120131</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
   
 </project>
