@@ -70,11 +70,6 @@ public class RF2Importer implements IImporter {
     protected final Inputs inputs;
 
     protected final List<String> problems = new ArrayList<>();
-    protected final Map<String, String> primitive = new HashMap<>();
-    protected final Map<String, Set<String>> parents = new HashMap<>();
-    protected final Map<String, Set<String>> children = new HashMap<>();
-    protected final Map<String, List<String[]>> rels = new HashMap<>();
-    protected final Map<String, Map<String, String>> roles = new HashMap<>();
 
     /**
      * Imports a set of ontologies.
@@ -258,6 +253,11 @@ public class RF2Importer implements IImporter {
         // Transform each set of modules
         for(String modId : toLoad.keySet()) {
             for(Version v : toLoad.get(modId)) {
+                final Map<String, String> primitive = new HashMap<>();
+                final Map<String, Set<String>> parents = new HashMap<>();
+                final Map<String, Set<String>> children = new HashMap<>();
+                final Map<String, List<String[]>> rels = new HashMap<>();
+                final Map<String, Map<String, String>> roles = new HashMap<>();
                 String version = v.getId();
                 Map<String, String> metadata = v.getMetadata();
                 String conceptDefinedId = metadata.get("conceptDefinedId");
@@ -298,18 +298,18 @@ public class RF2Importer implements IImporter {
                         String src = rr.getSourceId();
                         String dest = rr.getDestinationId();
                         if (isAId.equals(type)) {
-                            populateParent(src, dest);
-                            populateChildren(dest, src);
+                            populateParent(src, dest, parents);
+                            populateChildren(dest, src, children);
                         } else {
                             // Populate relationships
                             populateRels(src, type, dest,
-                                    rr.getRelationshipGroup());
+                                    rr.getRelationshipGroup(), rels);
                         }
                     }
                 }
 
                 populateRoles(children.get(conceptModelAttId), "", 
-                        rightIdentityIds);
+                        rightIdentityIds, children, roles);
 
                 // Add role axioms
                 for (String r1 : roles.keySet()) {
@@ -546,6 +546,7 @@ public class RF2Importer implements IImporter {
                 Map<String, Object[]> map = new HashMap<>();
                 for(ConceptRow cr : vr.getConceptRows()) {
                     String id = cr.getId();
+                    
                     String et = cr.getEffectiveTime();
                     Object[] obj = map.get(id);
                     if(obj == null) {
@@ -716,13 +717,15 @@ public class RF2Importer implements IImporter {
                 } else if(inputType.equals(InputType.CLASSPATH)) {
                     in = this.getClass().getResourceAsStream(conceptsFile);
                 } else {
-                    throw new RuntimeException("Unexpected input type "+inputType);
+                    throw new RuntimeException("Unexpected input type "+
+                            inputType);
                 }
                 
                 if(in == null) {
                     throw new ImportException("Unable to load concepts file. " +
                             "Please check your input configuration file. " +
-                            "(input type = "+inputType+", file="+conceptsFile+")");
+                            "(input type = "+inputType+", file="+conceptsFile+
+                            ")");
                 }
                 
                 try (BufferedReader br = new BufferedReader(
@@ -749,18 +752,20 @@ public class RF2Importer implements IImporter {
                             br.close();
                             throw new RuntimeException(
                                 "Concepts: Mis-formatted "
-                                + "line, expected at least 5 tab-separated fields, "
-                                + "got: " + line);
+                                + "line, expected at least 5 tab-separated " +
+                                "fields, got: " + line);
                         }
         
                         final String id = line.substring(0, idx1);
-                        final String effectiveTime = line.substring(idx1 + 1, idx2);
+                        final String effectiveTime = line.substring(idx1 + 1, 
+                                idx2);
                         final String active = line.substring(idx2 + 1, idx3);
                         final String moduleId = line.substring(idx3 + 1, idx4);
-                        final String definitionStatusId = line.substring(idx4 + 1);
+                        final String definitionStatusId = line.substring(
+                                idx4 + 1);
         
-                        ConceptRow cr = new ConceptRow(id, effectiveTime, active, 
-                                moduleId, definitionStatusId);
+                        ConceptRow cr = new ConceptRow(id, effectiveTime, 
+                                active, moduleId, definitionStatusId);
                         
                         Module m = moduleMap.get(moduleId);
                         if(m == null) {
@@ -777,12 +782,14 @@ public class RF2Importer implements IImporter {
                     }
                 } catch (IOException e) {
                     log.error(e);
-                    throw new ImportException("Problem while loading concepts.", e);
+                    throw new ImportException("Problem while loading concepts.",
+                            e);
                 }
             }
             
             // Load relationships
-            Set<String> relationshipsFiles = input.getStatedRelationshipsFiles();
+            Set<String> relationshipsFiles = 
+                    input.getStatedRelationshipsFiles();
             for(String relationshipsFile : relationshipsFiles) {
                 InputStream in = null;
                 if(inputType.equals(InputType.EXTERNAL)) {
@@ -794,14 +801,15 @@ public class RF2Importer implements IImporter {
                 } else if(inputType.equals(InputType.CLASSPATH)) {
                     in = this.getClass().getResourceAsStream(relationshipsFile);
                 } else {
-                    throw new RuntimeException("Unexpected input type "+inputType);
+                    throw new RuntimeException("Unexpected input type "+
+                            inputType);
                 }
                 
                 if(in == null) {
                     throw new ImportException("Unable to load realtionships " +
-                            "file. Please check your input configuration file. " +
-                            "(input type = "+inputType+
-                            ", file="+relationshipsFile+")");
+                            "file. Please check your input configuration " +
+                            "file. (input type = "+inputType+", file="+
+                            relationshipsFile+")");
                 }
                 
                 try (BufferedReader br = new BufferedReader(
@@ -832,31 +840,34 @@ public class RF2Importer implements IImporter {
                         // idx8+1..idx9 == characteristicTypeId
                         // idx9+1..end == modifierId
         
-                        if (idx1 < 0 || idx2 < 0 || idx3 < 0 || idx4 < 0 || idx5 < 0
-                                || idx6 < 0 || idx7 < 0 || idx8 < 0 || idx9 < 0) {
+                        if (idx1 < 0 || idx2 < 0 || idx3 < 0 || idx4 < 0 || 
+                                idx5 < 0 || idx6 < 0 || idx7 < 0 || idx8 < 0 || 
+                                idx9 < 0) {
                             br.close();
-                            throw new RuntimeException("Concepts: Mis-formatted "
-                                    + "line, expected 10 tab-separated fields, "
-                                    + "got: " + line);
+                            throw new RuntimeException("Concepts: " +
+                            	"Mis-formatted line, expected 10 " +
+                            	"tab-separated fields, got: " + line);
                         }
         
                         final String id = line.substring(0, idx1);
-                        final String effectiveTime = line.substring(idx1 + 1, idx2);
+                        final String effectiveTime = line.substring(idx1 + 1, 
+                                idx2);
                         final String active = line.substring(idx2 + 1, idx3);
                         final String moduleId = line.substring(idx3 + 1, idx4);
                         final String sourceId = line.substring(idx4 + 1, idx5);
-                        final String destinationId = line.substring(idx5 + 1, idx6);
+                        final String destinationId = line.substring(idx5 + 1, 
+                                idx6);
                         final String relationshipGroup = line.substring(idx6 + 1, 
                                 idx7);
                         final String typeId = line.substring(idx7 + 1, idx8);
-                        final String characteristicTypeId = line.substring(idx8 + 1,
-                                idx9);
+                        final String characteristicTypeId = line.substring(
+                                idx8 + 1, idx9);
                         final String modifierId = line.substring(idx9 + 1);
                         
-                        RelationshipRow rr = new RelationshipRow(id, effectiveTime, 
-                                active, moduleId, sourceId, destinationId, 
-                                relationshipGroup, typeId, characteristicTypeId, 
-                                modifierId);
+                        RelationshipRow rr = new RelationshipRow(id, 
+                                effectiveTime, active, moduleId, sourceId, 
+                                destinationId, relationshipGroup, typeId, 
+                                characteristicTypeId, modifierId);
                         
                         Module m = moduleMap.get(moduleId);
                         if(m == null) {
@@ -957,8 +968,9 @@ public class RF2Importer implements IImporter {
         }
         return r;
     }
-
-    protected void populateParent(String src, String tgt) {
+    
+    protected void populateParent(String src, String tgt, 
+            Map<String, Set<String>> parents) {
         Set<String> prs = parents.get(src);
         if (prs == null) {
             prs = new TreeSet<>();
@@ -967,7 +979,8 @@ public class RF2Importer implements IImporter {
         prs.add(tgt);
     }
 
-    protected void populateChildren(String src, String tgt) {
+    protected void populateChildren(String src, String tgt, 
+            Map<String, Set<String>> children) {
         Set<String> prs = children.get(src);
         if (prs == null) {
             prs = new TreeSet<>();
@@ -975,9 +988,9 @@ public class RF2Importer implements IImporter {
         }
         prs.add(tgt);
     }
-
+    
     protected void populateRels(String src, String role, String tgt,
-            String group) {
+            String group, Map<String, List<String[]>> rels) {
         List<String[]> val = rels.get(src);
         if (val == null) {
             val = new ArrayList<>();
@@ -987,25 +1000,26 @@ public class RF2Importer implements IImporter {
     }
 
     protected void populateRoles(Set<String> roles, String parentSCTID, 
-            String rightIdentityIds) {
+            String rightIdentityIds, Map<String, Set<String>> children, 
+            Map<String, Map<String, String>> rolesMap) {
         if(roles == null) return;
         for (String role : roles) {
             Set<String> cs = children.get(role);
             if (cs != null) {
-                populateRoles(cs, role, rightIdentityIds);
+                populateRoles(cs, role, rightIdentityIds, children, rolesMap);
             }
             String[] ris = rightIdentityIds.split("[,]");
             String ri = (ris[0].equals(role)) ? ris[1] : null;
             if (ri != null) {
-                populateRoleDef(role, ri, parentSCTID);
+                populateRoleDef(role, ri, parentSCTID, rolesMap);
             } else {
-                populateRoleDef(role, "", parentSCTID);
+                populateRoleDef(role, "", parentSCTID, rolesMap);
             }
         }
     }
-
+    
     protected void populateRoleDef(String code, String rightId,
-            String parentRole) {
+            String parentRole, Map<String, Map<String, String>> roles) {
         Map<String, String> vals = roles.get(code);
         if (vals == null) {
             vals = new HashMap<>();
