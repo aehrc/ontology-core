@@ -790,6 +790,15 @@ public class RF2Importer implements IImporter {
             // Load relationships
             Set<String> relationshipsFiles = 
                     input.getStatedRelationshipsFiles();
+            if(relationshipsFiles == null || relationshipsFiles.isEmpty()) {
+                relationshipsFiles = input.getRelationshipsFiles();
+            }
+            
+            if(relationshipsFiles == null || relationshipsFiles.isEmpty()) {
+                throw new ImportException(
+                        "No relationships files was specified.");
+            }
+            
             for(String relationshipsFile : relationshipsFiles) {
                 InputStream in = null;
                 if(inputType.equals(InputType.EXTERNAL)) {
