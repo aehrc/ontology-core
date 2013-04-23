@@ -16,6 +16,19 @@ import au.csiro.ontology.axioms.IAxiom;
 public interface IOntology<T extends Comparable<T>> {
     
     /**
+     * Returns the identifier of the ontology.
+     * @return
+     */
+    public String getId();
+    
+    /**
+     * Returns the version of the ontology.
+     * 
+     * @return
+     */
+    public String getVersion();
+    
+    /**
      * Returns the {@link Collection} of axioms in the ontology.
      * 
      * @return The axioms.

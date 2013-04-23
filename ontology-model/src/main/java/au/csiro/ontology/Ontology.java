@@ -27,6 +27,16 @@ import au.csiro.ontology.model.Concept;
 public class Ontology<T extends Comparable<T>> implements IOntology<T> {
     
     /**
+     * The id of the ontology.
+     */
+    protected final String id;
+    
+    /**
+     * The version of the ontology.
+     */
+    protected final String version;
+    
+    /**
      * The collection of stated axioms that form the ontology.
      */
     protected final Collection<IAxiom> statedAxioms;
@@ -50,8 +60,11 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
      * @param nodeMap
      * @param lastAffectedNodes
      */
-    public Ontology(Collection<IAxiom> statedAxioms, Map<T, Node<T>> nodeMap, 
-    		Set<Node<T>> lastAffectedNodes) {
+    public Ontology(String id, String version, 
+            Collection<IAxiom> statedAxioms, Map<T, Node<T>> nodeMap, 
+            Set<Node<T>> lastAffectedNodes) {
+        this.id = id;
+        this.version = version;
         if(statedAxioms == null) {
             this.statedAxioms = new ArrayList<>();
         } else {
@@ -69,8 +82,9 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
      * @param statedAxioms
      * @param nodeMap
      */
-    public Ontology(Collection<IAxiom> statedAxioms, Map<T, Node<T>> nodeMap) {
-    	this(statedAxioms, nodeMap, null);
+    public Ontology(String id, String version, 
+            Collection<IAxiom> statedAxioms, Map<T, Node<T>> nodeMap) {
+    	this(id, version, statedAxioms, nodeMap, null);
     }
 
     @Override
@@ -122,5 +136,15 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
 		lastAffectedNodes.clear();
 		lastAffectedNodes.addAll(nodes);
 	}
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public String getVersion() {
+        return version;
+    }
     
 }

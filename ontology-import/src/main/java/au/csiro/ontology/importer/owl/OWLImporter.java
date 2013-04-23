@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -68,7 +69,7 @@ import au.csiro.ontology.Ontology;
 import au.csiro.ontology.axioms.ConceptInclusion;
 import au.csiro.ontology.axioms.IAxiom;
 import au.csiro.ontology.axioms.RoleInclusion;
-import au.csiro.ontology.importer.IImporter;
+import au.csiro.ontology.importer.BaseImporter;
 import au.csiro.ontology.importer.ImportException;
 import au.csiro.ontology.model.BooleanLiteral;
 import au.csiro.ontology.model.Concept;
@@ -97,7 +98,7 @@ import au.csiro.ontology.util.Statistics;
  * @author Alejandro Metke
  * 
  */
-public class OWLImporter implements IImporter {
+public class OWLImporter extends BaseImporter {
     
     public static final String THING_IRI = "http://www.w3.org/2002/07/owl#Thing";
     public static final String NOTHING_IRI = "http://www.w3.org/2002/07/owl#Nothing";
@@ -109,6 +110,8 @@ public class OWLImporter implements IImporter {
     
     private OWLOntology ontology;
     private List<OWLAxiom> axioms;
+    
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
     
     public OWLImporter(OWLOntology ontology) {
         this();
@@ -833,33 +836,59 @@ public class OWLImporter implements IImporter {
     }
 
     @Override
-    public Map<String, Map<String, IOntology<String>>> getOntologyVersions(
+    public Iterator<IOntology<String>> getOntologyVersions(
             IProgressMonitor monitor) {
+        return new OntologyInterator(monitor);
+    }
+    
+    class OntologyInterator implements Iterator<IOntology<String>> {
+        private boolean accessed = false;
+        private IProgressMonitor monitor;
         
-        long start = System.currentTimeMillis();
-        
-        Set<IAxiom> ont = null;
-        String url = null;
-        if(ontology != null) {
-            ont = transform(ontology, monitor);
-            url = ontology.getOntologyID().toString();
-        } else if(axioms != null) {
-            ont = transform(axioms, monitor);
-            url = "incremental";
-        } else {
-            throw new IllegalArgumentException("No OWL ontology to transform.");
+        public OntologyInterator(IProgressMonitor monitor) {
+            this.monitor = monitor;
         }
         
-        Ontology<String> o = new Ontology<>(ont, null);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-        Map<String, Map<String, IOntology<String>>> res = new HashMap<>();
-        Map<String, IOntology<String>> map = new HashMap<>();
-        map.put(sdf.format(new Date()), o);
-        res.put(url, map);
-        
-        Statistics.INSTANCE.setTime("owl loading", 
-                System.currentTimeMillis() - start);
-        return res;
-    }
+        @Override
+        public boolean hasNext() {
+            return !accessed;
+        }
 
+        @Override
+        public IOntology<String> next() {
+            long start = System.currentTimeMillis();
+            
+            Set<IAxiom> ont = null;
+            if(ontology != null) {
+                ont = transform(ontology, monitor);
+            } else if(axioms != null) {
+                ont = transform(axioms, monitor);
+            } else {
+                throw new IllegalArgumentException(
+                        "No OWL ontology to transform.");
+            }
+            
+            String id = null;
+            if(ontology != null) {
+                id = ontology.getOntologyID().toString();
+            } else {
+                id = "incremental";
+            }
+            
+            String version = sdf.format(new Date());
+            
+            Ontology<String> res = new Ontology<>(id, version, ont, null);
+            Statistics.INSTANCE.setTime("owl loading", 
+                    System.currentTimeMillis() - start);
+            accessed = true;
+            return res;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+        
+    }
+    
 }

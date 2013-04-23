@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,7 +22,7 @@ import au.csiro.ontology.Ontology;
 import au.csiro.ontology.axioms.ConceptInclusion;
 import au.csiro.ontology.axioms.IAxiom;
 import au.csiro.ontology.axioms.RoleInclusion;
-import au.csiro.ontology.importer.IImporter;
+import au.csiro.ontology.importer.BaseImporter;
 import au.csiro.ontology.model.Concept;
 import au.csiro.ontology.model.Conjunction;
 import au.csiro.ontology.model.Existential;
@@ -39,7 +40,7 @@ import au.csiro.ontology.util.Statistics;
  * @author Alejandro Metke
  * 
  */
-public class RF1Importer implements IImporter {
+public class RF1Importer extends BaseImporter {
 
     protected final InputStream conceptsFile;
     protected final InputStream relationshipsFile;
@@ -74,149 +75,169 @@ public class RF1Importer implements IImporter {
     }
     
     @Override
-    public Map<String, Map<String, IOntology<String>>> getOntologyVersions(
+    public Iterator<IOntology<String>> getOntologyVersions(
             IProgressMonitor monitor) {
+        return new OntologyInterator(monitor);
+    }
+    
+    class OntologyInterator implements Iterator<IOntology<String>> {
+        private boolean accessed = false;
+        private IProgressMonitor monitor;
         
-        long start = System.currentTimeMillis();
+        public OntologyInterator(IProgressMonitor monitor) {
+            this.monitor = monitor;
+        }
         
-        monitor.taskStarted("Loading axioms");
-        
-        Map<String, Map<String, IOntology<String>>> res = new HashMap<>();
-
-        // Extract the version rows
-        VersionRows vr = extractVersionRows();
-
-        Collection<IAxiom> axioms = new ArrayList<>();
-
-        // Process concept rows
-        for (ConceptRow cr : vr.getConceptRows()) {
-            if (!"CONCEPTID".equals(cr.getConceptId()) && 
-                    "0".equals(cr.getConceptStatus())) {
-                primitive.put(cr.getConceptId(), cr.getIsPrimitive());
-            }
+        @Override
+        public boolean hasNext() {
+            return !accessed;
         }
 
-        // Process relationship rows
-        for (RelationshipRow rr : vr.getRelationshipRows()) {
+        @Override
+        public IOntology<String> next() {
+            long start = System.currentTimeMillis();
+            
+            monitor.taskStarted("Loading axioms");
 
-            // only process active concepts and defining relationships
-            if (!"RELATIONSHIPID".equals(rr.getRelationshipId())
-                    && "0".equals(rr.getCharacteristicType())) {
-                if (metadata.getIsAId().equals(rr.getRelationshipType())) {
-                    populateParent(rr.getConceptId1(), rr.getConceptId2());
-                    populateChildren(rr.getConceptId2(), rr.getConceptId1());
-                } else {
-                    // Populate relationships
-                    populateRels(rr.getConceptId1(), 
-                            rr.getRelationshipType(), rr.getConceptId2(), 
-                            rr.getRelationshipGroup());
+            // Extract the version rows
+            VersionRows vr = extractVersionRows();
+            Collection<IAxiom> axioms = new ArrayList<>();
+
+            // Process concept rows
+            for (ConceptRow cr : vr.getConceptRows()) {
+                if (!"CONCEPTID".equals(cr.getConceptId()) && 
+                        "0".equals(cr.getConceptStatus())) {
+                    primitive.put(cr.getConceptId(), cr.getIsPrimitive());
                 }
             }
-        }
-        
-        Set<String> conceptModelChildren = children.get(
-                metadata.getConceptModelAttId());
-        if (conceptModelChildren != null)
-            populateRoles(conceptModelChildren, "");
 
-        // Add the role axioms
-        for (String r1 : roles.keySet()) {
-            String parentRole = roles.get(r1).get("parentrole");
+            // Process relationship rows
+            for (RelationshipRow rr : vr.getRelationshipRows()) {
 
-            if (!"".equals(parentRole)) {
-                axioms.add(new RoleInclusion(
-                        new Role<String>(r1), 
-                        new Role<String>(parentRole)));
-            }
-
-            String rightId = roles.get(r1).get("rightID");
-            if (!"".equals(rightId)) {
-                axioms.add(new RoleInclusion(new Role[] { 
-                        new Role<String>(r1), new Role<String>(rightId) }, 
-                        new Role<String>(r1)));
-            }
-        }
-
-        // Add concept axioms
-        for (String c1 : primitive.keySet()) {
-            if (roles.get(c1) != null)
-                continue;
-            Set<String> prs = parents.get(c1);
-            int numParents = (prs != null) ? prs.size() : 0;
-
-            List<String[]> relsVal = rels.get(c1);
-            int numRels = 0;
-            if (relsVal != null)
-                numRels = 1;
-
-            int numElems = numParents + numRels;
-
-            if (numElems == 0) {
-                // do nothing
-            } else if (numElems == 1 && (prs != null && !prs.isEmpty())) {
-                axioms.add(new ConceptInclusion(new Concept<String>(c1), 
-                        new Concept<String>(prs.iterator().next())));
-            } else {
-                List<IConcept> conjs = new ArrayList<>();
-                
-                if(prs != null) {
-                    for (String pr : prs) {
-                        conjs.add(new Concept<String>(pr));
+                // only process active concepts and defining relationships
+                if (!"RELATIONSHIPID".equals(rr.getRelationshipId())
+                        && "0".equals(rr.getCharacteristicType())) {
+                    if (metadata.getIsAId().equals(rr.getRelationshipType())) {
+                        populateParent(rr.getConceptId1(), rr.getConceptId2());
+                        populateChildren(rr.getConceptId2(), rr.getConceptId1());
+                    } else {
+                        // Populate relationships
+                        populateRels(rr.getConceptId1(), 
+                                rr.getRelationshipType(), rr.getConceptId2(), 
+                                rr.getRelationshipGroup());
                     }
                 }
+            }
+            
+            Set<String> conceptModelChildren = children.get(
+                    metadata.getConceptModelAttId());
+            if (conceptModelChildren != null)
+                populateRoles(conceptModelChildren, "");
 
-                if (relsVal != null) {
-                    for (Set<RoleValuePair> rvs : groupRoles(relsVal)) {
-                        if (rvs.size() > 1) {
-                            List<IConcept> innerConjs = new ArrayList<>();
-                            for (RoleValuePair rv : rvs) {
-                                Role<String> role = new Role<>(rv.role);
-                                Concept<String> filler = new Concept<>(
-                                        rv.value);
+            // Add the role axioms
+            for (String r1 : roles.keySet()) {
+                String parentRole = roles.get(r1).get("parentrole");
+
+                if (!"".equals(parentRole)) {
+                    axioms.add(new RoleInclusion(
+                            new Role<String>(r1), 
+                            new Role<String>(parentRole)));
+                }
+
+                String rightId = roles.get(r1).get("rightID");
+                if (!"".equals(rightId)) {
+                    axioms.add(new RoleInclusion(new Role[] { 
+                            new Role<String>(r1), new Role<String>(rightId) }, 
+                            new Role<String>(r1)));
+                }
+            }
+
+            // Add concept axioms
+            for (String c1 : primitive.keySet()) {
+                if (roles.get(c1) != null)
+                    continue;
+                Set<String> prs = parents.get(c1);
+                int numParents = (prs != null) ? prs.size() : 0;
+
+                List<String[]> relsVal = rels.get(c1);
+                int numRels = 0;
+                if (relsVal != null)
+                    numRels = 1;
+
+                int numElems = numParents + numRels;
+
+                if (numElems == 0) {
+                    // do nothing
+                } else if (numElems == 1 && (prs != null && !prs.isEmpty())) {
+                    axioms.add(new ConceptInclusion(new Concept<String>(c1), 
+                            new Concept<String>(prs.iterator().next())));
+                } else {
+                    List<IConcept> conjs = new ArrayList<>();
+                    
+                    if(prs != null) {
+                        for (String pr : prs) {
+                            conjs.add(new Concept<String>(pr));
+                        }
+                    }
+
+                    if (relsVal != null) {
+                        for (Set<RoleValuePair> rvs : groupRoles(relsVal)) {
+                            if (rvs.size() > 1) {
+                                List<IConcept> innerConjs = new ArrayList<>();
+                                for (RoleValuePair rv : rvs) {
+                                    Role<String> role = new Role<>(rv.role);
+                                    Concept<String> filler = new Concept<>(
+                                            rv.value);
+                                    Existential<String> exis = 
+                                            new Existential<>(role, filler);
+                                    innerConjs.add(exis);
+                                }
+                                // Wrap with a role group
+                                conjs.add(new Existential<String>(
+                                        new Role<String>("RoleGroup"), 
+                                        new Conjunction(innerConjs)));
+                            } else {
+                                RoleValuePair first = rvs.iterator().next();
+                                Role<String> role = new Role<>(first.role);
+                                Concept<String> filler = 
+                                        new Concept<>(first.value);
                                 Existential<String> exis = 
                                         new Existential<>(role, filler);
-                                innerConjs.add(exis);
-                            }
-                            // Wrap with a role group
-                            conjs.add(new Existential<String>(
-                                    new Role<String>("RoleGroup"), 
-                                    new Conjunction(innerConjs)));
-                        } else {
-                            RoleValuePair first = rvs.iterator().next();
-                            Role<String> role = new Role<>(first.role);
-                            Concept<String> filler = new Concept<>(first.value);
-                            Existential<String> exis = new Existential<>(role, 
-                                    filler);
-                            if (metadata.getNeverGroupedIds().contains(
-                                    first.role)) {
-                                // Does not need a role group
-                                conjs.add(exis);
-                            } else {
-                                // Needs a role group
-                                conjs.add(new Existential<>(
-                                        new Role<>("RoleGroup"), exis));
+                                if (metadata.getNeverGroupedIds().contains(
+                                        first.role)) {
+                                    // Does not need a role group
+                                    conjs.add(exis);
+                                } else {
+                                    // Needs a role group
+                                    conjs.add(new Existential<>(
+                                            new Role<>("RoleGroup"), exis));
+                                }
                             }
                         }
                     }
-                }
 
-                axioms.add(new ConceptInclusion(new Concept<>(c1), 
-                        new Conjunction(conjs)));
+                    axioms.add(new ConceptInclusion(new Concept<>(c1), 
+                            new Conjunction(conjs)));
 
-                if (primitive.get(c1).equals("0")) {
-                    axioms.add(new ConceptInclusion(new Conjunction(conjs),
-                            new Concept<>(c1)));
+                    if (primitive.get(c1).equals("0")) {
+                        axioms.add(new ConceptInclusion(new Conjunction(conjs),
+                                new Concept<>(c1)));
+                    }
                 }
             }
+            
+            Statistics.INSTANCE.setTime("rf1 loading", 
+                    System.currentTimeMillis() - start);
+            accessed = true;
+            return new Ontology<String>("snomed", vr.getVersionName(), axioms, 
+                    null);
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
         }
         
-        Map<String, IOntology<String>> map = new HashMap<>();
-        map.put(vr.getVersionName(), new Ontology<String>(axioms, null));
-        res.put("snomed", map);
-        
-        Statistics.INSTANCE.setTime("rf1 loading", 
-                System.currentTimeMillis() - start);
-        return res;
     }
 
     protected void populateParent(String src, String tgt) {
@@ -261,7 +282,8 @@ public class RF1Importer implements IImporter {
         }
     }
 
-    protected void populateRoleDef(String code, String rightId, String parentRole) {
+    protected void populateRoleDef(String code, String rightId, 
+            String parentRole) {
         Map<String, String> vals = roles.get(code);
         if (vals == null) {
             vals = new HashMap<>();

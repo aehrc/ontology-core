@@ -4,8 +4,8 @@
  */
 package au.csiro.ontology.importer;
 
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import au.csiro.ontology.IOntology;
 import au.csiro.ontology.util.IProgressMonitor;
@@ -31,23 +31,18 @@ public interface IImporter {
      * single ontology.</p> 
      * 
      * <p>If the files contain related modules then all of them are returned as 
-     * a single ontology. This method returns a map of maps. The first key 
-     * refers to the ontology URI. For example, if importing SNOMED CT 
-     * international, this key would be "snomed/sct/900000000000207008". The 
-     * keys of the second map are the versions of this ontology. If importing a 
-     * full release of SNOMED, then this map would have one key for each SNOMED 
-     * release. </p>
+     * a single ontology. This method returns an iterator that allows importing
+     * each ontology version.</p>
      * 
-     * <p>If importing an ontology from OWL, where versions and modules are not
-     * natively supported, the first key will contain the ontology URI and the
-     * second key will contain the date when the import process occurred.</p>
+     * @param monitor A progress monitor.
      * 
-     * @return A map of maps with ontologies represented as sets of axioms in 
-     * the internal format.
+     * @return An interator that allows importing one ontology version at a 
+     * time.
      * 
-     * @throws ImportException if a problem occurs when importing the ontology.
+     * @throws ImportException if a problem occurs when importing the 
+     * ontologies.
      */
-    public Map<String, Map<String, IOntology<String>>> getOntologyVersions(
+    public Iterator<IOntology<String>> getOntologyVersions(
             IProgressMonitor monitor);
     
     /**
