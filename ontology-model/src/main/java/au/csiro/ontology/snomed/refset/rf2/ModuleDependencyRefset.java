@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * This class repesents a module dependeny reference set.
+ * 
  * @author Alejandro Metke
  *
  */
@@ -18,59 +20,59 @@ public class ModuleDependencyRefset extends Refset implements
     
     protected final Map<String, Map<String, ModuleDependency>> dependencies = 
             new HashMap<>();
-    
+            
     /**
      * Creates a new module dependency reference set.
      * 
-     * @param id
-     * @param displayName
+     * @param members
      */
     public ModuleDependencyRefset(Set<ModuleDependencyRow> members) {
-        Map<String, Map<String, Set<ModuleDependency>>> map = new HashMap<>();
-        
-        Set<String> all = new HashSet<>();
-        for(ModuleDependencyRow rf : members) {
-            String moduleId = rf.getModuleId();
-            String sourceEffectiveTime = rf.getSourceEffectiveTime();
-            String referencedComponentId = rf.getReferencedComponentId();
-            String targetEffectiveTime = rf.getTargetEffectiveTime();
+        // Index the dependency rows
+        Map<String, Set<String>> index = new HashMap<>();
+        for(ModuleDependencyRow member : members) {
+            String key = member.getModuleId() + "_" + 
+                    member.getSourceEffectiveTime();
+            String val = member.getReferencedComponentId() + "_" + 
+                    member.getTargetEffectiveTime();
             
-            all.add(moduleId);
-            all.add(referencedComponentId);
-            //dependencies.add(referencedComponentId);
-            
-            Map<String, Set<ModuleDependency>> m1 = map.get(moduleId);
-            if(m1 == null) {
-                m1 = new HashMap<>();
-                map.put(moduleId, m1);
+            Set<String> vals = index.get(key);
+            if(vals == null) {
+                vals = new HashSet<>();
+                index.put(key, vals);
             }
-            
-            Set<ModuleDependency> m2 = m1.get(sourceEffectiveTime);
-            if(m2 == null) {
-                m2 = new HashSet<>();
-                m1.put(sourceEffectiveTime, m2);
-            }
-            
-            m2.add(new ModuleDependency(referencedComponentId, targetEffectiveTime));
+            vals.add(val);
         }
         
-        // Build the collection of module dependencies
-        for(String id : all) {
-            Map<String, Set<ModuleDependency>> versions = map.get(id);
-            if(versions != null) {
-                for(String version : versions.keySet()) {
-                    ModuleDependency m = new ModuleDependency(id, version);
-                    Set<ModuleDependency> deps = versions.get(version);
-                    m.getDependencies().addAll(deps);
-                    Map<String, ModuleDependency> c = dependencies.get(id);
-                    if(c == null) {
-                        c = new HashMap<>();
-                        dependencies.put(id, c);
-                    }
-                    c.put(version, m);
-                }
-            }  
+        for(String src : index.keySet()) {
+            String[] parts = src.split("[_]");
+            String srcId = parts[0];
+            String srcVer = parts[1];
+
+            ModuleDependency md = createDependency(src, index);
+            Map<String, ModuleDependency> verDepMap = dependencies.get(srcId);
+            if(verDepMap == null) {
+                verDepMap = new HashMap<>();
+                dependencies.put(srcId, verDepMap);
+            }
+            
+            verDepMap.put(srcVer, md);
         }
+    }
+    
+    private ModuleDependency createDependency(String key, 
+            Map<String, Set<String>> index) {
+        String[] parts = key.split("[_]");
+        ModuleDependency md = new ModuleDependency(parts[0], parts[1]);
+        
+        Set<String> deps = index.get(key);
+        if(deps != null) {
+            for(String dep : deps) {
+                ModuleDependency nmd = createDependency(dep, index);
+                md.getDependencies().add(nmd);
+            }
+        }
+        
+        return md;
     }
 
     @Override

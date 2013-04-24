@@ -443,7 +443,7 @@ public class RF2Importer extends BaseImporter {
                                 idx4 + 1);
                         
                         String tgtVer = modMap.get(moduleId);
-                        
+                        if(tgtVer == null) continue;
                         int rel = effectiveTime.compareTo(tgtVer);
                         if(rel <= 0) {
                             ConceptRow currConceptRow = conceptMap.get(id);
@@ -551,6 +551,7 @@ public class RF2Importer extends BaseImporter {
                         final String modifierId = line.substring(idx9 + 1);
                         
                         String tgtVer = modMap.get(moduleId);
+                        if(tgtVer == null) continue;
                         int rel = effectiveTime.compareTo(tgtVer);
                         if(rel <= 0) {
                             RelationshipRow currRelationshipRow = 
