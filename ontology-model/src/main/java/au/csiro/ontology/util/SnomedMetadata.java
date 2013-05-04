@@ -58,6 +58,10 @@ public class SnomedMetadata {
         return props.getProperty("isAId");
     }
 
+    public String getLateralityId() {
+        return props.getProperty("lateralityId");
+    }
+
     /**
      * Returns the id of the enumeration in SNOMED used to indicate that a
      * concept is fully defined.
