@@ -15,33 +15,33 @@ import au.csiro.ontology.input.Inputs.ReleaseType;
  */
 public class RF2Input extends Input {
     // Terminology files
-    protected Set<String> conceptsFiles = new HashSet<>();
-    protected Set<String> descriptionsFiles = new HashSet<>();
-    protected Set<String> identifiersFiles = new HashSet<>();
-    protected Set<String> relationshipsFiles = new HashSet<>();
-    protected Set<String> statedRelationshipsFiles = new HashSet<>();
-    protected Set<String> textDefinitionsFiles = new HashSet<>();
+    protected Set<String> conceptsFiles = new HashSet<String>();
+    protected Set<String> descriptionsFiles = new HashSet<String>();
+    protected Set<String> identifiersFiles = new HashSet<String>();
+    protected Set<String> relationshipsFiles = new HashSet<String>();
+    protected Set<String> statedRelationshipsFiles = new HashSet<String>();
+    protected Set<String> textDefinitionsFiles = new HashSet<String>();
     
     // Reference set files
-    protected Set<String> refsetDescriptorRefsetFiles = new HashSet<>();
-    protected Set<String> descriptionFormatRefsetFiles = new HashSet<>();
-    protected Set<String> moduleDependenciesRefsetFiles = new HashSet<>();
-    protected Set<String> languageRefsetFiles = new HashSet<>();
-    protected Set<String> simpleRefsetFiles = new HashSet<>();
-    protected Set<String> orderedRefsetFiles = new HashSet<>();
-    protected Set<String> attributeValueRefsetFiles = new HashSet<>();
-    protected Set<String> simpleMapRefsetFiles = new HashSet<>();
-    protected Set<String> complexMapRefsetFiles = new HashSet<>();
-    protected Set<String> querySpecificationRefsetFiles = new HashSet<>();
-    protected Set<String> annotationRefsetFiles = new HashSet<>();
-    protected Set<String> associationRefsetFiles = new HashSet<>();
+    protected Set<String> refsetDescriptorRefsetFiles = new HashSet<String>();
+    protected Set<String> descriptionFormatRefsetFiles = new HashSet<String>();
+    protected Set<String> moduleDependenciesRefsetFiles = new HashSet<String>();
+    protected Set<String> languageRefsetFiles = new HashSet<String>();
+    protected Set<String> simpleRefsetFiles = new HashSet<String>();
+    protected Set<String> orderedRefsetFiles = new HashSet<String>();
+    protected Set<String> attributeValueRefsetFiles = new HashSet<String>();
+    protected Set<String> simpleMapRefsetFiles = new HashSet<String>();
+    protected Set<String> complexMapRefsetFiles = new HashSet<String>();
+    protected Set<String> querySpecificationRefsetFiles = new HashSet<String>();
+    protected Set<String> annotationRefsetFiles = new HashSet<String>();
+    protected Set<String> associationRefsetFiles = new HashSet<String>();
     
     // The type of release - full, snapshot or incremental
     protected ReleaseType releaseType;
     
     // List of module information - indicates which modules should be
     // processed and includes the meta-data needed to do so
-    protected List<ModuleInfo> modules = new ArrayList<>();
+    protected List<ModuleInfo> modules = new ArrayList<ModuleInfo>();
     
     /**
      * Constructor.

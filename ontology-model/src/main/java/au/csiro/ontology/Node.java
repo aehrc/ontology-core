@@ -23,17 +23,17 @@ public class Node<T extends Comparable<T>> implements Serializable {
     /**
      * Set of equivalent concepts in this node.
      */
-    protected final Set<T> equivalentConcepts = new HashSet<>();
+    protected final Set<T> equivalentConcepts = new HashSet<T>();
     
     /**
      * Set of parents nodes.
      */
-    protected final Set<Node<T>> parents = new HashSet<>();
+    protected final Set<Node<T>> parents = new HashSet<Node<T>>();
     
     /**
      * Set of child nodes.
      */
-    protected final Set<Node<T>> children = new HashSet<>();
+    protected final Set<Node<T>> children = new HashSet<Node<T>>();
 
     /**
      * @return the equivalentConcepts

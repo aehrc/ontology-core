@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public class Version {
     protected String id;
-    protected Map<String, String> metadata = new HashMap<>();
+    protected Map<String, String> metadata = new HashMap<String, String>();
     
     public Version() {
         

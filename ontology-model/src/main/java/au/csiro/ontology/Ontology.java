@@ -45,13 +45,13 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
      * A map that contains references to all the nodes in the taxonomy indexed
      * by id.
      */
-    protected final Map<T, Node<T>> nodeMap = new HashMap<>();
+    protected final Map<T, Node<T>> nodeMap = new HashMap<T, Node<T>>();
     
     /**
      * Set of {@link Node}s pontentially affected by the last incremental
      * classification.
      */
-    protected final Set<Node<T>> lastAffectedNodes = new HashSet<>();
+    protected final Set<Node<T>> lastAffectedNodes = new HashSet<Node<T>>();
     
     /**
      * Builds a new ontology.
@@ -66,7 +66,7 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
         this.id = id;
         this.version = version;
         if(statedAxioms == null) {
-            this.statedAxioms = new ArrayList<>();
+            this.statedAxioms = new ArrayList<IAxiom>();
         } else {
             this.statedAxioms = statedAxioms;
         }
@@ -87,62 +87,51 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
     	this(id, version, statedAxioms, nodeMap, null);
     }
 
-    @Override
     public Collection<IAxiom> getStatedAxioms() {
         return statedAxioms;
     }
     
-    @Override
     public Node<T> getNode(T id) {
         return nodeMap.get(id);
     }
     
-    @Override
     public Iterator<Node<T>> nodeIterator() {
-        Set<Node<T>> set = new HashSet<>(nodeMap.values());
+        Set<Node<T>> set = new HashSet<Node<T>>(nodeMap.values());
         return set.iterator();
     }
 
-    @Override
     public Map<T, Node<T>> getNodeMap() {
         return nodeMap;
     }
 
     @SuppressWarnings("unchecked")
-    @Override
     public Node<T> getTopNode() {
         return getNode((T)Concept.TOP);
     }
 
     @SuppressWarnings("unchecked")
-    @Override
     public Node<T> getBottomNode() {
         return getNode((T)Concept.BOTTOM);
     }
 
-    @Override
     public void setNodeMap(Map<T, Node<T>> nodeMap) {
         this.nodeMap.clear();
         this.nodeMap.putAll(nodeMap);
     }
 
-	@Override
-	public Set<Node<T>> getAffectedNodes() {
-		return lastAffectedNodes;
-	}
+    public Set<Node<T>> getAffectedNodes() {
+        return lastAffectedNodes;
+    }
 
-	@Override
-	public void setAffectedNodes(Set<Node<T>> nodes) {
-		lastAffectedNodes.clear();
-		lastAffectedNodes.addAll(nodes);
-	}
+    public void setAffectedNodes(Set<Node<T>> nodes) {
+        lastAffectedNodes.clear();
+        lastAffectedNodes.addAll(nodes);
+    }
 
-    @Override
     public String getId() {
         return id;
     }
 
-    @Override
     public String getVersion() {
         return version;
     }

@@ -132,7 +132,6 @@ public class ConceptRow implements Comparable<ConceptRow> {
         return true;
     }
 
-    @Override
     public int compareTo(ConceptRow other) {
         if(this.equals(other))
             return 0;

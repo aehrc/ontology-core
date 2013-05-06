@@ -21,12 +21,42 @@ import au.csiro.ontology.axioms.IAxiom;
 public interface IReasoner<T extends Comparable<T>> {
     
     /**
+     * Loads and indexes the supplied axioms.
+     * 
+     * @param axioms
+     */
+    public void loadAxioms(Set<IAxiom> axioms);
+    
+    /**
+     * Loads and indexes the supplied axioms.
+     * 
+     * @param axioms
+     */
+    public void loadAxioms(Iterator<IAxiom> axioms);
+    
+    /**
+     * Loads and indexes the supplied axioms.
+     * 
+     * @param axioms
+     */
+    public void loadAxioms(IOntology<T> ont);
+    
+    /**
+     * Classifies the current axioms.
+     * 
+     * @return
+     */
+    public IReasoner<T> classify();
+    
+    /**
      * Classifies the supplied axioms. The first time this method is called it 
      * will perform a full classification. Subsequent calls will trigger
      * incremental classifications.
      * 
      * @param axioms The axioms in the base ontology.
      * @return IReasoner
+     * @deprecated Use {@link IReasoner#loadAxioms(Set)}  and 
+     * {@link IReasoner#classify()} instead. 
      */
     public IReasoner<T> classify(Set<IAxiom> axioms);
     
@@ -38,6 +68,8 @@ public interface IReasoner<T extends Comparable<T>> {
      * @param axioms An iterator for the axioms. Implementations must be able
      * to handle null values.
      * @return IReasoner
+     * @deprecated Use {@link IReasoner#loadAxioms(Iterator)} and 
+     * {@link IReasoner#classify()} instead. 
      */
     public IReasoner<T> classify(Iterator<IAxiom> axioms);
     
@@ -45,6 +77,10 @@ public interface IReasoner<T extends Comparable<T>> {
      * Classifies the stated axioms in the supplied ontology. The first time 
      * this method is called it will perform a full classification. Subsequent 
      * calls will trigger incremental classifications.
+     * 
+     * @deprecated Use {@link IReasoner#loadAxioms(IOntology)} and 
+     * {@link IReasoner#classify()} instead. 
+     * instead.
      * 
      * @param ont An ontology.
      * @return IReasoner
@@ -89,7 +125,7 @@ public interface IReasoner<T extends Comparable<T>> {
      * the ontology has not been classified yet).
      * 
      * @return The taxonomy.
-     * @deprecated Use getClassifiedOntology instead.
+     * @deprecated Use {@link IReasoner#getClassifiedOntology()} instead.
      */
     public Taxonomy<T> getTaxonomy();
 

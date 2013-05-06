@@ -25,7 +25,6 @@ public class DateLiteral implements IDateLiteral {
     /**
      * @return the value
      */
-    @Override
     public Calendar getValue() {
         return value;
     }
@@ -60,7 +59,6 @@ public class DateLiteral implements IDateLiteral {
         return sdf.format(value.getTime());
     }
 
-    @Override
     public int compareTo(ILiteral o) {
         DateLiteral dl = (DateLiteral) o;
         Calendar otherValue = dl.value;

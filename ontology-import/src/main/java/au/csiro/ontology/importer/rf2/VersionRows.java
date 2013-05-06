@@ -19,12 +19,13 @@ public class VersionRows {
     /**
      * The concept rows in this version.
      */
-    protected final List<ConceptRow> conceptRows = new ArrayList<>();
+    protected final List<ConceptRow> conceptRows = new ArrayList<ConceptRow>();
 
     /**
      * The relationship rows in this version.
      */
-    protected final List<RelationshipRow> relationshipRows = new ArrayList<>();
+    protected final List<RelationshipRow> relationshipRows = 
+            new ArrayList<RelationshipRow>();
 
     /**
      * Builds a new VersionRows.

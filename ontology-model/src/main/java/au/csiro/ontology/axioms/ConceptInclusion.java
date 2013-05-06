@@ -98,7 +98,6 @@ public class ConceptInclusion implements IConceptInclusion {
         return true;
     }
 
-    @Override
     public int compareTo(IAxiom o) {
         if(!(o instanceof IConceptInclusion)) {
             return -1;

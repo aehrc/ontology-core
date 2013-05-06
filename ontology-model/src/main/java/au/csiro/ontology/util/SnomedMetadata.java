@@ -25,9 +25,10 @@ public class SnomedMetadata {
 
     protected Properties props = new Properties();
 
-    protected Set<String> neverGroupedIds = new HashSet<>();
+    protected Set<String> neverGroupedIds = new HashSet<String>();
 
-    protected Map<String, String> rightIdentities = new HashMap<>();
+    protected Map<String, String> rightIdentities = 
+            new HashMap<String, String>();
 
     /**
      * Constructor.
@@ -133,7 +134,7 @@ public class SnomedMetadata {
         String s = props.getProperty("neverGroupedIds");
         if(s == null) return Collections.emptySet();
         
-        Set<String> res = new HashSet<>();
+        Set<String> res = new HashSet<String>();
         String[] parts = s.split("[,]");
         for(String part : parts) {
             res.add(part);
@@ -164,7 +165,7 @@ public class SnomedMetadata {
         String s = props.getProperty("rightIdentityIds");
         if(s == null) return Collections.emptyMap();
         
-        Map<String, String> res = new HashMap<>();
+        Map<String, String> res = new HashMap<String, String>();
         String[] parts = s.split("[,]");
         res.put(parts[0], parts[1]);
         return res;

@@ -52,7 +52,7 @@ public class InputsUtil {
         
         in1.setReleaseType(ReleaseType.FULL);
         
-        Map<String, String> md = new HashMap<>();
+        Map<String, String> md = new HashMap<String, String>();
         md.put("conceptModelAttId", "410662002");
         md.put("isAId", "116680003");
         md.put("conceptDefinedId", "900000000000073002");

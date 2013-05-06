@@ -26,7 +26,6 @@ public class IntegerLiteral implements IIntegerLiteral {
     /**
      * @return the value
      */
-    @Override
     public int getValue() {
         return value;
     }
@@ -58,7 +57,6 @@ public class IntegerLiteral implements IIntegerLiteral {
         return String.valueOf(value);
     }
 
-    @Override
     public int compareTo(ILiteral o) {
         IntegerLiteral il = (IntegerLiteral) o;
         int otherValue = il.value;

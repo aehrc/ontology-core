@@ -35,7 +35,7 @@ public class Conjunction implements IConjunction {
         // independent, i.e. conjunctions are reflexive (should also be
         // transitive, but Agile says STTCPW)
 
-        final SortedSet<IConcept> sorted = new TreeSet<>(
+        final SortedSet<IConcept> sorted = new TreeSet<IConcept>(
                 concepts);
         this.concepts = sorted.toArray(new IConcept[sorted.size()]);
         hashCode = sorted.hashCode();
@@ -77,7 +77,6 @@ public class Conjunction implements IConjunction {
     }
 
     @SuppressWarnings("rawtypes")
-    @Override
     public int compareTo(IConcept o) {
         Class thisClass = this.getClass();
         Class otherClass = o.getClass();

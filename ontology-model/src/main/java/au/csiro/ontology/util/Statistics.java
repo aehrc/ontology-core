@@ -24,7 +24,7 @@ public class Statistics {
     /**
      * Map with performance values.
      */
-    private final Map<String, Long> stats = new HashMap<>();
+    private final Map<String, Long> stats = new HashMap<String, Long>();
     
     /**
      * Private constructor.

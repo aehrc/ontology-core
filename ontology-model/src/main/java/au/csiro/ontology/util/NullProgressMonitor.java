@@ -13,22 +13,18 @@ package au.csiro.ontology.util;
  */
 public class NullProgressMonitor implements IProgressMonitor {
 
-    @Override
     public void taskStarted(String taskName) {
         
     }
 
-    @Override
     public void taskEnded() {
         
     }
 
-    @Override
     public void step(int value, int max) {
         
     }
 
-    @Override
     public void taskBusy() {
         
     }

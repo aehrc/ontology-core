@@ -200,7 +200,6 @@ public class DescriptionRow implements Comparable<DescriptionRow>{
         return true;
     }
 
-    @Override
     public int compareTo(DescriptionRow other) {
         if(this.equals(other))
             return 0;

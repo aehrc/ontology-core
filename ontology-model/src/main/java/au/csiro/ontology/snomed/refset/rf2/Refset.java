@@ -21,12 +21,10 @@ public abstract class Refset implements IRefset {
         
     }
 
-    @Override
     public String getId() {
         return id;
     }
 
-    @Override
     public String getDisplayName() {
         return displayName;
     }

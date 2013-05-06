@@ -157,7 +157,7 @@ public class AxiomUtils {
             String roles = s.substring(start+1, closingIndex-1);
             
             int rstart = 0;
-            List<IRole> lhsRoles = new ArrayList<>();
+            List<IRole> lhsRoles = new ArrayList<IRole>();
             
             while(rstart < roles.length()) {
                 int rclosingIndex = findClosingIndex(roles, '{', '}', rstart);
@@ -209,7 +209,7 @@ public class AxiomUtils {
                         "Unsupported parametrised type "+type);
             }
         } else if("Conjunction".equals(conceptType)) {
-            List<IConcept> conjuncts = new ArrayList<>();
+            List<IConcept> conjuncts = new ArrayList<IConcept>();
             
             while(start < s.length() && s.charAt(start) != '}') {
                 int closingIndex = findClosingIndex(s, '{', '}', start);
@@ -316,7 +316,7 @@ public class AxiomUtils {
     @SuppressWarnings("rawtypes")
     public static Set<IAxiom> findDefiningAxioms(Collection<IAxiom> axioms, 
             Concept concept) {
-        Set<IAxiom> res = new HashSet<>();
+        Set<IAxiom> res = new HashSet<IAxiom>();
         for(IAxiom axiom : axioms) {
             if(axiom instanceof IConceptInclusion) {
                 IConceptInclusion ci = (IConceptInclusion)axiom;
@@ -342,13 +342,13 @@ public class AxiomUtils {
         final String PART_OF = "part-of";
         final String HAS_LOCATION = "has-location";
         
-        Concept<String> finger = new Concept<>(FINGER);
-        Concept<String> bodyPart = new Concept<>(BODY_PART);
-        Concept<String> hand = new Concept<>(HAND);
+        Concept<String> finger = new Concept<String>(FINGER);
+        Concept<String> bodyPart = new Concept<String>(BODY_PART);
+        Concept<String> hand = new Concept<String>(HAND);
         
-        Role<String> subPart = new Role<>(SUB_PART);
-        Role<String> partOf = new Role<>(PART_OF);
-        Role<String> hasLocation = new Role<>(HAS_LOCATION);
+        Role<String> subPart = new Role<String>(SUB_PART);
+        Role<String> partOf = new Role<String>(PART_OF);
+        Role<String> hasLocation = new Role<String>(HAS_LOCATION);
         
         IAxiom axiom1 = new ConceptInclusion(finger, 
                 new Conjunction(new IConcept[]{

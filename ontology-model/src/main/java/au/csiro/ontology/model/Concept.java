@@ -21,12 +21,14 @@ public class Concept<T extends Comparable<T>> implements INamedConcept<T> {
     /**
      * Represents the top concept.
      */
-    public static IConcept TOP = new Concept<>();
+    @SuppressWarnings("rawtypes")
+    public static IConcept TOP = new Concept();
     
     /**
      * Represents the bottom concept.
      */
-    public static IConcept BOTTOM = new Concept<>();
+    @SuppressWarnings("rawtypes")
+    public static IConcept BOTTOM = new Concept();
     
     /**
      * String identifier of this concept.
@@ -110,7 +112,6 @@ public class Concept<T extends Comparable<T>> implements INamedConcept<T> {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Override
     public int compareTo(IConcept o) {
         Class thisClass = this.getClass();
         Class otherClass = o.getClass();

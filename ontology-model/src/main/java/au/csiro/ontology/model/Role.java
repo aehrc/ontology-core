@@ -15,7 +15,8 @@ public class Role<T extends Comparable<T>> implements INamedRole<T> {
     /**
      * Represents the role used to group related expressions in SNOMED.
      */
-    public static IRole ROLE_GROUP = new Role<>();
+    @SuppressWarnings("rawtypes")
+    public static IRole ROLE_GROUP = new Role();
     
     /**
      * String identifier of this concept.
@@ -83,7 +84,6 @@ public class Role<T extends Comparable<T>> implements INamedRole<T> {
     }
 
     @SuppressWarnings("unchecked")
-    @Override
     public int compareTo(IRole o) {
         if(!(o instanceof INamedRole)) {
             return -1;

@@ -81,7 +81,6 @@ public class Datatype<T extends Comparable<T>> implements IDatatype<T> {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Override
     public int compareTo(IConcept o) {
         Class thisClass = this.getClass();
         Class otherClass = o.getClass();

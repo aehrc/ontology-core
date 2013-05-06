@@ -55,7 +55,6 @@ public class StringLiteral implements IStringLiteral {
         return value;
     }
 
-    @Override
     public int compareTo(ILiteral o) {
         StringLiteral sl = (StringLiteral) o;
         String otherValue = sl.value;
