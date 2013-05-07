@@ -41,7 +41,7 @@ public class Datatype<T extends Comparable<T>> implements IDatatype<T> {
 
     @Override
     public String toString() {
-        return feature + ".";
+        return feature + "." +literal;
     }
 
     @Override

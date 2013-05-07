@@ -23,7 +23,7 @@ public class Existential<T extends Comparable<T>> implements IExistential<T> {
 
     @Override
     public String toString() {
-        return role + " . " + concept;
+        return role + "." + concept;
     }
     
     public INamedRole<T> getRole() {

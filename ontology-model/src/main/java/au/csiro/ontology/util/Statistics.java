@@ -81,4 +81,12 @@ public class Statistics {
         return sb.toString();
     }
     
+    public long getTotalTime() {
+        long res = 0;
+        for(String key : stats.keySet()) {
+            res += stats.get(key);
+        }
+        return res;
+    }
+    
 }
