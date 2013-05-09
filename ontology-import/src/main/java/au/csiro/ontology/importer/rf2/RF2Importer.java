@@ -123,27 +123,13 @@ public class RF2Importer extends BaseImporter {
         for(RF2Input input : inputs.getRf2Inputs()) {
             InputType inputType = input.getInputType();
             for(String md : input.getModuleDependenciesRefsetFiles()) {
-                InputStream is = null;
-                if(inputType.equals(InputType.EXTERNAL)) {
-                    try {
-                        is = new FileInputStream(md);
-                    } catch (FileNotFoundException e) {
-                        is = null;
-                    }
-                } else if(inputType.equals(InputType.CLASSPATH)) {
-                    is = this.getClass().getResourceAsStream(md);
-                } else {
-                    throw new RuntimeException("Unexpected input type "+
-                            inputType);
-                }
-                
-                if(is == null) {
+                try {
+                    iss.add(input.getInputStream(md));
+                } catch (IOException e) {
                     throw new ImportException("Unable to load module " +
-                        "dependencias. Please check your input configuration " +
-                        "file. (input type = "+inputType+", file="+md+")");
+                            "dependencias. Please check your input configuration " +
+                            "file. (input type = "+inputType+", file="+md+")", e);
                 }
-                
-                iss.add(is);
             }
         }
         
@@ -381,33 +367,13 @@ public class RF2Importer extends BaseImporter {
         // for this import entry
         Map<String, RelationshipRow> relationshipMap = new HashMap<>();
         
-        for(RF2Input input : inputs.getRf2Inputs()) {
+        for (RF2Input input : inputs.getRf2Inputs()) {
             InputType inputType = input.getInputType();
             Set<String> conceptsFiles = input.getConceptsFiles();
             for(String conceptsFile : conceptsFiles) {
-                InputStream in = null;
-                if(inputType.equals(InputType.EXTERNAL)) {
-                    try {
-                        in = new FileInputStream(conceptsFile);
-                    } catch (FileNotFoundException e) {
-                        in = null;
-                    }
-                } else if(inputType.equals(InputType.CLASSPATH)) {
-                    in = this.getClass().getResourceAsStream(conceptsFile);
-                } else {
-                    throw new RuntimeException("Unexpected input type "+
-                            inputType);
-                }
-                
-                if(in == null) {
-                    throw new ImportException("Unable to load concepts file. " +
-                            "Please check your input configuration file. " +
-                            "(input type = "+inputType+", file="+conceptsFile+
-                            ")");
-                }
-                
                 try (BufferedReader br = new BufferedReader(
-                        new InputStreamReader(in))) {
+                        new InputStreamReader(
+                                input.getInputStream(conceptsFile)))) {
                     String line = br.readLine(); // Skip first line
         
                     while (null != (line = br.readLine())) {
@@ -459,8 +425,9 @@ public class RF2Importer extends BaseImporter {
                     }
                 } catch (IOException e) {
                     log.error(e);
-                    throw new ImportException("Problem while loading concepts.",
-                            e);
+                    throw new ImportException("Unable to load concepts file. " +
+                            "Please check your input configuration file. " +
+                            "(input type = "+inputType+", file="+conceptsFile+")", e);
                 }
             }
             
@@ -477,29 +444,8 @@ public class RF2Importer extends BaseImporter {
             }
             
             for(String relationshipsFile : relationshipsFiles) {
-                InputStream in = null;
-                if(inputType.equals(InputType.EXTERNAL)) {
-                    try {
-                        in = new FileInputStream(relationshipsFile);
-                    } catch (FileNotFoundException e) {
-                        in = null;
-                    }
-                } else if(inputType.equals(InputType.CLASSPATH)) {
-                    in = this.getClass().getResourceAsStream(relationshipsFile);
-                } else {
-                    throw new RuntimeException("Unexpected input type "+
-                            inputType);
-                }
-                
-                if(in == null) {
-                    throw new ImportException("Unable to load realtionships " +
-                            "file. Please check your input configuration " +
-                            "file. (input type = "+inputType+", file="+
-                            relationshipsFile+")");
-                }
-                
                 try (BufferedReader br = new BufferedReader(
-                        new InputStreamReader(in))) {
+                        new InputStreamReader(input.getInputStream(relationshipsFile)))) {
                     String line = br.readLine(); // Skip first line
                     while (null != (line = br.readLine())) {
                         if (line.trim().length() < 1) {
@@ -570,8 +516,10 @@ public class RF2Importer extends BaseImporter {
                     }
                 } catch (IOException e) {
                     log.error(e);
-                    throw new ImportException(
-                            "Problem while loading Relationships.", e);
+                    throw new ImportException("Unable to load realtionships " +
+                            "file. Please check your input configuration " +
+                            "file. (input type = "+inputType+", file="+
+                            relationshipsFile+")");
                 } 
             }
         }
