@@ -60,12 +60,25 @@ public class Concept<T extends Comparable<T>> implements INamedConcept<T> {
         this.id = id;
     }
 
+    public static <S extends Comparable<S>> Concept<S> createFrom(S id) {
+        if (Concept.TOP == id) {
+            return (Concept<S>) TOP;
+        } else if (Concept.BOTTOM == id) {
+            return (Concept<S>) BOTTOM;
+        } else {
+            return new Concept<>(id);
+        }
+    }
+    
     /**
      * Returns this concept's identifier.
      * 
      * @return The identifier.
      */
     public T getId() {
+        if (id == null) {
+            throw new UnsupportedOperationException("Id is undefined for " + this);
+        }
         return id;
     }
 
@@ -116,7 +129,17 @@ public class Concept<T extends Comparable<T>> implements INamedConcept<T> {
         Class otherClass = o.getClass();
         if(thisClass.equals(otherClass)) {
             Concept<T> other = (Concept<T>)o;
-            return id.compareTo(other.id);
+            if (this == TOP) {
+                return other == TOP ? 0 : -1;
+            } else if (this == BOTTOM) {
+                return other == BOTTOM ? 0 : 1;
+            } else if (other == TOP) {
+                return 1;
+            } else if (other == BOTTOM) {
+                return -1;
+            } else {
+                return id.compareTo(other.id);
+            }
         } else {
             return thisClass.toString().compareTo(otherClass.toString());
         }
