@@ -25,7 +25,6 @@ public class BooleanLiteral implements IBooleanLiteral {
     /**
      * @return the value
      */
-    @Override
     public boolean getValue() {
         return value;
     }
@@ -65,7 +64,6 @@ public class BooleanLiteral implements IBooleanLiteral {
         return "false";
     }
 
-    @Override
     public int compareTo(ILiteral o) {
         BooleanLiteral bl = (BooleanLiteral) o;
         boolean otherValue = bl.value;

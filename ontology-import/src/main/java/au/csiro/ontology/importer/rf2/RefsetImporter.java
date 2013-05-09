@@ -40,10 +40,12 @@ public class RefsetImporter {
     public static IModuleDependencyRefset importModuleDependencyRefset(
             Set<InputStream> refsetFiles) {
         
-        Set<ModuleDependencyRow> members = new HashSet<>();
+        Set<ModuleDependencyRow> members = new HashSet<ModuleDependencyRow>();
         for(InputStream refsetFile : refsetFiles) {
-            try (BufferedReader br = new BufferedReader(
-                    new InputStreamReader(refsetFile))){
+            BufferedReader br = null;
+            try {
+                br = new BufferedReader(
+                        new InputStreamReader(refsetFile));
                 String line = br.readLine();
                 
                 String[] cols = line.split("[\t]");
@@ -75,6 +77,10 @@ public class RefsetImporter {
             } catch (Exception e) {
                 log.error("Problem reading refset file "+refsetFile, e);
                 throw new ImportException("Problem reading refset file ", e);
+            } finally {
+                if(br != null) {
+                    try { br.close(); } catch(Exception e) {}
+                }
             }
         }
         

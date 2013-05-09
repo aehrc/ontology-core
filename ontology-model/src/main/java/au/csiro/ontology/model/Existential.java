@@ -23,15 +23,13 @@ public class Existential<T extends Comparable<T>> implements IExistential<T> {
 
     @Override
     public String toString() {
-        return role + " . " + concept;
+        return role + "." + concept;
     }
     
-    @Override
     public INamedRole<T> getRole() {
         return role;
     }
     
-    @Override
     public IConcept getConcept() {
         return concept;
     }
@@ -69,7 +67,6 @@ public class Existential<T extends Comparable<T>> implements IExistential<T> {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Override
     public int compareTo(IConcept o) {
         Class thisClass = this.getClass();
         Class otherClass = o.getClass();

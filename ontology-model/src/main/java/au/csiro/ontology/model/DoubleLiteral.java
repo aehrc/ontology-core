@@ -60,7 +60,6 @@ public class DoubleLiteral implements IDoubleLiteral {
         return String.valueOf(value);
     }
 
-    @Override
     public int compareTo(ILiteral o) {
         DoubleLiteral dl = (DoubleLiteral) o;
         double otherValue = dl.value;

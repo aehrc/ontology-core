@@ -21,7 +21,6 @@ public class LongLiteral implements ILongLiteral {
     /**
      * @return the value
      */
-    @Override
     public long getValue() {
         return value;
     }
@@ -53,7 +52,6 @@ public class LongLiteral implements ILongLiteral {
         return String.valueOf(value);
     }
 
-    @Override
     public int compareTo(ILiteral o) {
         LongLiteral ll = (LongLiteral) o;
         long otherValue = ll.value;

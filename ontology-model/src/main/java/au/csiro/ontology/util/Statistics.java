@@ -24,7 +24,7 @@ public class Statistics {
     /**
      * Map with performance values.
      */
-    private final Map<String, Long> stats = new HashMap<>();
+    private final Map<String, Long> stats = new HashMap<String, Long>();
     
     /**
      * Private constructor.
@@ -79,6 +79,14 @@ public class Statistics {
         }
         
         return sb.toString();
+    }
+    
+    public long getTotalTime() {
+        long res = 0;
+        for(String key : stats.keySet()) {
+            res += stats.get(key);
+        }
+        return res;
     }
     
 }

@@ -26,7 +26,7 @@ public class TestRefsetImporter {
     
     @Test
     public void testImportModuleDependencyRefset() {
-        Set<InputStream> refsetFiles = new HashSet<>();
+        Set<InputStream> refsetFiles = new HashSet<InputStream>();
         refsetFiles.add(this.getClass().getResourceAsStream(
                 "/der2_ssRefset_ModuleDependencyFull_AU1000036_20121130.txt"));
         IModuleDependencyRefset dr = 

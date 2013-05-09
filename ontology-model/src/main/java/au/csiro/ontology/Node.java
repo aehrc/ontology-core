@@ -5,8 +5,9 @@
 package au.csiro.ontology;
 
 import java.io.Serializable;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Represents a node in the taxonomy generated after classifying an ontology.
@@ -23,17 +24,20 @@ public class Node<T extends Comparable<T>> implements Serializable {
     /**
      * Set of equivalent concepts in this node.
      */
-    protected final Set<T> equivalentConcepts = new HashSet<>();
+    protected final Set<T> equivalentConcepts = Collections.newSetFromMap(
+            new ConcurrentHashMap<T, Boolean>());
     
     /**
      * Set of parents nodes.
      */
-    protected final Set<Node<T>> parents = new HashSet<>();
+    protected final Set<Node<T>> parents = Collections.newSetFromMap(
+            new ConcurrentHashMap<Node<T>, Boolean>());
     
     /**
      * Set of child nodes.
      */
-    protected final Set<Node<T>> children = new HashSet<>();
+    protected final Set<Node<T>> children = Collections.newSetFromMap(
+            new ConcurrentHashMap<Node<T>, Boolean>());
 
     /**
      * @return the equivalentConcepts

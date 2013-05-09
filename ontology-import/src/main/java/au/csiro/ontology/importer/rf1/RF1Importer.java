@@ -52,12 +52,12 @@ public class RF1Importer extends BaseImporter {
      */
     protected SnomedMetadata metadata = SnomedMetadata.INSTANCE;
     
-    protected final List<String> problems = new ArrayList<>();
-    protected final Map<String, String> primitive = new HashMap<>();
-    protected final Map<String, Set<String>> parents = new HashMap<>();
-    protected final Map<String, Set<String>> children = new HashMap<>();
-    protected final Map<String, List<String[]>> rels = new HashMap<>();
-    protected final Map<String, Map<String, String>> roles = new HashMap<>();
+    protected final List<String> problems = new ArrayList<String>();
+    protected final Map<String, String> primitive = new HashMap<String, String>();
+    protected final Map<String, Set<String>> parents = new HashMap<String, Set<String>>();
+    protected final Map<String, Set<String>> children = new HashMap<String, Set<String>>();
+    protected final Map<String, List<String[]>> rels = new HashMap<String, List<String[]>>();
+    protected final Map<String, Map<String, String>> roles = new HashMap<String, Map<String, String>>();
 
     /**
      * Creates a new {@link RF1Importer}.
@@ -74,7 +74,6 @@ public class RF1Importer extends BaseImporter {
         this.version = version;
     }
     
-    @Override
     public Iterator<IOntology<String>> getOntologyVersions(
             IProgressMonitor monitor) {
         return new OntologyInterator(monitor);
@@ -88,12 +87,10 @@ public class RF1Importer extends BaseImporter {
             this.monitor = monitor;
         }
         
-        @Override
         public boolean hasNext() {
             return !accessed;
         }
 
-        @Override
         public IOntology<String> next() {
             long start = System.currentTimeMillis();
             
@@ -101,7 +98,7 @@ public class RF1Importer extends BaseImporter {
 
             // Extract the version rows
             VersionRows vr = extractVersionRows();
-            Collection<IAxiom> axioms = new ArrayList<>();
+            Collection<IAxiom> axioms = new ArrayList<IAxiom>();
 
             // Process concept rows
             for (ConceptRow cr : vr.getConceptRows()) {
@@ -172,7 +169,7 @@ public class RF1Importer extends BaseImporter {
                     axioms.add(new ConceptInclusion(new Concept<String>(c1), 
                             new Concept<String>(prs.iterator().next())));
                 } else {
-                    List<IConcept> conjs = new ArrayList<>();
+                    List<IConcept> conjs = new ArrayList<IConcept>();
                     
                     if(prs != null) {
                         for (String pr : prs) {
@@ -183,13 +180,13 @@ public class RF1Importer extends BaseImporter {
                     if (relsVal != null) {
                         for (Set<RoleValuePair> rvs : groupRoles(relsVal)) {
                             if (rvs.size() > 1) {
-                                List<IConcept> innerConjs = new ArrayList<>();
+                                List<IConcept> innerConjs = new ArrayList<IConcept>();
                                 for (RoleValuePair rv : rvs) {
-                                    Role<String> role = new Role<>(rv.role);
-                                    Concept<String> filler = new Concept<>(
+                                    Role<String> role = new Role<String>(rv.role);
+                                    Concept<String> filler = new Concept<String>(
                                             rv.value);
                                     Existential<String> exis = 
-                                            new Existential<>(role, filler);
+                                            new Existential<String>(role, filler);
                                     innerConjs.add(exis);
                                 }
                                 // Wrap with a role group
@@ -198,30 +195,30 @@ public class RF1Importer extends BaseImporter {
                                         new Conjunction(innerConjs)));
                             } else {
                                 RoleValuePair first = rvs.iterator().next();
-                                Role<String> role = new Role<>(first.role);
+                                Role<String> role = new Role<String>(first.role);
                                 Concept<String> filler = 
-                                        new Concept<>(first.value);
+                                        new Concept<String>(first.value);
                                 Existential<String> exis = 
-                                        new Existential<>(role, filler);
+                                        new Existential<String>(role, filler);
                                 if (metadata.getNeverGroupedIds().contains(
                                         first.role)) {
                                     // Does not need a role group
                                     conjs.add(exis);
                                 } else {
                                     // Needs a role group
-                                    conjs.add(new Existential<>(
-                                            new Role<>("RoleGroup"), exis));
+                                    conjs.add(new Existential<String>(
+                                            new Role<String>("RoleGroup"), exis));
                                 }
                             }
                         }
                     }
 
-                    axioms.add(new ConceptInclusion(new Concept<>(c1), 
+                    axioms.add(new ConceptInclusion(new Concept<String>(c1), 
                             new Conjunction(conjs)));
 
                     if (primitive.get(c1).equals("0")) {
                         axioms.add(new ConceptInclusion(new Conjunction(conjs),
-                                new Concept<>(c1)));
+                                new Concept<String>(c1)));
                     }
                 }
             }
@@ -233,7 +230,6 @@ public class RF1Importer extends BaseImporter {
                     null);
         }
 
-        @Override
         public void remove() {
             throw new UnsupportedOperationException();
         }
@@ -243,7 +239,7 @@ public class RF1Importer extends BaseImporter {
     protected void populateParent(String src, String tgt) {
         Set<String> prs = parents.get(src);
         if (prs == null) {
-            prs = new TreeSet<>();
+            prs = new TreeSet<String>();
             parents.put(src, prs);
         }
         prs.add(tgt);
@@ -252,7 +248,7 @@ public class RF1Importer extends BaseImporter {
     protected void populateChildren(String src, String tgt) {
         Set<String> prs = children.get(src);
         if (prs == null) {
-            prs = new TreeSet<>();
+            prs = new TreeSet<String>();
             children.put(src, prs);
         }
         prs.add(tgt);
@@ -261,7 +257,7 @@ public class RF1Importer extends BaseImporter {
     protected void populateRels(String src, String role, String tgt, String group) {
         List<String[]> val = rels.get(src);
         if (val == null) {
-            val = new ArrayList<>();
+            val = new ArrayList<String[]>();
             rels.put(src, val);
         }
         val.add(new String[] { role, tgt, group });
@@ -286,7 +282,7 @@ public class RF1Importer extends BaseImporter {
             String parentRole) {
         Map<String, String> vals = roles.get(code);
         if (vals == null) {
-            vals = new HashMap<>();
+            vals = new HashMap<String, String>();
             roles.put(code, vals);
         }
         vals.put("rightID", rightId);
@@ -294,31 +290,31 @@ public class RF1Importer extends BaseImporter {
     }
 
     protected Set<Set<RoleValuePair>> groupRoles(List<String[]> groups) {
-        Map<String, Set<RoleValuePair>> roleGroups = new HashMap<>();
+        Map<String, Set<RoleValuePair>> roleGroups = new HashMap<String, Set<RoleValuePair>>();
 
         for (String[] group : groups) {
             String roleGroup = group[2];
             Set<RoleValuePair> lrvp = roleGroups.get(roleGroup);
             if (lrvp == null) {
-                lrvp = new HashSet<>();
+                lrvp = new HashSet<RoleValuePair>();
                 roleGroups.put(group[2], lrvp);
             }
             lrvp.add(new RoleValuePair(group[0], group[1]));
         }
 
-        Set<Set<RoleValuePair>> res = new HashSet<>();
+        Set<Set<RoleValuePair>> res = new HashSet<Set<RoleValuePair>>();
         for (String roleGroup : roleGroups.keySet()) {
             Set<RoleValuePair> val = roleGroups.get(roleGroup);
 
             // 0 indicates not grouped
             if ("0".equals(roleGroup)) {
                 for (RoleValuePair rvp : val) {
-                    Set<RoleValuePair> sin = new HashSet<>();
+                    Set<RoleValuePair> sin = new HashSet<RoleValuePair>();
                     sin.add(rvp);
                     res.add(sin);
                 }
             } else {
-                Set<RoleValuePair> item = new HashSet<>();
+                Set<RoleValuePair> item = new HashSet<RoleValuePair>();
                 for (RoleValuePair trvp : val) {
                     item.add(trvp);
                 }
@@ -337,7 +333,6 @@ public class RF1Importer extends BaseImporter {
         roles.clear();
     }
     
-    @Override
     public List<String> getProblems() {
         return problems;
     }
@@ -397,13 +392,15 @@ public class RF1Importer extends BaseImporter {
     /**
      * Processes the raw RF1 files and generates a {@link VersionRows}.
      */
-    @SuppressWarnings("resource")
     public VersionRows extractVersionRows() {
         // Read all the concepts from the raw data
-        List<ConceptRow> crs = new ArrayList<>();
+        List<ConceptRow> crs = new ArrayList<ConceptRow>();
         
-        try (BufferedReader br = new BufferedReader(
-                new InputStreamReader(conceptsFile))) {
+        BufferedReader br = null;
+        
+        try {
+            br = new BufferedReader(
+                    new InputStreamReader(conceptsFile));
             String line = br.readLine(); // Skip first line
 
             while (null != (line = br.readLine())) {
@@ -444,12 +441,18 @@ public class RF1Importer extends BaseImporter {
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            if(br != null) {
+                try { br.close(); } catch(Exception e) {}
+            }
         }
 
         // Read all the relationships from the raw data
-        List<RelationshipRow> rrs = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(
-                new InputStreamReader(relationshipsFile))) {
+        List<RelationshipRow> rrs = new ArrayList<RelationshipRow>();
+        
+        try {
+            br = new BufferedReader(
+                    new InputStreamReader(relationshipsFile));
             String line = br.readLine(); // Skip first line
             while (null != (line = br.readLine())) {
                 if (line.trim().length() < 1) {
@@ -492,6 +495,10 @@ public class RF1Importer extends BaseImporter {
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            if(br != null) {
+                try { br.close(); } catch(Exception e) {}
+            }
         }
 
         // In this case we know we are dealing with a single version so we need

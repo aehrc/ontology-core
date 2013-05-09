@@ -220,7 +220,6 @@ public class RelationshipRow implements Comparable<RelationshipRow> {
         return true;
     }
 
-    @Override
     public int compareTo(RelationshipRow other) {
         if(this.equals(other))
             return 0;

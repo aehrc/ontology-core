@@ -54,7 +54,6 @@ public class RoleInclusion implements IRoleInclusion {
      * 
      * @return
      */
-    @Override
     public IRole[] lhs() {
         return lhs;
     }
@@ -64,7 +63,6 @@ public class RoleInclusion implements IRoleInclusion {
      * 
      * @return
      */
-    @Override
     public IRole rhs() {
         return rhs;
     }
@@ -82,7 +80,6 @@ public class RoleInclusion implements IRoleInclusion {
         return sb.toString();
     }
 
-    @Override
     public int compareTo(IAxiom o) {
         if(!(o instanceof IRoleInclusion)) {
             return 1;

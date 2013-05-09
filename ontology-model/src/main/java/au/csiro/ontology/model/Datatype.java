@@ -41,7 +41,7 @@ public class Datatype<T extends Comparable<T>> implements IDatatype<T> {
 
     @Override
     public String toString() {
-        return feature + ".";
+        return feature + "." +literal;
     }
 
     @Override
@@ -81,7 +81,6 @@ public class Datatype<T extends Comparable<T>> implements IDatatype<T> {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Override
     public int compareTo(IConcept o) {
         Class thisClass = this.getClass();
         Class otherClass = o.getClass();

@@ -36,12 +36,12 @@ public class Inputs {
     /**
      * List of RF2 input files.
      */
-    protected List<RF2Input> rf2Inputs = new ArrayList<>();
+    protected List<RF2Input> rf2Inputs = new ArrayList<RF2Input>();
     
     /**
      * List of OWL input files.
      */
-    protected List<OWLInput> owlInputs = new ArrayList<>();
+    protected List<OWLInput> owlInputs = new ArrayList<OWLInput>();
     
     /**
      * Loads an {@link Inputs} object from am XML file.

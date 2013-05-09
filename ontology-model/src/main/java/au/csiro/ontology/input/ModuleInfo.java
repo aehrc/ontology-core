@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class ModuleInfo {
     protected String id;
-    protected List<Version> versions = new ArrayList<>();
+    protected List<Version> versions = new ArrayList<Version>();
     
     public ModuleInfo() {
         

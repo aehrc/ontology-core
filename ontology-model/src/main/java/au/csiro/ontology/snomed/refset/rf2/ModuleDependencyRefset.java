@@ -19,7 +19,7 @@ public class ModuleDependencyRefset extends Refset implements
         IModuleDependencyRefset {
     
     protected final Map<String, Map<String, ModuleDependency>> dependencies = 
-            new HashMap<>();
+            new HashMap<String, Map<String, ModuleDependency>>();
             
     /**
      * Creates a new module dependency reference set.
@@ -28,7 +28,7 @@ public class ModuleDependencyRefset extends Refset implements
      */
     public ModuleDependencyRefset(Set<ModuleDependencyRow> members) {
         // Index the dependency rows
-        Map<String, Set<String>> index = new HashMap<>();
+        Map<String, Set<String>> index = new HashMap<String, Set<String>>();
         for(ModuleDependencyRow member : members) {
             String key = member.getModuleId() + "_" + 
                     member.getSourceEffectiveTime();
@@ -37,7 +37,7 @@ public class ModuleDependencyRefset extends Refset implements
             
             Set<String> vals = index.get(key);
             if(vals == null) {
-                vals = new HashSet<>();
+                vals = new HashSet<String>();
                 index.put(key, vals);
             }
             vals.add(val);
@@ -51,7 +51,7 @@ public class ModuleDependencyRefset extends Refset implements
             ModuleDependency md = createDependency(src, index);
             Map<String, ModuleDependency> verDepMap = dependencies.get(srcId);
             if(verDepMap == null) {
-                verDepMap = new HashMap<>();
+                verDepMap = new HashMap<String, ModuleDependency>();
                 dependencies.put(srcId, verDepMap);
             }
             
@@ -75,7 +75,6 @@ public class ModuleDependencyRefset extends Refset implements
         return md;
     }
 
-    @Override
     public Map<String, Map<String, ModuleDependency>> getModuleDependencies() {
         return dependencies;
     }

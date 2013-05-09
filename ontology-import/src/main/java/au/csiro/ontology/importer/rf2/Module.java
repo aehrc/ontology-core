@@ -24,7 +24,8 @@ public class Module {
      * A collection of rows from the RF2 tables for each version of this module.
      * The map is indexed by version.
      */
-    protected final SortedMap<String, VersionRows> versions = new TreeMap<>();
+    protected final SortedMap<String, VersionRows> versions = 
+            new TreeMap<String, VersionRows>();
     
     /**
      * Creates a new module.

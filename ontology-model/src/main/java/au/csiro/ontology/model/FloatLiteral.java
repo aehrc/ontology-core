@@ -25,7 +25,6 @@ public class FloatLiteral implements IFloatLiteral {
     /**
      * @return the value
      */
-    @Override
     public float getValue() {
         return value;
     }
@@ -57,7 +56,6 @@ public class FloatLiteral implements IFloatLiteral {
         return String.valueOf(value);
     }
 
-    @Override
     public int compareTo(ILiteral o) {
         FloatLiteral fl = (FloatLiteral) o;
         float otherValue = fl.value;

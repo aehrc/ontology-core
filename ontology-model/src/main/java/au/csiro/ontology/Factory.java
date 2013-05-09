@@ -37,78 +37,63 @@ import au.csiro.ontology.model.StringLiteral;
  */
 public class Factory<T extends Comparable<T>> implements IFactory<T> {
 
-    @Override
     public IConcept createConcept(T id) {
-        return new Concept<>(id);
+        return new Concept<T>(id);
     }
 
-    @Override
     public INamedRole<T> createRole(T id) {
-        return new Role<>(id);
+        return new Role<T>(id);
     }
 
-    @Override
     public INamedFeature<T> createFeature(T id) {
-        return new Feature<>(id);
+        return new Feature<T>(id);
     }
 
-    @Override
     public IConcept createConjunction(IConcept... concepts) {
         return new Conjunction(concepts);
     }
 
-    @Override
     public IConcept createExistential(INamedRole<T> role, IConcept filler) {
         return new Existential<T>(role, filler);
     }
 
-    @Override
     public IConcept createDatatype(INamedFeature<T> feature, Operator operator, 
             ILiteral literal) {
         return new Datatype<T>(feature, operator, literal);
     }
 
-    @Override
     public IAxiom createConceptInclusion(IConcept lhs, IConcept rhs) {
         return new ConceptInclusion(lhs, rhs);
     }
 
-    @Override
     public IAxiom createRoleInclusion(IRole[] lhs, IRole rhs) {
         return new RoleInclusion(lhs, rhs);
     }
 
-    @Override
     public ILiteral createBooleanLiteral(boolean value) {
         return new BooleanLiteral(value);
     }
 
-    @Override
     public ILiteral createIntegerLiteral(int value) {
         return new IntegerLiteral(value);
     }
 
-    @Override
     public ILiteral createFloatLiteral(float value) {
         return new FloatLiteral(value);
     }
 
-    @Override
     public ILiteral createDoubleLiteral(double value) {
         return new DoubleLiteral(value);
     }
 
-    @Override
     public ILiteral createDateLiteral(Calendar value) {
         return new DateLiteral(value);
     }
 
-    @Override
     public ILiteral createStringLiteral(String value) {
         return new StringLiteral(value);
     }
 
-    @Override
     public ILiteral createLongLiteral(long value) {
         return new LongLiteral(value);
     }

@@ -18,7 +18,8 @@ public class ModuleDependency {
 
     protected String id;
     protected String version;
-    protected final Set<ModuleDependency> dependencies = new HashSet<>();
+    protected final Set<ModuleDependency> dependencies = 
+            new HashSet<ModuleDependency>();
     
     /**
      * Creates a new module.
