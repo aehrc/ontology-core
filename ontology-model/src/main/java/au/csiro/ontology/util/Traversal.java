@@ -13,14 +13,17 @@ import au.csiro.ontology.Node;
 public interface Traversal {
     
     /**
-     * A level-order traversal where the level is the min distance from the root.
+     * A level-order traversal where the level is the min distance from the 
+     * root.
      * <p>
-     * <b>Will</b> visit descendants of {@code start} that have paths to the root not also containing {@code start}.
+     * <b>Will</b> visit descendants of {@code start} that have paths to the 
+     * root not also containing {@code start}.
      */
     final public static Traversal BFS_MIN = new AbstractTraversal() {
-        public <T extends Comparable<T>> void accept(Node<T> start, Visitor<T>... visitors) {
-            final Set<Node<T>> done = new HashSet<>();
-            final LinkedList<Node<T>> queue = new LinkedList<>();
+        public <T extends Comparable<T>> void accept(Node<T> start, 
+                Visitor<T>... visitors) {
+            final Set<Node<T>> done = new HashSet<Node<T>>();
+            final LinkedList<Node<T>> queue = new LinkedList<Node<T>>();
             queue.add(start);
             
             while (!queue.isEmpty()) {
@@ -44,8 +47,8 @@ public interface Traversal {
     final public static Traversal BFS_MAX = new AbstractTraversal() {
         
         public <T extends Comparable<T>> void accept(Node<T> start, Visitor<T>... visitors) {
-            final Set<Node<T>> done = new HashSet<>();
-            final LinkedList<Node<T>> queue = new LinkedList<>();
+            final Set<Node<T>> done = new HashSet<Node<T>>();
+            final LinkedList<Node<T>> queue = new LinkedList<Node<T>>();
             queue.add(start);
             
             while (!queue.isEmpty()) {
@@ -79,11 +82,12 @@ public interface Traversal {
          * @param ont
          * @return
          */
+        @SuppressWarnings("unchecked")
         public static <T extends Comparable<T>> Map<Node<T>, Object> computeStats(final IOntology<T> ont) {
-            final Map<Node<T>, Object> result = new HashMap<>();
+            final Map<Node<T>, Object> result = new HashMap<Node<T>, Object>();
             
-            final Map<Node<T>, Integer> minLevel = new HashMap<>();
-            final Map<Node<T>, Integer> maxLevel = new HashMap<>();
+            final Map<Node<T>, Integer> minLevel = new HashMap<Node<T>, Integer>();
+            final Map<Node<T>, Integer> maxLevel = new HashMap<Node<T>, Integer>();
             
             final Visitor<T> v = new Visitor<T>() {
                 public void visit(final Node<T> node) {
@@ -116,8 +120,9 @@ public interface Traversal {
 }
 
 abstract class AbstractTraversal implements Traversal {
-    @Override
+    
     public <T extends Comparable<T>> void accept(IOntology<T> ont, Visitor<T>... visitors) {
         accept(ont.getTopNode(), visitors);
     }
+    
 }

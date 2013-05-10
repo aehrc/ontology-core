@@ -12,7 +12,7 @@ import java.util.zip.ZipFile;
  * 
  * @author Alejandro Metke
  */
-public abstract class Input implements AutoCloseable {  // AutoCloseable is a Java 7 feature
+public abstract class Input {
     
     /**
      * Indicates if the files should be loaded from an external file system or
@@ -93,7 +93,6 @@ public abstract class Input implements AutoCloseable {  // AutoCloseable is a Ja
      * <p>
      * Note that this will close any InputStreams linked to a base Zip file.
      */
-    @Override
     public void close() throws IOException {
         if (null != zip) {
             zip.close();

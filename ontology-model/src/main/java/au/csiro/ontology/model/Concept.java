@@ -62,13 +62,14 @@ public class Concept<T extends Comparable<T>> implements INamedConcept<T> {
         this.id = id;
     }
 
+    @SuppressWarnings("unchecked")
     public static <S extends Comparable<S>> Concept<S> createFrom(S id) {
         if (Concept.TOP == id) {
             return (Concept<S>) TOP;
         } else if (Concept.BOTTOM == id) {
             return (Concept<S>) BOTTOM;
         } else {
-            return new Concept<>(id);
+            return new Concept<S>(id);
         }
     }
     
