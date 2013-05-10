@@ -5,6 +5,7 @@
 package au.csiro.ontology.importer.rf2;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
@@ -36,9 +37,10 @@ public class RefsetImporter {
      * 
      * @param refsetFiles The input streams.
      * @return
+     * @throws ImportException 
      */
     public static IModuleDependencyRefset importModuleDependencyRefset(
-            Set<InputStream> refsetFiles) {
+            Set<InputStream> refsetFiles) throws ImportException {
         
         Set<ModuleDependencyRow> members = new HashSet<ModuleDependencyRow>();
         for(InputStream refsetFile : refsetFiles) {
@@ -74,7 +76,7 @@ public class RefsetImporter {
                     throw new ImportException("Malformed module dependency " +
                     	"reference set with columns "+Arrays.asList(cols));
                 }
-            } catch (Exception e) {
+            } catch (IOException e) {
                 log.error("Problem reading refset file "+refsetFile, e);
                 throw new ImportException("Problem reading refset file ", e);
             } finally {

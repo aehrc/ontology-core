@@ -43,7 +43,7 @@ public interface IImporter {
      * ontologies.
      */
     public Iterator<IOntology<String>> getOntologyVersions(
-            IProgressMonitor monitor);
+            IProgressMonitor monitor) throws ImportException;
     
     /**
      * Returns a list of problems that happened during the import process. This

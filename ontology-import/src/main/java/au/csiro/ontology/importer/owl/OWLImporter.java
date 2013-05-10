@@ -414,7 +414,7 @@ public class OWLImporter extends BaseImporter {
     }
 
     private Set<IAxiom> transform(List<OWLAxiom> axioms, 
-            IProgressMonitor monitor) {
+            IProgressMonitor monitor) throws ImportException {
         monitor.taskStarted("Loading axioms");
         final Set<IAxiom> res = new HashSet<IAxiom>();
         int totalAxioms = axioms.size();
@@ -483,13 +483,13 @@ public class OWLImporter extends BaseImporter {
         monitor.taskEnded();
         
         if(!problems.isEmpty()) {
-            throw new ImportException();
+            throw new ImportException("Problems occurred during import. See getProblems()");
         }
         
         return res;
     }
 
-    private Set<IAxiom> transform(OWLOntology ont, IProgressMonitor monitor) {
+    private Set<IAxiom> transform(OWLOntology ont, IProgressMonitor monitor) throws ImportException {
         /*
         OWL2ELProfile profile = new OWL2ELProfile();
         OWLProfileReport report = profile.checkOntology(ont);
@@ -851,17 +851,21 @@ public class OWLImporter extends BaseImporter {
             return !accessed;
         }
 
-        public IOntology<String> next() {
+        public IOntology<String> next() throws IllegalArgumentException, RuntimeException {
             long start = System.currentTimeMillis();
             
             Set<IAxiom> ont = null;
-            if(ontology != null) {
-                ont = transform(ontology, monitor);
-            } else if(axioms != null) {
-                ont = transform(axioms, monitor);
-            } else {
-                throw new IllegalArgumentException(
-                        "No OWL ontology to transform.");
+            try {
+                if(ontology != null) {
+                    ont = transform(ontology, monitor);
+                } else if(axioms != null) {
+                    ont = transform(axioms, monitor);
+                } else {
+                    throw new IllegalArgumentException(
+                            "No OWL ontology to transform.");
+                }
+            } catch (ImportException e) {
+                throw new RuntimeException(e);
             }
             
             String id = null;

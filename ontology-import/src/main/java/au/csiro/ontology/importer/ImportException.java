@@ -11,19 +11,12 @@ package au.csiro.ontology.importer;
  * @author Alejandro Metke
  *
  */
-public class ImportException extends RuntimeException {
+public class ImportException extends Exception {
 
     /**
      * 
      */
     private static final long serialVersionUID = 1L;
-
-    /**
-     * 
-     */
-    public ImportException() {
-        
-    }
 
     /**
      * @param arg0
@@ -34,28 +27,10 @@ public class ImportException extends RuntimeException {
 
     /**
      * @param arg0
-     */
-    public ImportException(Throwable arg0) {
-        super(arg0);
-    }
-
-    /**
-     * @param arg0
      * @param arg1
      */
     public ImportException(String arg0, Throwable arg1) {
         super(arg0, arg1);
-    }
-
-    /**
-     * @param arg0
-     * @param arg1
-     * @param arg2
-     * @param arg3
-     */
-    public ImportException(String arg0, Throwable arg1, boolean arg2,
-            boolean arg3) {
-        super(arg0, arg1, arg2, arg3);
     }
 
 }

@@ -13,6 +13,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+import au.csiro.ontology.importer.ImportException;
 import au.csiro.ontology.snomed.refset.rf2.IModuleDependencyRefset;
 import au.csiro.ontology.snomed.refset.rf2.ModuleDependency;
 
@@ -25,7 +26,7 @@ import au.csiro.ontology.snomed.refset.rf2.ModuleDependency;
 public class TestRefsetImporter {
     
     @Test
-    public void testImportModuleDependencyRefset() {
+    public void testImportModuleDependencyRefset() throws ImportException {
         Set<InputStream> refsetFiles = new HashSet<InputStream>();
         refsetFiles.add(this.getClass().getResourceAsStream(
                 "/der2_ssRefset_ModuleDependencyFull_AU1000036_20121130.txt"));

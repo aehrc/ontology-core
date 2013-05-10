@@ -77,8 +77,9 @@ public class RF2Importer extends BaseImporter {
      * 
      * @param inputsStream An input stream with the contents of the XML 
      * configuration file.
+     * @throws ImportException 
      */
-    public RF2Importer(InputStream inputsStream) {
+    public RF2Importer(InputStream inputsStream) throws ImportException {
         try {
             inputs = Inputs.load(inputsStream);
         } catch (JAXBException e) {
@@ -90,8 +91,9 @@ public class RF2Importer extends BaseImporter {
     /**
      * Imports a set of ontologies. Loads the configuration file from the class
      * path.
+     * @throws ImportException 
      */
-    public RF2Importer() {
+    public RF2Importer() throws ImportException {
         try {
             inputs = Inputs.load(
                     this.getClass().getResourceAsStream("/config.xml"));
@@ -115,8 +117,9 @@ public class RF2Importer extends BaseImporter {
      * single {@link IModuleDependencyRefset}.
      * 
      * @return
+     * @throws ImportException 
      */
-    protected IModuleDependencyRefset loadModuleDependencies() {
+    protected IModuleDependencyRefset loadModuleDependencies() throws ImportException {
         Set<InputStream> iss = new HashSet<InputStream>();
         for(RF2Input input : inputs.getRf2Inputs()) {
             InputType inputType = input.getInputType();
@@ -342,7 +345,7 @@ public class RF2Importer extends BaseImporter {
     }
 
     public Iterator<IOntology<String>> getOntologyVersions(
-            IProgressMonitor monitor) {
+            IProgressMonitor monitor) throws ImportException {
         return new OntologyInterator(monitor);
     }
     
@@ -351,8 +354,9 @@ public class RF2Importer extends BaseImporter {
      * 
      * @param entry
      * @return
+     * @throws ImportException 
      */
-    protected VersionRows getBundle(ImportEntry entry) {
+    protected VersionRows getBundle(ImportEntry entry) throws ImportException {
         // Add module information to map for easy lookup
         Map<String, String> modMap = new HashMap<String, String>();
         for(Module module : entry.getModules()) {
@@ -724,7 +728,7 @@ public class RF2Importer extends BaseImporter {
         private final List<ImportEntry> entries = new ArrayList<ImportEntry>();
         private final IProgressMonitor monitor;
         
-        public OntologyInterator(IProgressMonitor monitor) {
+        public OntologyInterator(IProgressMonitor monitor) throws ImportException {
             this.monitor = monitor;
             
             // 1. Load module dependencies
@@ -775,9 +779,17 @@ public class RF2Importer extends BaseImporter {
             return !entries.isEmpty();
         }
 
-        public IOntology<String> next() {
+        /**
+         * @throws RuntimeException in case an {@code ImportException} has occurred.
+         */
+        public IOntology<String> next() throws RuntimeException {
             ImportEntry entry = entries.remove(entries.size()-1);
-            VersionRows bundle = getBundle(entry);
+            VersionRows bundle;
+            try {
+                bundle = getBundle(entry);
+            } catch (ImportException e) {
+                throw new RuntimeException(e);
+            }
             return transform(entry.getRootModuleId(), 
                     entry.getRootModuleVersion(), bundle, entry.getMetadata(), 
                     monitor);
