@@ -58,9 +58,7 @@ public class IntegerLiteral implements IIntegerLiteral {
     }
 
     public int compareTo(ILiteral o) {
-        IntegerLiteral il = (IntegerLiteral) o;
-        int otherValue = il.value;
-        return Integer.compare(value, otherValue);
+        return ((Integer)value).compareTo(((IntegerLiteral)o).value);
     }
 
 }

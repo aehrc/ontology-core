@@ -53,9 +53,7 @@ public class LongLiteral implements ILongLiteral {
     }
 
     public int compareTo(ILiteral o) {
-        LongLiteral ll = (LongLiteral) o;
-        long otherValue = ll.value;
-        return Long.compare(value, otherValue);
+        return ((Long)value).compareTo(((LongLiteral)o).value);
     }
 
 }
