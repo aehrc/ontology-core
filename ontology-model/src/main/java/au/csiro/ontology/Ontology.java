@@ -42,6 +42,11 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
     protected final Collection<IAxiom> statedAxioms;
     
     /**
+     * The collection of inferred axioms that form the ontology.
+     */
+    protected final Collection<IAxiom> inferredAxioms = new ArrayList<IAxiom>();
+    
+    /**
      * A map that contains references to all the nodes in the taxonomy indexed
      * by id.
      */
@@ -56,6 +61,8 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
     /**
      * Builds a new ontology.
      * 
+     * @param id
+     * @param version
      * @param statedAxioms
      * @param nodeMap
      * @param lastAffectedNodes
@@ -86,52 +93,68 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
             Collection<IAxiom> statedAxioms, Map<T, Node<T>> nodeMap) {
     	this(id, version, statedAxioms, nodeMap, null);
     }
-
+    
+    @Override
     public Collection<IAxiom> getStatedAxioms() {
         return statedAxioms;
     }
+
+    @Override
+    public Collection<IAxiom> getInferredAxioms() {
+        return inferredAxioms;
+    }
     
+    @Override
     public Node<T> getNode(T id) {
         return nodeMap.get(id);
     }
     
+    @Override
     public Iterator<Node<T>> nodeIterator() {
         Set<Node<T>> set = new HashSet<Node<T>>(nodeMap.values());
         return set.iterator();
     }
-
+    
+    @Override
     public Map<T, Node<T>> getNodeMap() {
         return nodeMap;
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public Node<T> getTopNode() {
         return getNode((T)Concept.TOP);
     }
-
+    
+    @Override
     @SuppressWarnings("unchecked")
     public Node<T> getBottomNode() {
         return getNode((T)Concept.BOTTOM);
     }
-
+    
+    @Override
     public void setNodeMap(Map<T, Node<T>> nodeMap) {
         this.nodeMap.clear();
         this.nodeMap.putAll(nodeMap);
     }
-
+    
+    @Override
     public Set<Node<T>> getAffectedNodes() {
         return lastAffectedNodes;
     }
-
+    
+    @Override
     public void setAffectedNodes(Set<Node<T>> nodes) {
         lastAffectedNodes.clear();
         lastAffectedNodes.addAll(nodes);
     }
-
+    
+    @Override
     public String getId() {
         return id;
     }
 
+    @Override
     public String getVersion() {
         return version;
     }

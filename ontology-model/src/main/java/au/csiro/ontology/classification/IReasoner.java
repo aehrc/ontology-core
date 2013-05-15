@@ -106,6 +106,15 @@ public interface IReasoner<T extends Comparable<T>> {
     public IOntology<T> getClassifiedOntology();
     
     /**
+     * Returns an {@link IOntology} that represents the generated taxonomy. 
+     * If no axioms have yet been classified it throws a 
+     * {@link RuntimeException}.
+     * 
+     * @return The classified ontology.
+     */
+    public IOntology<T> getClassifiedOntology(IOntology<T> ont);
+    
+    /**
      * Saves this reasoner to the specified {@link OutputStream}.
      * 
      * @param out The {@link OutputStream}.

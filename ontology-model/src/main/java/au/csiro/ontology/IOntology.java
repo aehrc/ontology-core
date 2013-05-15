@@ -36,6 +36,13 @@ public interface IOntology<T extends Comparable<T>> {
     public Collection<IAxiom> getStatedAxioms();
     
     /**
+     * Returns the {@link Collection} of inferred axioms in the ontology.
+     * 
+     * @return
+     */
+    public Collection<IAxiom> getInferredAxioms();
+    
+    /**
      * Returns the {@link Node} in the taxonomy that contains a specified 
      * concept or null if such {@link Node} does not exist.
      * 
