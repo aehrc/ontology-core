@@ -8,13 +8,13 @@ package au.csiro.ontology.model;
  * @author Alejandro Metke
  *
  */
-public interface INamedFeature<T> extends IFeature {
+public interface INamedFeature extends IFeature {
     
     /**
      * Returns the id of this named feature.
      * 
      * @return
      */
-    public T getId();
+    public String getId();
     
 }

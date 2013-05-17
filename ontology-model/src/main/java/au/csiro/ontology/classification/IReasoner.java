@@ -18,7 +18,7 @@ import au.csiro.ontology.axioms.IAxiom;
  *
  */
 @SuppressWarnings("deprecation")
-public interface IReasoner<T extends Comparable<T>> {
+public interface IReasoner {
     
     /**
      * Loads and indexes the supplied axioms.
@@ -39,14 +39,14 @@ public interface IReasoner<T extends Comparable<T>> {
      * 
      * @param axioms
      */
-    public void loadAxioms(IOntology<T> ont);
+    public void loadAxioms(IOntology ont);
     
     /**
      * Classifies the current axioms.
      * 
      * @return
      */
-    public IReasoner<T> classify();
+    public IReasoner classify();
     
     /**
      * Classifies the supplied axioms. The first time this method is called it 
@@ -58,7 +58,7 @@ public interface IReasoner<T extends Comparable<T>> {
      * @deprecated Use {@link IReasoner#loadAxioms(Set)}  and 
      * {@link IReasoner#classify()} instead. 
      */
-    public IReasoner<T> classify(Set<IAxiom> axioms);
+    public IReasoner classify(Set<IAxiom> axioms);
     
     /**
      * Classifies the supplied axioms. The first time this method is called it 
@@ -71,7 +71,7 @@ public interface IReasoner<T extends Comparable<T>> {
      * @deprecated Use {@link IReasoner#loadAxioms(Iterator)} and 
      * {@link IReasoner#classify()} instead. 
      */
-    public IReasoner<T> classify(Iterator<IAxiom> axioms);
+    public IReasoner classify(Iterator<IAxiom> axioms);
     
     /**
      * Classifies the stated axioms in the supplied ontology. The first time 
@@ -85,7 +85,7 @@ public interface IReasoner<T extends Comparable<T>> {
      * @param ont An ontology.
      * @return IReasoner
      */
-    public IReasoner<T> classify(IOntology<T> ont);
+    public IReasoner classify(IOntology ont);
     
     /**
      * Removes all the state in the classifier except the taxonomy generated
@@ -103,7 +103,7 @@ public interface IReasoner<T extends Comparable<T>> {
      * 
      * @return The classified ontology.
      */
-    public IOntology<T> getClassifiedOntology();
+    public IOntology getClassifiedOntology();
     
     /**
      * Returns an {@link IOntology} that represents the generated taxonomy. 
@@ -112,7 +112,7 @@ public interface IReasoner<T extends Comparable<T>> {
      * 
      * @return The classified ontology.
      */
-    public IOntology<T> getClassifiedOntology(IOntology<T> ont);
+    public IOntology getClassifiedOntology(IOntology ont);
     
     /**
      * Saves this reasoner to the specified {@link OutputStream}.
@@ -136,6 +136,6 @@ public interface IReasoner<T extends Comparable<T>> {
      * @return The taxonomy.
      * @deprecated Use {@link IReasoner#getClassifiedOntology()} instead.
      */
-    public Taxonomy<T> getTaxonomy();
+    public Taxonomy getTaxonomy();
 
 }

@@ -299,10 +299,10 @@ public class OWLImporter extends BaseImporter {
         int size = sub.size();
         IRole[] lhss = new IRole[size];
         for (int i = 0; i < size; i++) {
-            lhss[i] = new Role<String>(sub.get(i).asOWLObjectProperty().toStringID());
+            lhss[i] = new Role(sub.get(i).asOWLObjectProperty().toStringID());
         }
 
-        Role<String> rhs = new Role<String>(sup.asOWLObjectProperty().toStringID());
+        Role rhs = new Role(sup.asOWLObjectProperty().toStringID());
 
         if (lhss.length == 1 || lhss.length == 2) {
             return new RoleInclusion(lhss, rhs);
@@ -318,8 +318,8 @@ public class OWLImporter extends BaseImporter {
         OWLObjectPropertyExpression sub = a.getSubProperty();
         OWLObjectPropertyExpression sup = a.getSuperProperty();
 
-        Role<String> lhs = new Role<String>(sub.asOWLObjectProperty().toStringID());
-        Role<String> rhs = new Role<String>(sup.asOWLObjectProperty().toStringID());
+        Role lhs = new Role(sub.asOWLObjectProperty().toStringID());
+        Role rhs = new Role(sup.asOWLObjectProperty().toStringID());
 
         return new RoleInclusion(new Role[]{lhs}, rhs);
     }
@@ -328,13 +328,13 @@ public class OWLImporter extends BaseImporter {
             OWLReflexiveObjectPropertyAxiom a) {
         OWLObjectPropertyExpression exp = a.getProperty();
         return new RoleInclusion(new Role[] {}, 
-                new Role<String>(exp.asOWLObjectProperty().toStringID()));
+                new Role(exp.asOWLObjectProperty().toStringID()));
     }
 
     private IAxiom transformOWLTransitiveObjectPropertyAxiom(
             OWLTransitiveObjectPropertyAxiom a) {
         OWLObjectPropertyExpression exp = a.getProperty();
-        Role<String> r = new Role<String>(exp.asOWLObjectProperty().toStringID());
+        Role r = new Role(exp.asOWLObjectProperty().toStringID());
         return new RoleInclusion(new Role[] { r, r }, r);
     }
 
@@ -392,7 +392,8 @@ public class OWLImporter extends BaseImporter {
                 conjs[i] = concepts.get(i);
             }
     
-            return new ConceptInclusion(new Conjunction(conjs), Concept.BOTTOM);
+            return new ConceptInclusion(new Conjunction(conjs), 
+                    Concept.BOTTOM_CONCEPT);
         } catch(UnsupportedOperationException e) {
             problems.add(e.getMessage());
             return null;
@@ -406,8 +407,8 @@ public class OWLImporter extends BaseImporter {
             OWLObjectPropertyExpression sub = ax.getSubProperty();
             OWLObjectPropertyExpression sup = ax.getSuperProperty();
 
-            axioms.add(new RoleInclusion(new Role<String>(sub.asOWLObjectProperty()
-                    .toStringID()), new Role<String>(sup.asOWLObjectProperty()
+            axioms.add(new RoleInclusion(new Role(sub.asOWLObjectProperty()
+                    .toStringID()), new Role(sup.asOWLObjectProperty()
                     .toStringID())));
         }
         return axioms;
@@ -426,8 +427,8 @@ public class OWLImporter extends BaseImporter {
                 OWLEntity ent = a.getEntity();
                 if (ent.isOWLClass()) {
                     res.add(new ConceptInclusion(
-                            new Concept<String>(ent.asOWLClass().toStringID()), 
-                            Concept.TOP));
+                            new Concept(ent.asOWLClass().toStringID()), 
+                            Concept.TOP_CONCEPT));
                 } else if (ent.isOWLObjectProperty()) {
                     // Do nothing for now.
                 } else if (ent.isOWLDataProperty()) {
@@ -643,8 +644,8 @@ public class OWLImporter extends BaseImporter {
 
                 checkInconsistentProperty(dp, type);
 
-                Feature<String> f = new Feature<String>(dp.toStringID());
-                push(new Datatype<String>(f, Operator.EQUALS, getLiteral(l)));
+                Feature f = new Feature(dp.toStringID());
+                push(new Datatype(f, Operator.EQUALS, getLiteral(l)));
             }
 
             public void visit(OWLDataAllValuesFrom e) {
@@ -673,15 +674,15 @@ public class OWLImporter extends BaseImporter {
                     OWLDatatype type = l.getDatatype();
                     checkInconsistentProperty(dp, type);
                     
-                    Feature<String> f = new Feature<String>(dp.toStringID());
-                    push(new Datatype<String>(f, Operator.EQUALS, getLiteral(l)));
+                    Feature f = new Feature(dp.toStringID());
+                    push(new Datatype(f, Operator.EQUALS, getLiteral(l)));
                 } else if(range instanceof OWLDatatypeRestriction) {
-                    Feature<String> f = new Feature<String>(dp.toStringID());
+                    Feature f = new Feature(dp.toStringID());
                     
                     OWLDatatypeRestriction dtr = (OWLDatatypeRestriction)range;
                     Set<OWLFacetRestriction> frs = dtr.getFacetRestrictions();
                     
-                    List<Datatype<String>> conjuncts = new ArrayList<Datatype<String>>();
+                    List<Datatype> conjuncts = new ArrayList<Datatype>();
                     for(OWLFacetRestriction fr : frs) {
                         OWLLiteral l = fr.getFacetValue();
                         checkInconsistentProperty(dp, l.getDatatype()); 
@@ -689,22 +690,22 @@ public class OWLImporter extends BaseImporter {
                         
                         switch(facet) {
                             case MAX_EXCLUSIVE:
-                                conjuncts.add(new Datatype<String>(f, 
+                                conjuncts.add(new Datatype(f, 
                                         Operator.LESS_THAN, 
                                         getLiteral(l)));
                                 break;
                             case MAX_INCLUSIVE:
-                                conjuncts.add(new Datatype<String>(f, 
+                                conjuncts.add(new Datatype(f, 
                                         Operator.LESS_THAN_EQUALS, 
                                         getLiteral(l)));
                                 break;
                             case MIN_EXCLUSIVE:
-                                conjuncts.add(new Datatype<String>(f, 
+                                conjuncts.add(new Datatype(f, 
                                         Operator.GREATER_THAN, 
                                         getLiteral(l)));
                                 break;
                             case MIN_INCLUSIVE:
-                                conjuncts.add(new Datatype<String>(f, 
+                                conjuncts.add(new Datatype(f, 
                                         Operator.GREATER_THAN_EQUALS, 
                                         getLiteral(l)));
                                 break;
@@ -742,7 +743,7 @@ public class OWLImporter extends BaseImporter {
                  * individuals that are connected by OPE to themselves.
                  */
                 
-                /*Role<String> r = new Role<>(
+                /*Role r = new Role<>(
                         e.getProperty().asOWLObjectProperty().toStringID());*/
 
                 unimplemented(e);
@@ -772,10 +773,10 @@ public class OWLImporter extends BaseImporter {
             }
 
             public void visit(OWLObjectSomeValuesFrom e) {
-                Role<String> r = new Role<String>(e.getProperty().asOWLObjectProperty()
+                Role r = new Role(e.getProperty().asOWLObjectProperty()
                         .toStringID());
                 e.getFiller().accept(this);
-                push(new Existential<String>(r, pop()));
+                push(new Existential(r, pop()));
             }
 
             public void visit(OWLObjectComplementOf e) {
@@ -801,12 +802,12 @@ public class OWLImporter extends BaseImporter {
             public void visit(OWLClass e) {
                 String id = e.toStringID();
                 if (("<"+THING_IRI+">").equals(id) || THING_IRI.equals(id))
-                    push(Concept.TOP);
+                    push(Concept.TOP_CONCEPT);
                 else if (("<"+NOTHING_IRI+">").equals(id)
                         || NOTHING_IRI.equals(id))
-                    push(Concept.BOTTOM);
+                    push(Concept.BOTTOM_CONCEPT);
                 else
-                    push(new Concept<String>(id));
+                    push(new Concept(id));
             }
 
         });
@@ -834,12 +835,12 @@ public class OWLImporter extends BaseImporter {
         return problems;
     }
 
-    public Iterator<IOntology<String>> getOntologyVersions(
+    public Iterator<IOntology> getOntologyVersions(
             IProgressMonitor monitor) {
         return new OntologyInterator(monitor);
     }
     
-    class OntologyInterator implements Iterator<IOntology<String>> {
+    class OntologyInterator implements Iterator<IOntology> {
         private boolean accessed = false;
         private IProgressMonitor monitor;
         
@@ -851,7 +852,7 @@ public class OWLImporter extends BaseImporter {
             return !accessed;
         }
 
-        public IOntology<String> next() throws IllegalArgumentException, RuntimeException {
+        public IOntology next() throws IllegalArgumentException, RuntimeException {
             long start = System.currentTimeMillis();
             
             Set<IAxiom> ont = null;
@@ -877,7 +878,7 @@ public class OWLImporter extends BaseImporter {
             
             String version = sdf.format(new Date());
             
-            Ontology<String> res = new Ontology<String>(id, version, ont, null);
+            Ontology res = new Ontology(id, version, ont, null);
             Statistics.INSTANCE.setTime("owl loading", 
                     System.currentTimeMillis() - start);
             accessed = true;

@@ -13,7 +13,7 @@ import au.csiro.ontology.axioms.IAxiom;
  * @author Alejandro Metke
  *
  */
-public interface IOntology<T extends Comparable<T>> {
+public interface IOntology {
     
     /**
      * Returns the identifier of the ontology.
@@ -49,21 +49,21 @@ public interface IOntology<T extends Comparable<T>> {
      * @param id The concept's id.
      * @return The node.
      */
-    public Node<T> getNode(T id);
+    public Node getNode(String id);
     
     /**
      * Returns the {@link Node} in the taxonomy that corresponds to top.
      * 
      * @return The top node.
      */
-    public Node<T> getTopNode();
+    public Node getTopNode();
     
     /**
      * Returns the {@link Node} in the taxonomy that correspond to bottom.
      * 
      * @return The bottom node.
      */
-    public Node<T> getBottomNode();
+    public Node getBottomNode();
     
     /**
      * Returns an {@link Iterator} for all the nodes in the taxonomy or null if
@@ -71,7 +71,7 @@ public interface IOntology<T extends Comparable<T>> {
      * 
      * @return The iterator.
      */
-    public Iterator<Node<T>> nodeIterator();
+    public Iterator<Node> nodeIterator();
     
     /**
      * Returns the taxonomy represented by a {@link Map} of keys to 
@@ -79,7 +79,7 @@ public interface IOntology<T extends Comparable<T>> {
      * 
      * @return The taxonomy.
      */
-    public Map<T, Node<T>> getNodeMap();
+    public Map<String, Node> getNodeMap();
     
     /**
      * Sets the taxonomy represented by a {@link Map} of keys to 
@@ -87,7 +87,7 @@ public interface IOntology<T extends Comparable<T>> {
      * 
      * @param nodeMap The taxonomy.
      */
-    public void setNodeMap(Map<T, Node<T>> nodeMap);
+    public void setNodeMap(Map<String, Node> nodeMap);
     
     /**
      * Returns a {@link Set} with a subset of nodes in the taxonomy that have 
@@ -97,7 +97,7 @@ public interface IOntology<T extends Comparable<T>> {
      * 
      * @return The subset of the taxonomy that has potentially changed.
      */
-    public Set<Node<T>> getAffectedNodes();
+    public Set<Node> getAffectedNodes();
     
     /**
      * Sets the {@link Set} of nodes in the taxonomy that might have been 
@@ -105,6 +105,6 @@ public interface IOntology<T extends Comparable<T>> {
      * 
      * @param cids The set of nodes to set.
      */
-    public void setAffectedNodes(Set<Node<T>> nodes);
+    public void setAffectedNodes(Set<Node> nodes);
 
 }

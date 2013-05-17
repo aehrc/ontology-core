@@ -11,12 +11,12 @@ package au.csiro.ontology.model;
  * @author Alejandro Metke
  * 
  */
-public class Existential<T extends Comparable<T>> implements IExistential<T> {
+public class Existential implements IExistential {
 
-    private INamedRole<T> role;
+    private INamedRole role;
     private IConcept concept;
 
-    public Existential(INamedRole<T> role, IConcept concept) {
+    public Existential(INamedRole role, IConcept concept) {
         this.role = role;
         this.concept = concept;
     }
@@ -26,7 +26,7 @@ public class Existential<T extends Comparable<T>> implements IExistential<T> {
         return role + "." + concept;
     }
     
-    public INamedRole<T> getRole() {
+    public INamedRole getRole() {
         return role;
     }
     
@@ -43,7 +43,6 @@ public class Existential<T extends Comparable<T>> implements IExistential<T> {
         return result;
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -66,12 +65,12 @@ public class Existential<T extends Comparable<T>> implements IExistential<T> {
         return true;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({ "rawtypes" })
     public int compareTo(IConcept o) {
         Class thisClass = this.getClass();
         Class otherClass = o.getClass();
         if(thisClass.equals(otherClass)) {
-            Existential<T> other = (Existential<T>)o;
+            Existential other = (Existential)o;
             int res = 0;
             res = role.getId().compareTo(other.role.getId());
             if(res != 0) return res;

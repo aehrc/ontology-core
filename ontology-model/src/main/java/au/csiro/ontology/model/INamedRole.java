@@ -10,13 +10,13 @@ package au.csiro.ontology.model;
  * @author Alejandro Metke
  *
  */
-public interface INamedRole<T> extends IRole {
+public interface INamedRole extends IRole {
     
     /**
      * Returns the id of this named role.
      * 
      * @return
      */
-    public T getId();
+    public String getId();
     
 }

@@ -30,36 +30,36 @@ import au.csiro.ontology.model.Role;
 import au.csiro.ontology.model.StringLiteral;
 
 /**
- * Concrete implemetation of {@link IFactory}.
+ * Concrete implementation of {@link IFactory}.
  * 
  * @author Alejandro Metke
  *
  */
-public class Factory<T extends Comparable<T>> implements IFactory<T> {
+public class Factory implements IFactory {
 
-    public IConcept createConcept(T id) {
-        return new Concept<T>(id);
+    public IConcept createConcept(String id) {
+        return new Concept(id);
     }
 
-    public INamedRole<T> createRole(T id) {
-        return new Role<T>(id);
+    public INamedRole createRole(String id) {
+        return new Role(id);
     }
 
-    public INamedFeature<T> createFeature(T id) {
-        return new Feature<T>(id);
+    public INamedFeature createFeature(String id) {
+        return new Feature(id);
     }
 
     public IConcept createConjunction(IConcept... concepts) {
         return new Conjunction(concepts);
     }
 
-    public IConcept createExistential(INamedRole<T> role, IConcept filler) {
-        return new Existential<T>(role, filler);
+    public IConcept createExistential(INamedRole role, IConcept filler) {
+        return new Existential(role, filler);
     }
 
-    public IConcept createDatatype(INamedFeature<T> feature, Operator operator, 
+    public IConcept createDatatype(INamedFeature feature, Operator operator, 
             ILiteral literal) {
-        return new Datatype<T>(feature, operator, literal);
+        return new Datatype(feature, operator, literal);
     }
 
     public IAxiom createConceptInclusion(IConcept lhs, IConcept rhs) {

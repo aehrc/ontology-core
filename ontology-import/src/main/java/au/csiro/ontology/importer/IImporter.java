@@ -42,7 +42,7 @@ public interface IImporter {
      * @throws ImportException if a problem occurs when importing the 
      * ontologies.
      */
-    public Iterator<IOntology<String>> getOntologyVersions(
+    public Iterator<IOntology> getOntologyVersions(
             IProgressMonitor monitor) throws ImportException;
     
     /**

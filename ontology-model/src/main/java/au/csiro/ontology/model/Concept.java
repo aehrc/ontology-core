@@ -11,7 +11,7 @@ package au.csiro.ontology.model;
  * @param <T>
  * 
  */
-public class Concept<T extends Comparable<T>> implements INamedConcept<T> {
+public class Concept implements INamedConcept {
     
     /**
      * Serialisation version.
@@ -21,35 +21,27 @@ public class Concept<T extends Comparable<T>> implements INamedConcept<T> {
     /**
      * Represents the top concept.
      */
-    @SuppressWarnings("rawtypes")
-    public static IConcept TOP = new Concept();
+    public static String TOP = "_TOP_";
     
     /**
      * Represents the bottom concept.
      */
-    @SuppressWarnings("rawtypes")
-    public static IConcept BOTTOM = new Concept();
+    public static String BOTTOM = "_BOTTOM_";
+    
+    /**
+     * The top concept.
+     */
+    public static final Concept TOP_CONCEPT = new Concept(TOP);
+    
+    /**
+     * The bottom concept.
+     */
+    public static final Concept BOTTOM_CONCEPT = new Concept(BOTTOM);
     
     /**
      * String identifier of this concept.
      */
-    protected final T id;
-    
-    /**
-     * Private constructor.
-     */
-    private Concept() {
-        id = null;
-    }
-    
-    /**
-     * This method must be invoked after deserialising a reasoner because top
-     * and bottom are just plain object references.
-     */
-    public static void reconnectTopBottom(IConcept top, IConcept bottom) {
-        TOP = top;
-        BOTTOM = bottom;
-    }
+    protected final String id;
 
     /**
      * Creates a new Concept.
@@ -57,20 +49,9 @@ public class Concept<T extends Comparable<T>> implements INamedConcept<T> {
      * @param id
      *            The concept's identifier.
      */
-    public Concept(T id) {
+    public Concept(String id) {
         assert(id != null);
         this.id = id;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <S extends Comparable<S>> Concept<S> createFrom(S id) {
-        if (Concept.TOP == id) {
-            return (Concept<S>) TOP;
-        } else if (Concept.BOTTOM == id) {
-            return (Concept<S>) BOTTOM;
-        } else {
-            return new Concept<S>(id);
-        }
     }
     
     /**
@@ -78,18 +59,17 @@ public class Concept<T extends Comparable<T>> implements INamedConcept<T> {
      * 
      * @return The identifier.
      */
-    public T getId() {
-        if (id == null) {
-            throw new UnsupportedOperationException("Id is undefined for " + this);
-        }
+    public String getId() {
         return id;
     }
 
     @Override
     public String toString() {
-        if(this == TOP) return "_top_";
-        else if(this == BOTTOM) return "_bottom_";
-        else return id.toString();
+        StringBuilder builder = new StringBuilder();
+        builder.append("Concept [id=");
+        builder.append(id);
+        builder.append("]");
+        return builder.toString();
     }
 
     @Override
@@ -99,8 +79,7 @@ public class Concept<T extends Comparable<T>> implements INamedConcept<T> {
         result = prime * result + ((id == null) ? 0 : id.hashCode());
         return result;
     }
-
-    @SuppressWarnings("rawtypes")
+    
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -111,40 +90,16 @@ public class Concept<T extends Comparable<T>> implements INamedConcept<T> {
             return false;
         Concept other = (Concept) obj;
         if (id == null) {
-            /*
             if (other.id != null)
                 return false;
-            else
-                assert(false);
-            */
-            // We return false because id is null, this is either TOP or BOTTOM
-            // and if obj is not == this then they are not the same objects
-            return false;
         } else if (!id.equals(other.id))
             return false;
         return true;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public int compareTo(IConcept o) {
-        Class thisClass = this.getClass();
-        Class otherClass = o.getClass();
-        if(thisClass.equals(otherClass)) {
-            Concept<T> other = (Concept<T>)o;
-            if (this == TOP) {
-                return other == TOP ? 0 : -1;
-            } else if (this == BOTTOM) {
-                return other == BOTTOM ? 0 : 1;
-            } else if (other == TOP) {
-                return 1;
-            } else if (other == BOTTOM) {
-                return -1;
-            } else {
-                return id.compareTo(other.id);
-            }
-        } else {
-            return thisClass.toString().compareTo(otherClass.toString());
-        }
+    @Override
+    public int compareTo(IConcept other) {
+        return id.compareTo(((Concept)other).id);
     }
 
 }

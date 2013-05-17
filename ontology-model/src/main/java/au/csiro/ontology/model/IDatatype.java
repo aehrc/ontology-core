@@ -9,8 +9,8 @@ package au.csiro.ontology.model;
  * @author Alejandro Metke
  *
  */
-public interface IDatatype<T> extends IConcept {
-    public INamedFeature<T> getFeature();
+public interface IDatatype extends IConcept {
+    public INamedFeature getFeature();
     public Operator getOperator();
     public ILiteral getLiteral();
 }

@@ -20,16 +20,15 @@ public interface Traversal {
      * root not also containing {@code start}.
      */
     final public static Traversal BFS_MIN = new AbstractTraversal() {
-        public <T extends Comparable<T>> void accept(Node<T> start, 
-                Visitor<T>... visitors) {
-            final Set<Node<T>> done = new HashSet<Node<T>>();
-            final LinkedList<Node<T>> queue = new LinkedList<Node<T>>();
+        public void accept(Node start, Visitor... visitors) {
+            final Set<Node> done = new HashSet<Node>();
+            final LinkedList<Node> queue = new LinkedList<Node>();
             queue.add(start);
             
             while (!queue.isEmpty()) {
-                Node<T> node = queue.poll();
+                Node node = queue.poll();
                 if (!done.contains(node)) {     // don't visit more than once
-                    for (Visitor<T> v: visitors) {
+                    for (Visitor v: visitors) {
                         v.visit(node);
                     }
                     done.add(node);
@@ -46,19 +45,19 @@ public interface Traversal {
      */
     final public static Traversal BFS_MAX = new AbstractTraversal() {
         
-        public <T extends Comparable<T>> void accept(Node<T> start, Visitor<T>... visitors) {
-            final Set<Node<T>> done = new HashSet<Node<T>>();
-            final LinkedList<Node<T>> queue = new LinkedList<Node<T>>();
+        public void accept(Node start, Visitor... visitors) {
+            final Set<Node> done = new HashSet<Node>();
+            final LinkedList<Node> queue = new LinkedList<Node>();
             queue.add(start);
             
             while (!queue.isEmpty()) {
-                Node<T> node = queue.poll();
+                Node node = queue.poll();
                 if (!done.contains(node)) {     // don't visit more than once
-                    for (Visitor<T> v: visitors) {
+                    for (Visitor v: visitors) {
                         v.visit(node);
                     }
                     done.add(node);
-                    for (Node<T> child: node.getChildren()) {
+                    for (Node child: node.getChildren()) {
                         if (done.containsAll(child.getParents())) {     // check all parents are done first
                             queue.add(child);
                         }
@@ -68,11 +67,11 @@ public interface Traversal {
         }
     };
 
-    public <T extends Comparable<T>> void accept(IOntology<T> ont, Visitor<T>... visitors);
-    public <T extends Comparable<T>> void accept(Node<T> node, Visitor<T>... visitors);
+    public void accept(IOntology ont, Visitor... visitors);
+    public void accept(Node node, Visitor... visitors);
     
-    static interface Visitor<T extends Comparable<T>> {
-        void visit(Node<T> node);
+    static interface Visitor {
+        void visit(Node node);
     }
 
     static class Stats {
@@ -82,15 +81,14 @@ public interface Traversal {
          * @param ont
          * @return
          */
-        @SuppressWarnings("unchecked")
-        public static <T extends Comparable<T>> Map<Node<T>, Object> computeStats(final IOntology<T> ont) {
-            final Map<Node<T>, Object> result = new HashMap<Node<T>, Object>();
+        public static Map<Node, Object> computeStats(final IOntology ont) {
+            final Map<Node, Object> result = new HashMap<Node, Object>();
             
-            final Map<Node<T>, Integer> minLevel = new HashMap<Node<T>, Integer>();
-            final Map<Node<T>, Integer> maxLevel = new HashMap<Node<T>, Integer>();
+            final Map<Node, Integer> minLevel = new HashMap<Node, Integer>();
+            final Map<Node, Integer> maxLevel = new HashMap<Node, Integer>();
             
-            final Visitor<T> v = new Visitor<T>() {
-                public void visit(final Node<T> node) {
+            final Visitor v = new Visitor() {
+                public void visit(final Node node) {
                     int min;
                     int max;
                     
@@ -99,7 +97,7 @@ public interface Traversal {
                     } else {
                         min = Integer.MAX_VALUE;
                         max = Integer.MIN_VALUE;
-                        for (Node<T> parent: node.getParents()) {
+                        for (Node parent: node.getParents()) {
                             min = Math.min(min, minLevel.get(parent) + 1);
                             max = Math.max(max, maxLevel.get(parent) + 1);
                         }
@@ -121,7 +119,7 @@ public interface Traversal {
 
 abstract class AbstractTraversal implements Traversal {
     
-    public <T extends Comparable<T>> void accept(IOntology<T> ont, Visitor<T>... visitors) {
+    public void accept(IOntology ont, Visitor... visitors) {
         accept(ont.getTopNode(), visitors);
     }
     

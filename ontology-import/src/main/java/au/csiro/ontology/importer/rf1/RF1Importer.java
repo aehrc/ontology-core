@@ -74,12 +74,12 @@ public class RF1Importer extends BaseImporter {
         this.version = version;
     }
     
-    public Iterator<IOntology<String>> getOntologyVersions(
+    public Iterator<IOntology> getOntologyVersions(
             IProgressMonitor monitor) {
         return new OntologyInterator(monitor);
     }
     
-    class OntologyInterator implements Iterator<IOntology<String>> {
+    class OntologyInterator implements Iterator<IOntology> {
         private boolean accessed = false;
         private IProgressMonitor monitor;
         
@@ -91,7 +91,7 @@ public class RF1Importer extends BaseImporter {
             return !accessed;
         }
 
-        public IOntology<String> next() {
+        public IOntology next() {
             long start = System.currentTimeMillis();
             
             monitor.taskStarted("Loading axioms");
@@ -137,15 +137,15 @@ public class RF1Importer extends BaseImporter {
 
                 if (!"".equals(parentRole)) {
                     axioms.add(new RoleInclusion(
-                            new Role<String>(r1), 
-                            new Role<String>(parentRole)));
+                            new Role(r1), 
+                            new Role(parentRole)));
                 }
 
                 String rightId = roles.get(r1).get("rightID");
                 if (!"".equals(rightId)) {
                     axioms.add(new RoleInclusion(new Role[] { 
-                            new Role<String>(r1), new Role<String>(rightId) }, 
-                            new Role<String>(r1)));
+                            new Role(r1), new Role(rightId) }, 
+                            new Role(r1)));
                 }
             }
 
@@ -166,14 +166,14 @@ public class RF1Importer extends BaseImporter {
                 if (numElems == 0) {
                     // do nothing
                 } else if (numElems == 1 && (prs != null && !prs.isEmpty())) {
-                    axioms.add(new ConceptInclusion(new Concept<String>(c1), 
-                            new Concept<String>(prs.iterator().next())));
+                    axioms.add(new ConceptInclusion(new Concept(c1), 
+                            new Concept(prs.iterator().next())));
                 } else {
                     List<IConcept> conjs = new ArrayList<IConcept>();
                     
                     if(prs != null) {
                         for (String pr : prs) {
-                            conjs.add(new Concept<String>(pr));
+                            conjs.add(new Concept(pr));
                         }
                     }
 
@@ -182,43 +182,41 @@ public class RF1Importer extends BaseImporter {
                             if (rvs.size() > 1) {
                                 List<IConcept> innerConjs = new ArrayList<IConcept>();
                                 for (RoleValuePair rv : rvs) {
-                                    Role<String> role = new Role<String>(rv.role);
-                                    Concept<String> filler = new Concept<String>(
-                                            rv.value);
-                                    Existential<String> exis = 
-                                            new Existential<String>(role, filler);
+                                    Role role = new Role(rv.role);
+                                    Concept filler = new Concept(rv.value);
+                                    Existential exis = 
+                                            new Existential(role, filler);
                                     innerConjs.add(exis);
                                 }
                                 // Wrap with a role group
-                                conjs.add(new Existential<String>(
-                                        new Role<String>("RoleGroup"), 
+                                conjs.add(new Existential(
+                                        new Role("RoleGroup"), 
                                         new Conjunction(innerConjs)));
                             } else {
                                 RoleValuePair first = rvs.iterator().next();
-                                Role<String> role = new Role<String>(first.role);
-                                Concept<String> filler = 
-                                        new Concept<String>(first.value);
-                                Existential<String> exis = 
-                                        new Existential<String>(role, filler);
+                                Role role = new Role(first.role);
+                                Concept filler = new Concept(first.value);
+                                Existential exis = 
+                                        new Existential(role, filler);
                                 if (metadata.getNeverGroupedIds().contains(
                                         first.role)) {
                                     // Does not need a role group
                                     conjs.add(exis);
                                 } else {
                                     // Needs a role group
-                                    conjs.add(new Existential<String>(
-                                            new Role<String>("RoleGroup"), exis));
+                                    conjs.add(new Existential(
+                                            new Role("RoleGroup"), exis));
                                 }
                             }
                         }
                     }
 
-                    axioms.add(new ConceptInclusion(new Concept<String>(c1), 
+                    axioms.add(new ConceptInclusion(new Concept(c1), 
                             new Conjunction(conjs)));
 
                     if (primitive.get(c1).equals("0")) {
                         axioms.add(new ConceptInclusion(new Conjunction(conjs),
-                                new Concept<String>(c1)));
+                                new Concept(c1)));
                     }
                 }
             }
@@ -226,7 +224,7 @@ public class RF1Importer extends BaseImporter {
             Statistics.INSTANCE.setTime("rf1 loading", 
                     System.currentTimeMillis() - start);
             accessed = true;
-            return new Ontology<String>("snomed", vr.getVersionName(), axioms, 
+            return new Ontology("snomed", vr.getVersionName(), axioms, 
                     null);
         }
 

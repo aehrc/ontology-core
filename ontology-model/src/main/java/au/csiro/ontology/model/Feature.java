@@ -10,12 +10,12 @@ package au.csiro.ontology.model;
  * @author Alejandro Metke
  * 
  */
-public class Feature<T extends Comparable<T>> implements INamedFeature<T> {
+public class Feature implements INamedFeature {
 
     /**
      * String identifier of this concept.
      */
-    protected final T id;
+    protected final String id;
 
     /**
      * Creates a new Concept.
@@ -23,7 +23,8 @@ public class Feature<T extends Comparable<T>> implements INamedFeature<T> {
      * @param id
      *            The concept's identifier.
      */
-    public Feature(T id) {
+    public Feature(String id) {
+        assert(id != null);
         this.id = id;
     }
 
@@ -32,7 +33,7 @@ public class Feature<T extends Comparable<T>> implements INamedFeature<T> {
      * 
      * @return The identifier.
      */
-    public T getId() {
+    public String getId() {
         return id;
     }
 
@@ -49,7 +50,6 @@ public class Feature<T extends Comparable<T>> implements INamedFeature<T> {
         return result;
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(Object obj) {
         if (this == obj)

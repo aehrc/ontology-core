@@ -10,25 +10,12 @@ package au.csiro.ontology.model;
  * @author Alejandro Metke
  * 
  */
-public class Role<T extends Comparable<T>> implements INamedRole<T> {
-    
-    /**
-     * Represents the role used to group related expressions in SNOMED.
-     */
-    @SuppressWarnings("rawtypes")
-    public static IRole ROLE_GROUP = new Role();
+public class Role implements INamedRole {
     
     /**
      * String identifier of this concept.
      */
-    protected final T id;
-    
-    /**
-     * Private constructor.
-     */
-    private Role() {
-        id = null;
-    }
+    protected final String id;
     
     /**
      * Creates a new Role.
@@ -36,7 +23,7 @@ public class Role<T extends Comparable<T>> implements INamedRole<T> {
      * @param id
      *            The role's identifier.
      */
-    public Role(T id) {
+    public Role(String id) {
         assert(id != null);
         this.id = id;
     }
@@ -46,7 +33,7 @@ public class Role<T extends Comparable<T>> implements INamedRole<T> {
      * 
      * @return The identifier.
      */
-    public T getId() {
+    public String getId() {
         return id;
     }
 
@@ -63,7 +50,6 @@ public class Role<T extends Comparable<T>> implements INamedRole<T> {
         return result;
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -83,12 +69,11 @@ public class Role<T extends Comparable<T>> implements INamedRole<T> {
         return true;
     }
 
-    @SuppressWarnings("unchecked")
     public int compareTo(IRole o) {
         if(!(o instanceof INamedRole)) {
             return -1;
         } else {
-            return id.compareTo(((INamedRole<T>)o).getId());
+            return id.compareTo(((INamedRole)o).getId());
         }
     }
 

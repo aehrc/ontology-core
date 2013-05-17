@@ -12,12 +12,12 @@ import java.io.Serializable;
  * @author Alejandro Metke
  *
  */
-public interface INamedConcept<T> extends IConcept, Serializable {
+public interface INamedConcept extends IConcept, Serializable {
     
     /**
      * Returns the id of this named concept.
      * 
      * @return
      */
-    public T getId();
+    public String getId();
 }

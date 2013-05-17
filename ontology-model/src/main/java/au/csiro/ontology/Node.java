@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Alejandro Metke
  * 
  */
-public class Node<T extends Comparable<T>> implements Serializable {
+public class Node implements Serializable {
     /**
      * 
      */
@@ -24,39 +24,39 @@ public class Node<T extends Comparable<T>> implements Serializable {
     /**
      * Set of equivalent concepts in this node.
      */
-    protected final Set<T> equivalentConcepts = Collections.newSetFromMap(
-            new ConcurrentHashMap<T, Boolean>());
+    protected final Set<String> equivalentConcepts = Collections.newSetFromMap(
+            new ConcurrentHashMap<String, Boolean>());
     
     /**
      * Set of parents nodes.
      */
-    protected final Set<Node<T>> parents = Collections.newSetFromMap(
-            new ConcurrentHashMap<Node<T>, Boolean>());
+    protected final Set<Node> parents = Collections.newSetFromMap(
+            new ConcurrentHashMap<Node, Boolean>());
     
     /**
      * Set of child nodes.
      */
-    protected final Set<Node<T>> children = Collections.newSetFromMap(
-            new ConcurrentHashMap<Node<T>, Boolean>());
+    protected final Set<Node> children = Collections.newSetFromMap(
+            new ConcurrentHashMap<Node, Boolean>());
 
     /**
      * @return the equivalentConcepts
      */
-    public Set<T> getEquivalentConcepts() {
+    public Set<String> getEquivalentConcepts() {
         return equivalentConcepts;
     }
 
     /**
      * @return the parents
      */
-    public Set<Node<T>> getParents() {
+    public Set<Node> getParents() {
         return parents;
     }
 
     /**
      * @return the children
      */
-    public Set<Node<T>> getChildren() {
+    public Set<Node> getChildren() {
         return children;
     }
 
@@ -66,7 +66,7 @@ public class Node<T extends Comparable<T>> implements Serializable {
         int size = equivalentConcepts.size();
         int i = 0;
         sb.append("{");
-        for (T equiv : equivalentConcepts) {
+        for (String equiv : equivalentConcepts) {
             sb.append(equiv);
             if (++i < size)
                 sb.append(", ");
@@ -75,9 +75,6 @@ public class Node<T extends Comparable<T>> implements Serializable {
         return sb.toString();
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -89,10 +86,6 @@ public class Node<T extends Comparable<T>> implements Serializable {
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(Object obj) {
         if (this == obj)

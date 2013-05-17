@@ -20,7 +20,7 @@ import au.csiro.ontology.model.Operator;
  * @author Alejandro Metke
  *
  */
-public interface IFactory<T extends Comparable<T>> {
+public interface IFactory {
     
     /**
      * Creates a concept with the specified id.
@@ -28,7 +28,7 @@ public interface IFactory<T extends Comparable<T>> {
      * @param id
      * @return
      */
-    public IConcept createConcept(T id);
+    public IConcept createConcept(String id);
     
     /**
      * Creates a role with the specified id.
@@ -36,7 +36,7 @@ public interface IFactory<T extends Comparable<T>> {
      * @param id
      * @return
      */
-    public INamedRole<T> createRole(T id);
+    public INamedRole createRole(String id);
     
     /**
      * Creates a feature with the specified id.
@@ -44,7 +44,7 @@ public interface IFactory<T extends Comparable<T>> {
      * @param id
      * @return
      */
-    public INamedFeature<T> createFeature(T id);
+    public INamedFeature createFeature(String id);
     
     /**
      * Creates a conjunction.
@@ -61,7 +61,7 @@ public interface IFactory<T extends Comparable<T>> {
      * @param filler
      * @return
      */
-    public IConcept createExistential(INamedRole<T> role, IConcept filler);
+    public IConcept createExistential(INamedRole role, IConcept filler);
     
     /**
      * Creates a datatype expression.
@@ -70,7 +70,7 @@ public interface IFactory<T extends Comparable<T>> {
      * @param literal
      * @return
      */
-    public IConcept createDatatype(INamedFeature<T> feature, Operator operator, 
+    public IConcept createDatatype(INamedFeature feature, Operator operator, 
             ILiteral literal);
     
     /**

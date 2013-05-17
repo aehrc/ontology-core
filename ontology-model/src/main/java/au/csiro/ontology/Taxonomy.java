@@ -14,18 +14,18 @@ import java.util.Map;
  * @deprecated Use {@link IOntology} instead.
  *
  */
-public class Taxonomy<T extends Comparable<T>> {
+public class Taxonomy {
     
     /**
      * A map that contains references to all the nodes in the taxonomy indexed
      * by id.
      */
-    protected final Map<T, Node<T>> nodeMap;
+    protected final Map<String, Node> nodeMap;
     
     /**
      * Creates a new Taxonomy.
      */
-    public Taxonomy(Map<T, Node<T>> nodeMap) {
+    public Taxonomy(Map<String, Node> nodeMap) {
         this.nodeMap = nodeMap;
     }
     
@@ -36,7 +36,7 @@ public class Taxonomy<T extends Comparable<T>> {
      * @param id The concept's id.
      * @return the node.
      */
-    public Node<T> getNode(T id) {
+    public Node getNode(String id) {
         return nodeMap.get(id);
     }
     
@@ -45,7 +45,7 @@ public class Taxonomy<T extends Comparable<T>> {
      * 
      * @return the iterator.
      */
-    public Iterator<Node<T>> iterator() {
+    public Iterator<Node> iterator() {
         return nodeMap.values().iterator();
     }
     

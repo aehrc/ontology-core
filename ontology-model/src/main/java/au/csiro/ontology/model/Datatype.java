@@ -8,9 +8,9 @@ package au.csiro.ontology.model;
  * @author Alejandro Metke
  * 
  */
-public class Datatype<T extends Comparable<T>> implements IDatatype<T> {
+public class Datatype implements IDatatype {
     
-    private INamedFeature<T> feature;
+    private INamedFeature feature;
     private Operator operator;
     private ILiteral literal;
 
@@ -20,14 +20,14 @@ public class Datatype<T extends Comparable<T>> implements IDatatype<T> {
      * @param operator
      * @param literal
      */
-    public Datatype(INamedFeature<T> feature, Operator operator, 
+    public Datatype(INamedFeature feature, Operator operator, 
             ILiteral literal) {
         this.feature = feature;
         this.operator = operator;
         this.literal = literal;
     }
 
-    public INamedFeature<T> getFeature() {
+    public INamedFeature getFeature() {
         return feature;
     }
 
@@ -55,7 +55,6 @@ public class Datatype<T extends Comparable<T>> implements IDatatype<T> {
         return result;
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -80,12 +79,12 @@ public class Datatype<T extends Comparable<T>> implements IDatatype<T> {
         return true;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({ "rawtypes" })
     public int compareTo(IConcept o) {
         Class thisClass = this.getClass();
         Class otherClass = o.getClass();
         if(thisClass.equals(otherClass)) {
-            Datatype<T> other = (Datatype<T>)o;
+            Datatype other = (Datatype)o;
             int res = 0;
             res = feature.getId().compareTo(other.feature.getId());
             if(res != 0) return res;

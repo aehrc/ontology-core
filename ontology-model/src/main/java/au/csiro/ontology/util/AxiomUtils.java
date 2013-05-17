@@ -69,7 +69,6 @@ public class AxiomUtils {
         return sb.toString();
     }
     
-    @SuppressWarnings({ "rawtypes" })
     private static String serialiseConcept(IConcept c) {
         StringBuilder sb = new StringBuilder();
         sb.append("{");
@@ -78,17 +77,11 @@ public class AxiomUtils {
         
         if(c instanceof Concept) {
             Concept nc = (Concept)c;
-            if(nc == Concept.TOP) {
-                sb.append("type:TOP");
-            } else if (nc == Concept.BOTTOM) {
-                sb.append("type:BOTTOM");
-            } else {
-                Object id = nc.getId();
-                sb.append(id.getClass().getName());
-                sb.append(",\"");
-                sb.append(id.toString());
-                sb.append("\"");
-            }
+            String id = nc.getId();
+            sb.append(id.getClass().getName());
+            sb.append(",\"");
+            sb.append(id.toString());
+            sb.append("\"");
         } else if(c instanceof Conjunction) {
             Conjunction con = (Conjunction)c;
             IConcept[] ics = con.getConcepts();
@@ -109,7 +102,6 @@ public class AxiomUtils {
         return sb.toString();
     }
     
-    @SuppressWarnings("rawtypes")
     private static String serialiseRole(IRole r) {
         StringBuilder sb = new StringBuilder();
         sb.append("{");
@@ -183,7 +175,6 @@ public class AxiomUtils {
         }
     }
     
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     private static IConcept deserialiseConcept(String s) {
         int start = s.indexOf('{', 0);
         if(start != 0) {
@@ -200,10 +191,9 @@ public class AxiomUtils {
             // Only String is supported for now
             if("java.lang.String".equals(type)) {
                 // Find string enclosed in ""
-                // TODO: need to deal with nested escaped quotation marks
                 int closingIndex = s.indexOf('"', start + 1);
                 String literal = s.substring(start+1, closingIndex);
-                return new Concept<String>(literal);
+                return new Concept(literal);
             } else {
                 throw new RuntimeException(
                         "Unsupported parametrised type "+type);
@@ -227,7 +217,7 @@ public class AxiomUtils {
             closingIndex = findClosingIndex(s, '{', '}', start);
             String concept = s.substring(start, closingIndex);
             IConcept filler = deserialiseConcept(concept);
-            return new Existential<String>(r, filler);
+            return new Existential(r, filler);
         } else {
             throw new RuntimeException(
                     "Malformed concept string: unknown concept type "+
@@ -235,7 +225,6 @@ public class AxiomUtils {
         }
     }
     
-    @SuppressWarnings("rawtypes")
     private static INamedRole deserialiseRole(String s) {
         int start = s.indexOf('{', 0);
         if(start != 0) {
@@ -252,10 +241,9 @@ public class AxiomUtils {
             // Only String is supported for now
             if("java.lang.String".equals(type)) {
                 // Find string enclosed in ""
-                // TODO: need to deal with nested escaped quotation marks
                 int closingIndex = s.indexOf('"', start + 1);
                 String literal = s.substring(start+1, closingIndex);
-                return new Role<String>(literal);
+                return new Role(literal);
             } else {
                 throw new RuntimeException(
                         "Unsupported parametrised type "+type);
@@ -313,7 +301,6 @@ public class AxiomUtils {
      * @param concept
      * @return
      */
-    @SuppressWarnings("rawtypes")
     public static Set<IAxiom> findDefiningAxioms(Collection<IAxiom> axioms, 
             Concept concept) {
         Set<IAxiom> res = new HashSet<IAxiom>();
@@ -342,18 +329,18 @@ public class AxiomUtils {
         final String PART_OF = "part-of";
         final String HAS_LOCATION = "has-location";
         
-        Concept<String> finger = new Concept<String>(FINGER);
-        Concept<String> bodyPart = new Concept<String>(BODY_PART);
-        Concept<String> hand = new Concept<String>(HAND);
+        Concept finger = new Concept(FINGER);
+        Concept bodyPart = new Concept(BODY_PART);
+        Concept hand = new Concept(HAND);
         
-        Role<String> subPart = new Role<String>(SUB_PART);
-        Role<String> partOf = new Role<String>(PART_OF);
-        Role<String> hasLocation = new Role<String>(HAS_LOCATION);
+        Role subPart = new Role(SUB_PART);
+        Role partOf = new Role(PART_OF);
+        Role hasLocation = new Role(HAS_LOCATION);
         
         IAxiom axiom1 = new ConceptInclusion(finger, 
                 new Conjunction(new IConcept[]{
                         bodyPart, 
-                        new Existential<String>(subPart, hand)}
+                        new Existential(subPart, hand)}
                 ));
         
         String s = AxiomUtils.serialise(axiom1);
@@ -385,7 +372,11 @@ public class AxiomUtils {
         System.out.println("lhs: "+ri.lhs());
         System.out.println("rhs: "+ri.rhs());
         
-        IAxiom axiom4 = AxiomUtils.deserialise("{ConceptInclusion,{Concept,java.lang.String,\"449539009\"},{Existential,{Role,java.lang.String,\"RoleGroup\"},{Concept,au.csiro.snorocket.core.model.Conjunction,\"(4 . 704 + 5 . 2490)\"}}}");
+        IAxiom axiom4 = AxiomUtils.deserialise("{ConceptInclusion," +
+        	"{Concept,java.lang.String,\"449539009\"},{Existential," +
+        	"{Role,java.lang.String,\"RoleGroup\"}," +
+        	"{Concept,au.csiro.snorocket.core.model.Conjunction,\"" +
+        	"(4 . 704 + 5 . 2490)\"}}}");
         ci = (ConceptInclusion)axiom4;
         System.out.println("lhs: "+ci.lhs());
         System.out.println("rhs: "+ci.rhs());

@@ -24,7 +24,7 @@ import au.csiro.ontology.model.Concept;
  * @author Alejandro Metke
  *
  */
-public class Ontology<T extends Comparable<T>> implements IOntology<T> {
+public class Ontology implements IOntology {
     
     /**
      * The id of the ontology.
@@ -50,13 +50,13 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
      * A map that contains references to all the nodes in the taxonomy indexed
      * by id.
      */
-    protected final Map<T, Node<T>> nodeMap = new HashMap<T, Node<T>>();
+    protected final Map<String, Node> nodeMap = new HashMap<String, Node>();
     
     /**
      * Set of {@link Node}s pontentially affected by the last incremental
      * classification.
      */
-    protected final Set<Node<T>> lastAffectedNodes = new HashSet<Node<T>>();
+    protected final Set<Node> lastAffectedNodes = new HashSet<Node>();
     
     /**
      * Builds a new ontology.
@@ -68,8 +68,8 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
      * @param lastAffectedNodes
      */
     public Ontology(String id, String version, 
-            Collection<IAxiom> statedAxioms, Map<T, Node<T>> nodeMap, 
-            Set<Node<T>> lastAffectedNodes) {
+            Collection<IAxiom> statedAxioms, Map<String, Node> nodeMap, 
+            Set<Node> lastAffectedNodes) {
         this.id = id;
         this.version = version;
         if(statedAxioms == null) {
@@ -90,7 +90,7 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
      * @param nodeMap
      */
     public Ontology(String id, String version, 
-            Collection<IAxiom> statedAxioms, Map<T, Node<T>> nodeMap) {
+            Collection<IAxiom> statedAxioms, Map<String, Node> nodeMap) {
     	this(id, version, statedAxioms, nodeMap, null);
     }
     
@@ -105,46 +105,44 @@ public class Ontology<T extends Comparable<T>> implements IOntology<T> {
     }
     
     @Override
-    public Node<T> getNode(T id) {
+    public Node getNode(String id) {
         return nodeMap.get(id);
     }
     
     @Override
-    public Iterator<Node<T>> nodeIterator() {
-        Set<Node<T>> set = new HashSet<Node<T>>(nodeMap.values());
+    public Iterator<Node> nodeIterator() {
+        Set<Node> set = new HashSet<Node>(nodeMap.values());
         return set.iterator();
     }
     
     @Override
-    public Map<T, Node<T>> getNodeMap() {
+    public Map<String, Node> getNodeMap() {
         return nodeMap;
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Node<T> getTopNode() {
-        return getNode((T)Concept.TOP);
+    public Node getTopNode() {
+        return getNode(Concept.TOP);
     }
     
     @Override
-    @SuppressWarnings("unchecked")
-    public Node<T> getBottomNode() {
-        return getNode((T)Concept.BOTTOM);
+    public Node getBottomNode() {
+        return getNode(Concept.BOTTOM);
     }
     
     @Override
-    public void setNodeMap(Map<T, Node<T>> nodeMap) {
+    public void setNodeMap(Map<String, Node> nodeMap) {
         this.nodeMap.clear();
         this.nodeMap.putAll(nodeMap);
     }
     
     @Override
-    public Set<Node<T>> getAffectedNodes() {
+    public Set<Node> getAffectedNodes() {
         return lastAffectedNodes;
     }
     
     @Override
-    public void setAffectedNodes(Set<Node<T>> nodes) {
+    public void setAffectedNodes(Set<Node> nodes) {
         lastAffectedNodes.clear();
         lastAffectedNodes.addAll(nodes);
     }

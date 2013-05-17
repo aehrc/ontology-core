@@ -173,13 +173,13 @@ public class RF2Importer extends BaseImporter {
      * @param metadata
      * @return
      */
-    protected IOntology<String> transform(String id, String version, 
+    protected IOntology transform(String id, String version, 
             VersionRows vr, Map<String, String> metadata, 
             IProgressMonitor monitor) {
         
         final Map<String, IConcept> ci = new HashMap<String, IConcept>();
-        final Map<String, INamedRole<String>> ri = 
-                new HashMap<String, INamedRole<String>>();
+        final Map<String, INamedRole> ri = 
+                new HashMap<String, INamedRole>();
         
         final Map<String, String> primitive = new HashMap<String, String>();
         final Map<String, Set<String>> parents = 
@@ -292,34 +292,34 @@ public class RF2Importer extends BaseImporter {
                                     .size()];
                             int j = 0;
                             for (RoleValuePair rv : rvs) {
-                                INamedRole<String> role = getRole(
+                                INamedRole role = getRole(
                                         rv.role, ri);
                                 IConcept filler = getConcept(rv.value,
                                         ci);
-                                Existential<String> exis = 
-                                        new Existential<String>(
+                                Existential exis = 
+                                        new Existential(
                                         role, filler);
                                 innerConjs[j++] = exis;
                             }
                             // Wrap with a role group
-                            conjs.add(new Existential<String>(getRole(
+                            conjs.add(new Existential(getRole(
                                     roleGroupId, ri), new Conjunction(
                                     innerConjs)));
                         } else {
                             RoleValuePair first = rvs.iterator().next();
-                            INamedRole<String> role = getRole(
+                            INamedRole role = getRole(
                                     first.role, ri);
                             IConcept filler = getConcept(first.value,
                                     ci);
-                            IExistential<String> exis = 
-                                    new Existential<String>(
+                            IExistential exis = 
+                                    new Existential(
                                     role, filler);
                             if (neverGroupedIds.contains(first.role)) {
                                 // Does not need a role group
                                 conjs.add(exis);
                             } else {
                                 // Needs a role group
-                                conjs.add(new Existential<String>(
+                                conjs.add(new Existential(
                                     getRole(roleGroupId, ri), exis));
                             }
                         }
@@ -341,10 +341,10 @@ public class RF2Importer extends BaseImporter {
             }
         }
         
-        return new Ontology<String>(id, version, axioms, null);
+        return new Ontology(id, version, axioms, null);
     }
 
-    public Iterator<IOntology<String>> getOntologyVersions(
+    public Iterator<IOntology> getOntologyVersions(
             IProgressMonitor monitor) throws ImportException {
         return new OntologyInterator(monitor);
     }
@@ -561,17 +561,17 @@ public class RF2Importer extends BaseImporter {
     protected IConcept getConcept(String id, Map<String, IConcept> ci) {
         IConcept c = ci.get(id);
         if (c == null) {
-            c = new Concept<String>(id);
+            c = new Concept(id);
             ci.put(id, c);
         }
         return c;
     }
 
-    protected INamedRole<String> getRole(String id,
-            Map<String, INamedRole<String>> ri) {
-        INamedRole<String> r = ri.get(id);
+    protected INamedRole getRole(String id,
+            Map<String, INamedRole> ri) {
+        INamedRole r = ri.get(id);
         if (r == null) {
-            r = new Role<String>(id);
+            r = new Role(id);
             ri.put(id, r);
         }
         return r;
@@ -723,7 +723,7 @@ public class RF2Importer extends BaseImporter {
         }
     }
     
-    class OntologyInterator implements Iterator<IOntology<String>> {
+    class OntologyInterator implements Iterator<IOntology> {
         
         private final List<ImportEntry> entries = new ArrayList<ImportEntry>();
         private final IProgressMonitor monitor;
@@ -782,7 +782,7 @@ public class RF2Importer extends BaseImporter {
         /**
          * @throws RuntimeException in case an {@code ImportException} has occurred.
          */
-        public IOntology<String> next() throws RuntimeException {
+        public IOntology next() throws RuntimeException {
             ImportEntry entry = entries.remove(entries.size()-1);
             VersionRows bundle;
             try {

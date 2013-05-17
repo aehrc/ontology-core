@@ -8,14 +8,14 @@ package au.csiro.ontology.model;
  * @author Alejandro Metke
  *
  */
-public interface IExistential<T> extends IConcept {
+public interface IExistential extends IConcept {
     
     /**
      * Returns the role in the existential.
      * 
      * @return
      */
-    public INamedRole<T> getRole();
+    public INamedRole getRole();
     
     /**
      * Returns the concept in the existential (also knwon as the filler).
