@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -40,8 +41,10 @@ import au.csiro.ontology.input.Version;
 import au.csiro.ontology.model.Concept;
 import au.csiro.ontology.model.Conjunction;
 import au.csiro.ontology.model.Existential;
+import au.csiro.ontology.model.Feature;
 import au.csiro.ontology.model.IConcept;
 import au.csiro.ontology.model.IExistential;
+import au.csiro.ontology.model.INamedFeature;
 import au.csiro.ontology.model.INamedRole;
 import au.csiro.ontology.model.IRole;
 import au.csiro.ontology.model.Role;
@@ -230,8 +233,7 @@ public class RF2Importer extends BaseImporter {
                     populateChildren(dest, src, children);
                 } else {
                     // Populate relationships
-                    populateRels(src, type, dest,
-                            rr.getRelationshipGroup(), rels);
+                    populateRels(rr.getId(), src, type, dest, rr.getRelationshipGroup(), rels);
                 }
             }
         }
@@ -377,70 +379,16 @@ public class RF2Importer extends BaseImporter {
         for (RF2Input input : inputs.getRf2Inputs()) {
             InputType inputType = input.getInputType();
             Set<String> conceptsFiles = input.getConceptsFiles();
+            log.info("Read concepts info");
             for(String conceptsFile : conceptsFiles) {
-                BufferedReader br = null;
                 try {
-                    br = new BufferedReader(
-                        new InputStreamReader(
-                                input.getInputStream(conceptsFile)));
-                    String line = br.readLine(); // Skip first line
-        
-                    while (null != (line = br.readLine())) {
-                        line = new String(line.getBytes(), "UTF8");
-                        if (line.trim().length() < 1) {
-                            continue;
-                        }
-                        int idx1 = line.indexOf('\t');
-                        int idx2 = line.indexOf('\t', idx1 + 1);
-                        int idx3 = line.indexOf('\t', idx2 + 1);
-                        int idx4 = line.indexOf('\t', idx3 + 1);
-        
-                        // 0..idx1 == id
-                        // idx1+1..idx2 == effectiveTime
-                        // idx2+1..idx3 == active
-                        // idx3+1..idx4 == moduleId
-                        // idx4+1..end == definitionStatusId
-        
-                        if (idx1 < 0 || idx2 < 0 || idx3 < 0 || idx4 < 0) {
-                            br.close();
-                            throw new RuntimeException(
-                                "Concepts: Mis-formatted "
-                                + "line, expected at least 5 tab-separated " +
-                                "fields, got: " + line);
-                        }
-        
-                        final String id = line.substring(0, idx1);
-                        final String effectiveTime = line.substring(idx1 + 1, 
-                                idx2);
-                        final String active = line.substring(idx2 + 1, idx3);
-                        final String moduleId = line.substring(idx3 + 1, idx4);
-                        final String definitionStatusId = line.substring(
-                                idx4 + 1);
-                        
-                        String tgtVer = modMap.get(moduleId);
-                        if(tgtVer == null) continue;
-                        int rel = effectiveTime.compareTo(tgtVer);
-                        if(rel <= 0) {
-                            ConceptRow currConceptRow = conceptMap.get(id);
-                            if(currConceptRow == null || 
-                                effectiveTime.compareTo(
-                                    currConceptRow.getEffectiveTime()) > 0) {
-                                ConceptRow cr = new ConceptRow(id, 
-                                        effectiveTime, active, moduleId, 
-                                        definitionStatusId);
-                                conceptMap.put(id, cr);
-                            }
-                        }
-                    }
+                    final InputStream inputStream = input.getInputStream(conceptsFile);
+                    loadConceptRows(modMap, conceptMap, inputStream);
                 } catch (IOException e) {
                     log.error(e);
                     throw new ImportException("Unable to load concepts file. " +
                             "Please check your input configuration file. " +
                             "(input type = "+inputType+", file="+conceptsFile+")", e);
-                } finally {
-                    if(br != null) {
-                        try { br.close(); } catch(Exception e) {};
-                    }
                 }
             }
             
@@ -448,7 +396,10 @@ public class RF2Importer extends BaseImporter {
             Set<String> relationshipsFiles = 
                     input.getStatedRelationshipsFiles();
             if(relationshipsFiles == null || relationshipsFiles.isEmpty()) {
+                log.info("Read inferred relationships info");
                 relationshipsFiles = input.getRelationshipsFiles();
+            } else {
+                log.info("Read stated relationships info");
             }
             
             if(relationshipsFiles == null || relationshipsFiles.isEmpty()) {
@@ -457,105 +408,170 @@ public class RF2Importer extends BaseImporter {
             }
             
             for(String relationshipsFile : relationshipsFiles) {
-                BufferedReader br = null;
                 try {
-                    br = new BufferedReader(new InputStreamReader(input.getInputStream(relationshipsFile)));
-                    String line = br.readLine(); // Skip first line
-                    while (null != (line = br.readLine())) {
-                        if (line.trim().length() < 1) {
-                            continue;
-                        }
-                        int idx1 = line.indexOf('\t');
-                        int idx2 = line.indexOf('\t', idx1 + 1);
-                        int idx3 = line.indexOf('\t', idx2 + 1);
-                        int idx4 = line.indexOf('\t', idx3 + 1);
-                        int idx5 = line.indexOf('\t', idx4 + 1);
-                        int idx6 = line.indexOf('\t', idx5 + 1);
-                        int idx7 = line.indexOf('\t', idx6 + 1);
-                        int idx8 = line.indexOf('\t', idx7 + 1);
-                        int idx9 = line.indexOf('\t', idx8 + 1);
-        
-                        // 0..idx1 == id
-                        // idx1+1..idx2 == effectiveTime
-                        // idx2+1..idx3 == active
-                        // idx3+1..idx4 == moduleId
-                        // idx4+1..idx5 == sourceId
-                        // idx5+1..idx6 == destinationId
-                        // idx6+1..idx7 == relationshipGroup
-                        // idx7+1..idx8 == typeId
-                        // idx8+1..idx9 == characteristicTypeId
-                        // idx9+1..end == modifierId
-        
-                        if (idx1 < 0 || idx2 < 0 || idx3 < 0 || idx4 < 0 || 
-                                idx5 < 0 || idx6 < 0 || idx7 < 0 || idx8 < 0 || 
-                                idx9 < 0) {
-                            br.close();
-                            throw new RuntimeException("Concepts: " +
-                                "Mis-formatted line, expected 10 " +
-                                "tab-separated fields, got: " + line);
-                        }
-        
-                        final String id = line.substring(0, idx1);
-                        final String effectiveTime = line.substring(idx1 + 1, 
-                                idx2);
-                        final String active = line.substring(idx2 + 1, idx3);
-                        final String moduleId = line.substring(idx3 + 1, idx4);
-                        final String sourceId = line.substring(idx4 + 1, idx5);
-                        final String destinationId = line.substring(idx5 + 1, 
-                                idx6);
-                        final String relationshipGroup = line.substring(
-                                idx6 + 1, idx7);
-                        final String typeId = line.substring(idx7 + 1, idx8);
-                        final String characteristicTypeId = line.substring(
-                                idx8 + 1, idx9);
-                        final String modifierId = line.substring(idx9 + 1);
-                        
-                        String tgtVer = modMap.get(moduleId);
-                        if(tgtVer == null) continue;
-                        int rel = effectiveTime.compareTo(tgtVer);
-                        if(rel <= 0) {
-                            RelationshipRow currRelationshipRow = 
-                                    relationshipMap.get(id);
-                            if(currRelationshipRow == null || 
-                                effectiveTime.compareTo(
-                                    currRelationshipRow.getEffectiveTime()) > 0) {
-                                RelationshipRow rr = new RelationshipRow(id, 
-                                        effectiveTime, active, moduleId, 
-                                        sourceId, destinationId, 
-                                        relationshipGroup, typeId, 
-                                        characteristicTypeId, modifierId);
-                                relationshipMap.put(id, rr);
-                            }
-                        }
-                    }
+                    final InputStream inputStream = input.getInputStream(relationshipsFile);
+                    loadRelationshipRows(modMap, relationshipMap, inputStream);
                 } catch (IOException e) {
                     log.error(e);
                     throw new ImportException("Unable to load realtionships " +
                             "file. Please check your input configuration " +
                             "file. (input type = "+inputType+", file="+
                             relationshipsFile+")");
-                } finally {
-                    if(br != null) {
-                        try { br.close(); } catch(Exception e) {};
-                    }
                 }
             }
         }
         
-        VersionRows vr = new VersionRows();
-        
-        for(String key : conceptMap.keySet()) {
-            vr.getConceptRows().add(conceptMap.get(key));
-        }
-        
-        for(String key : relationshipMap.keySet()) {
-            vr.getRelationshipRows().add(relationshipMap.get(key));
-        }
+        VersionRows vr = new VersionRows(conceptMap.values(), relationshipMap.values());
         
         conceptMap = null;
         relationshipMap = null;
         
         return vr;
+    }
+
+    protected void loadRelationshipRows(Map<String, String> modMap,
+            Map<String, RelationshipRow> relationshipMap,
+            final InputStream inputStream) throws IOException {
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new InputStreamReader(inputStream));
+            String line = br.readLine(); // Skip first line
+            while (null != (line = br.readLine())) {
+                if (line.trim().length() < 1) {
+                    continue;
+                }
+                int idx1 = line.indexOf('\t');
+                int idx2 = line.indexOf('\t', idx1 + 1);
+                int idx3 = line.indexOf('\t', idx2 + 1);
+                int idx4 = line.indexOf('\t', idx3 + 1);
+                int idx5 = line.indexOf('\t', idx4 + 1);
+                int idx6 = line.indexOf('\t', idx5 + 1);
+                int idx7 = line.indexOf('\t', idx6 + 1);
+                int idx8 = line.indexOf('\t', idx7 + 1);
+                int idx9 = line.indexOf('\t', idx8 + 1);
+      
+                // 0..idx1 == id
+                // idx1+1..idx2 == effectiveTime
+                // idx2+1..idx3 == active
+                // idx3+1..idx4 == moduleId
+                // idx4+1..idx5 == sourceId
+                // idx5+1..idx6 == destinationId
+                // idx6+1..idx7 == relationshipGroup
+                // idx7+1..idx8 == typeId
+                // idx8+1..idx9 == characteristicTypeId
+                // idx9+1..end == modifierId
+      
+                if (idx1 < 0 || idx2 < 0 || idx3 < 0 || idx4 < 0 || 
+                        idx5 < 0 || idx6 < 0 || idx7 < 0 || idx8 < 0 || 
+                        idx9 < 0) {
+                    br.close();
+                    throw new RuntimeException("Concepts: " +
+                        "Mis-formatted line, expected 10 " +
+                        "tab-separated fields, got: " + line);
+                }
+      
+                final String id = line.substring(0, idx1);
+                final String effectiveTime = line.substring(idx1 + 1, 
+                        idx2);
+                final String active = line.substring(idx2 + 1, idx3);
+                final String moduleId = line.substring(idx3 + 1, idx4);
+                final String sourceId = line.substring(idx4 + 1, idx5);
+                final String destinationId = line.substring(idx5 + 1, 
+                        idx6);
+                final String relationshipGroup = line.substring(
+                        idx6 + 1, idx7);
+                final String typeId = line.substring(idx7 + 1, idx8);
+                final String characteristicTypeId = line.substring(
+                        idx8 + 1, idx9);
+                final String modifierId = line.substring(idx9 + 1);
+                
+                String tgtVer = modMap.get(moduleId);
+                if(tgtVer == null) continue;
+                int rel = effectiveTime.compareTo(tgtVer);
+                if(rel <= 0) {
+                    RelationshipRow currRelationshipRow = 
+                            relationshipMap.get(id);
+                    if(currRelationshipRow == null || 
+                        effectiveTime.compareTo(
+                            currRelationshipRow.getEffectiveTime()) > 0) {
+                        RelationshipRow rr = new RelationshipRow(id, 
+                                effectiveTime, active, moduleId, 
+                                sourceId, destinationId, 
+                                relationshipGroup, typeId, 
+                                characteristicTypeId, modifierId);
+                        relationshipMap.put(id, rr);
+                    }
+                }
+            }
+        } finally {
+            if(br != null) {
+                try { br.close(); } catch(Exception e) {};
+            }
+        }
+    }
+
+    protected void loadConceptRows(Map<String, String> modMap,
+            Map<String, ConceptRow> conceptMap, final InputStream inputStream)
+            throws IOException, UnsupportedEncodingException {
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(
+                new InputStreamReader(
+                        inputStream));
+            String line = br.readLine(); // Skip first line
+      
+            while (null != (line = br.readLine())) {
+                line = new String(line.getBytes(), "UTF8");
+                if (line.trim().length() < 1) {
+                    continue;
+                }
+                int idx1 = line.indexOf('\t');
+                int idx2 = line.indexOf('\t', idx1 + 1);
+                int idx3 = line.indexOf('\t', idx2 + 1);
+                int idx4 = line.indexOf('\t', idx3 + 1);
+      
+                // 0..idx1 == id
+                // idx1+1..idx2 == effectiveTime
+                // idx2+1..idx3 == active
+                // idx3+1..idx4 == moduleId
+                // idx4+1..end == definitionStatusId
+      
+                if (idx1 < 0 || idx2 < 0 || idx3 < 0 || idx4 < 0) {
+                    br.close();
+                    throw new RuntimeException(
+                        "Concepts: Mis-formatted "
+                        + "line, expected at least 5 tab-separated " +
+                        "fields, got: " + line);
+                }
+      
+                final String id = line.substring(0, idx1);
+                final String effectiveTime = line.substring(idx1 + 1, 
+                        idx2);
+                final String active = line.substring(idx2 + 1, idx3);
+                final String moduleId = line.substring(idx3 + 1, idx4);
+                final String definitionStatusId = line.substring(
+                        idx4 + 1);
+                
+                String tgtVer = modMap.get(moduleId);
+                if(tgtVer == null) continue;
+                int rel = effectiveTime.compareTo(tgtVer);
+                if(rel <= 0) {
+                    ConceptRow currConceptRow = conceptMap.get(id);
+                    if(currConceptRow == null || 
+                        effectiveTime.compareTo(
+                            currConceptRow.getEffectiveTime()) > 0) {
+                        ConceptRow cr = new ConceptRow(id, 
+                                effectiveTime, active, moduleId, 
+                                definitionStatusId);
+                        conceptMap.put(id, cr);
+                    }
+                }
+            }
+        } finally {
+            if(br != null) {
+                try { br.close(); } catch(Exception e) {};
+            }
+        }
     }
 
     protected IConcept getConcept(String id, Map<String, IConcept> ci) {
@@ -575,6 +591,16 @@ public class RF2Importer extends BaseImporter {
             ri.put(id, r);
         }
         return r;
+    }
+
+    protected INamedFeature getFeature(String id,
+            Map<String, INamedFeature> fi) {
+        INamedFeature f = fi.get(id);
+        if (f == null) {
+            f = new Feature(id);
+            fi.put(id, f);
+        }
+        return f;
     }
     
     protected void populateParent(String src, String tgt, 
@@ -597,14 +623,15 @@ public class RF2Importer extends BaseImporter {
         prs.add(tgt);
     }
     
-    protected void populateRels(String src, String role, String tgt,
-            String group, Map<String, List<String[]>> rels) {
+    protected void populateRels(
+            String comp, String src, String role, String tgt, String group,
+            Map<String, List<String[]>> rels) {
         List<String[]> val = rels.get(src);
         if (val == null) {
             val = new ArrayList<String[]>();
             rels.put(src, val);
         }
-        val.add(new String[] { role, tgt, group });
+        val.add(new String[] { comp, role, tgt, group });
     }
 
     protected void populateRoles(Set<String> roles, String parentSCTID, 
@@ -642,13 +669,16 @@ public class RF2Importer extends BaseImporter {
                 new HashMap<String, Set<RoleValuePair>>();
 
         for (String[] group : groups) {
-            String roleGroup = group[2];
+            String comp = group[0];
+            String attr = group[1];
+            String val = group[2];
+            String roleGroup = group[3];
             Set<RoleValuePair> lrvp = roleGroups.get(roleGroup);
             if (lrvp == null) {
                 lrvp = new HashSet<RoleValuePair>();
-                roleGroups.put(group[2], lrvp);
+                roleGroups.put(roleGroup, lrvp);
             }
-            lrvp.add(new RoleValuePair(group[0], group[1]));
+            lrvp.add(new RoleValuePair(attr, val, comp));
         }
 
         Set<Set<RoleValuePair>> res = new HashSet<Set<RoleValuePair>>();
@@ -678,12 +708,14 @@ public class RF2Importer extends BaseImporter {
     }
 
     protected class RoleValuePair {
-        String role;
-        String value;
+        final String role;
+        final String value;
+        final String id;
 
-        RoleValuePair(String role, String value) {
+        RoleValuePair(String role, String value, String id) {
             this.role = role;
             this.value = value;
+            this.id = id;
         }
 
         @Override
@@ -783,16 +815,15 @@ public class RF2Importer extends BaseImporter {
          * @throws RuntimeException in case an {@code ImportException} has occurred.
          */
         public IOntology next() throws RuntimeException {
-            ImportEntry entry = entries.remove(entries.size()-1);
-            VersionRows bundle;
             try {
-                bundle = getBundle(entry);
+                ImportEntry entry = entries.remove(entries.size()-1);
+                VersionRows bundle = getBundle(entry);
+                return transform(entry.getRootModuleId(), 
+                        entry.getRootModuleVersion(), bundle, entry.getMetadata(), 
+                        monitor);
             } catch (ImportException e) {
                 throw new RuntimeException(e);
             }
-            return transform(entry.getRootModuleId(), 
-                    entry.getRootModuleVersion(), bundle, entry.getMetadata(), 
-                    monitor);
         }
 
         public void remove() {

@@ -5,7 +5,7 @@
 package au.csiro.ontology.importer.rf2;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 /**
  * This class represents a collection of rows from the RF2 concepts,
@@ -19,32 +19,36 @@ public class VersionRows {
     /**
      * The concept rows in this version.
      */
-    protected final List<ConceptRow> conceptRows = new ArrayList<ConceptRow>();
+    protected final Collection<ConceptRow> conceptRows;
 
     /**
      * The relationship rows in this version.
      */
-    protected final List<RelationshipRow> relationshipRows = 
-            new ArrayList<RelationshipRow>();
+    protected final Collection<RelationshipRow> relationshipRows;
 
     /**
      * Builds a new VersionRows.
      */
     public VersionRows() {
-
+        this(new ArrayList<ConceptRow>(), new ArrayList<RelationshipRow>());
+    }
+    
+    public VersionRows(Collection<ConceptRow> conceptRows, Collection<RelationshipRow> relationshipRows) {
+        this.conceptRows = conceptRows;
+        this.relationshipRows = relationshipRows;
     }
 
     /**
      * @return the conceptRows
      */
-    public List<ConceptRow> getConceptRows() {
+    public Collection<ConceptRow> getConceptRows() {
         return conceptRows;
     }
 
     /**
      * @return the relationshipRows
      */
-    public List<RelationshipRow> getRelationshipRows() {
+    public Collection<RelationshipRow> getRelationshipRows() {
         return relationshipRows;
     }
     
