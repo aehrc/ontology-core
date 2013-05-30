@@ -99,7 +99,12 @@ public class Concept implements INamedConcept {
 
     @Override
     public int compareTo(IConcept other) {
+        if(!(other instanceof Concept)) {
+            return -1;
+        }
         return id.compareTo(((Concept)other).id);
     }
+    
+    
 
 }
