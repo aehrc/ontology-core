@@ -103,9 +103,9 @@
   </build>
   
   <scm>
-    <connection>scm:git:git@github.com:aehrc/ontology-core.git</connection>
-    <developerConnection>scm:git:git@github.com:aehrc/ontology-core.git</developerConnection>
-    <url>https://github.com/aehrc/ontology-core.git</url>
+    <connection>scm:git:https://stash.csiro.au/scm/sno/ontology-core.git</connection>
+    <developerConnection>scm:git:https://stash.csiro.au/scm/sno/ontology-core.git</developerConnection>
+    <url>https://stash.csiro.au/scm/sno/ontology-core.git</url>
     <tag>HEAD</tag>
   </scm>
 </project>
