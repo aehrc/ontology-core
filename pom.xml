@@ -103,8 +103,8 @@
   </build>
   
   <scm>
-    <connection>scm:git:ssh://git@stash.csiro.au:7999/sno/ontology-core.git</connection>
-    <developerConnection>scm:git:ssh://git@stash.csiro.au:7999/sno/ontology-core.git</developerConnection>
+    <connection>scm:git:https://stash.csiro.au/scm/sno/ontology-core.git</connection>
+    <developerConnection>scm:git:https://stash.csiro.au/scm/sno/ontology-core.git</developerConnection>
     <url>https://stash.csiro.au/scm/sno/ontology-core.git</url>
     <tag>HEAD</tag>
   </scm>
