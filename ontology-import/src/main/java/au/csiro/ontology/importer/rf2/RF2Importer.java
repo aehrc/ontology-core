@@ -97,12 +97,16 @@ public class RF2Importer extends BaseImporter {
      * @throws ImportException 
      */
     public RF2Importer() throws ImportException {
+        final String configFile = "/config.xml";
+        final String message = "Malformed input file: " + configFile;
         try {
-            inputs = Inputs.load(
-                    this.getClass().getResourceAsStream("/config.xml"));
+            inputs = Inputs.load(this.getClass().getResourceAsStream(configFile));
+        } catch (NullPointerException e) {
+            log.error(message, e);
+            throw new ImportException(message, e);
         } catch (JAXBException e) {
-            log.error("Malformed input file.", e);
-            throw new ImportException("Malformed input file.", e);
+            log.error(message, e);
+            throw new ImportException(message, e);
         }
     }
     
@@ -127,12 +131,17 @@ public class RF2Importer extends BaseImporter {
         for(RF2Input input : inputs.getRf2Inputs()) {
             InputType inputType = input.getInputType();
             for(String md : input.getModuleDependenciesRefsetFiles()) {
+                final String message = "Unable to load module " +
+                        "dependencias. Please check your input configuration " +
+                        "file. (input type = "+inputType+", file="+md+")";
                 try {
                     iss.add(input.getInputStream(md));
+                } catch (NullPointerException e) {
+                    log.error(message, e);
+                    throw new ImportException(message, e);
                 } catch (IOException e) {
-                    throw new ImportException("Unable to load module " +
-                            "dependencias. Please check your input configuration " +
-                            "file. (input type = "+inputType+", file="+md+")", e);
+                    log.error(message, e);
+                    throw new ImportException(message, e);
                 }
             }
         }
@@ -381,14 +390,17 @@ public class RF2Importer extends BaseImporter {
             Set<String> conceptsFiles = input.getConceptsFiles();
             log.info("Read concepts info");
             for(String conceptsFile : conceptsFiles) {
+                final String message = "Unable to load concepts file. " +
+                        "Please check your input configuration file. " +
+                        "(input type = "+inputType+", file="+conceptsFile+")";
                 try {
-                    final InputStream inputStream = input.getInputStream(conceptsFile);
-                    loadConceptRows(modMap, conceptMap, inputStream);
+                    loadConceptRows(modMap, conceptMap, input.getInputStream(conceptsFile));
+                } catch (NullPointerException e) {
+                    log.error(message, e);
+                    throw new ImportException(message, e);
                 } catch (IOException e) {
-                    log.error(e);
-                    throw new ImportException("Unable to load concepts file. " +
-                            "Please check your input configuration file. " +
-                            "(input type = "+inputType+", file="+conceptsFile+")", e);
+                    log.error(message, e);
+                    throw new ImportException(message, e);
                 }
             }
             
@@ -408,15 +420,18 @@ public class RF2Importer extends BaseImporter {
             }
             
             for(String relationshipsFile : relationshipsFiles) {
+                final String message = "Unable to load realtionships " +
+                        "file. Please check your input configuration " +
+                        "file. (input type = "+inputType+", file="+
+                        relationshipsFile+")";
                 try {
-                    final InputStream inputStream = input.getInputStream(relationshipsFile);
-                    loadRelationshipRows(modMap, relationshipMap, inputStream);
+                    loadRelationshipRows(modMap, relationshipMap, input.getInputStream(relationshipsFile));
+                } catch (NullPointerException e) {
+                    log.error(message, e);
+                    throw new ImportException(message, e);
                 } catch (IOException e) {
-                    log.error(e);
-                    throw new ImportException("Unable to load realtionships " +
-                            "file. Please check your input configuration " +
-                            "file. (input type = "+inputType+", file="+
-                            relationshipsFile+")");
+                    log.error(message, e);
+                    throw new ImportException(message, e);
                 }
             }
         }
