@@ -12,8 +12,15 @@ package au.csiro.ontology.model;
  */
 public class StringLiteral implements IStringLiteral {
 
-    private final String value;
-
+    private String value;
+    
+    /**
+     * 
+     */
+    public StringLiteral() {
+        
+    }
+    
     public StringLiteral(String value) {
         this.value = value;
     }
@@ -23,6 +30,13 @@ public class StringLiteral implements IStringLiteral {
      */
     public String getValue() {
         return value;
+    }
+
+    /**
+     * @param value the value to set
+     */
+    public void setValue(String value) {
+        this.value = value;
     }
 
     @Override

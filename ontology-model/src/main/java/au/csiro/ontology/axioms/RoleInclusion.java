@@ -20,13 +20,20 @@ public class RoleInclusion implements IRoleInclusion {
     /**
      * The left hand side of the expression.
      */
-    final protected IRole[] lhs;
+    protected IRole[] lhs;
     
     /**
      * The right hand side of the expression.
      */
-    final protected IRole rhs;
-
+    protected IRole rhs;
+    
+    /**
+     * 
+     */
+    public RoleInclusion() {
+        
+    }
+    
     /**
      * Creates a new {@link RoleInclusion}.
      * 
@@ -65,6 +72,34 @@ public class RoleInclusion implements IRoleInclusion {
      */
     public IRole rhs() {
         return rhs;
+    }
+
+    /**
+     * @return the lhs
+     */
+    public IRole[] getLhs() {
+        return lhs;
+    }
+
+    /**
+     * @param lhs the lhs to set
+     */
+    public void setLhs(IRole[] lhs) {
+        this.lhs = lhs;
+    }
+
+    /**
+     * @return the rhs
+     */
+    public IRole getRhs() {
+        return rhs;
+    }
+
+    /**
+     * @param rhs the rhs to set
+     */
+    public void setRhs(IRole rhs) {
+        this.rhs = rhs;
     }
 
     @Override

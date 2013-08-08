@@ -12,8 +12,15 @@ package au.csiro.ontology.model;
  */
 public class FloatLiteral implements IFloatLiteral {
 
-    private final float value;
-
+    private float value;
+    
+    /**
+     * 
+     */
+    public FloatLiteral() {
+        
+    }
+    
     /**
      * 
      * @param type
@@ -27,6 +34,13 @@ public class FloatLiteral implements IFloatLiteral {
      */
     public float getValue() {
         return value;
+    }
+
+    /**
+     * @param value the value to set
+     */
+    public void setValue(float value) {
+        this.value = value;
     }
 
     @Override

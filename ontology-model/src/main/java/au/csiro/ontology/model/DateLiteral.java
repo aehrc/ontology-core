@@ -16,8 +16,19 @@ import java.util.Calendar;
 public class DateLiteral implements IDateLiteral {
 
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-    private final Calendar value;
-
+    private Calendar value;
+    
+    /**
+     * 
+     */
+    public DateLiteral() {
+        
+    }
+    
+    /**
+     * 
+     * @param value
+     */
     public DateLiteral(Calendar value) {
         this.value = value;
     }
@@ -27,6 +38,13 @@ public class DateLiteral implements IDateLiteral {
      */
     public Calendar getValue() {
         return value;
+    }
+
+    /**
+     * @param value the value to set
+     */
+    public void setValue(Calendar value) {
+        this.value = value;
     }
 
     @Override

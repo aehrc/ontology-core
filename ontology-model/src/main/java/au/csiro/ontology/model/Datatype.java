@@ -13,15 +13,21 @@ public class Datatype implements IDatatype {
     private INamedFeature feature;
     private Operator operator;
     private ILiteral literal;
-
+    
+    /**
+     * 
+     */
+    public Datatype() {
+        
+    }
+    
     /**
      * 
      * @param feature
      * @param operator
      * @param literal
      */
-    public Datatype(INamedFeature feature, Operator operator, 
-            ILiteral literal) {
+    public Datatype(INamedFeature feature, Operator operator, ILiteral literal) {
         this.feature = feature;
         this.operator = operator;
         this.literal = literal;
@@ -37,6 +43,27 @@ public class Datatype implements IDatatype {
 
     public ILiteral getLiteral() {
         return literal;
+    }
+
+    /**
+     * @param feature the feature to set
+     */
+    public void setFeature(INamedFeature feature) {
+        this.feature = feature;
+    }
+
+    /**
+     * @param operator the operator to set
+     */
+    public void setOperator(Operator operator) {
+        this.operator = operator;
+    }
+
+    /**
+     * @param literal the literal to set
+     */
+    public void setLiteral(ILiteral literal) {
+        this.literal = literal;
     }
 
     @Override
