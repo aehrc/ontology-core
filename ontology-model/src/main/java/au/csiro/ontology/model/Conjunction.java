@@ -10,24 +10,29 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 /**
- * This class represents a conjunction (also referred to as an
- * ObjectIntersectionOf in OWL).
+ * This class represents a conjunction (also referred to as an ObjectIntersectionOf in OWL).
  * 
  * @author Alejandro Metke
  * 
  */
 public class Conjunction implements IConjunction {
 
-    final private IConcept[] concepts;
-    final private int hashCode;
+    private IConcept[] concepts;
+    private int hashCode;
+    
+    /**
+     * 
+     */
+    public Conjunction() {
 
+    }
+
+    /**
+     * 
+     * @param concepts
+     */
     public Conjunction(final IConcept[] concepts) {
-        final SortedSet<IConcept> sorted = new TreeSet<IConcept>();
-        for (IConcept concept : concepts) {
-            sorted.add(concept);
-        }
-        this.concepts = sorted.toArray(new IConcept[sorted.size()]);
-        hashCode = sorted.hashCode();
+        setConcepts(concepts);
     }
 
     public Conjunction(final Collection<? extends IConcept> concepts) {
@@ -35,14 +40,25 @@ public class Conjunction implements IConjunction {
         // independent, i.e. conjunctions are reflexive (should also be
         // transitive, but Agile says STTCPW)
 
-        final SortedSet<IConcept> sorted = new TreeSet<IConcept>(
-                concepts);
+        final SortedSet<IConcept> sorted = new TreeSet<IConcept>(concepts);
         this.concepts = sorted.toArray(new IConcept[sorted.size()]);
         hashCode = sorted.hashCode();
     }
 
     public IConcept[] getConcepts() {
         return concepts;
+    }
+
+    /**
+     * @param concepts the concepts to set
+     */
+    public void setConcepts(IConcept[] concepts) {
+        final SortedSet<IConcept> sorted = new TreeSet<IConcept>();
+        for (IConcept concept : concepts) {
+            sorted.add(concept);
+        }
+        this.concepts = sorted.toArray(new IConcept[sorted.size()]);
+        hashCode = sorted.hashCode();
     }
 
     @Override

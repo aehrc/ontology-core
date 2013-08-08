@@ -12,7 +12,14 @@ package au.csiro.ontology.model;
  */
 public class BooleanLiteral implements IBooleanLiteral {
 
-    private final boolean value;
+    private boolean value;
+    
+    /**
+     * 
+     */
+    public BooleanLiteral() {
+        super();
+    }
 
     /**
      * 
@@ -27,6 +34,13 @@ public class BooleanLiteral implements IBooleanLiteral {
      */
     public boolean getValue() {
         return value;
+    }
+
+    /**
+     * @param value the value to set
+     */
+    public void setValue(boolean value) {
+        this.value = value;
     }
 
     /**

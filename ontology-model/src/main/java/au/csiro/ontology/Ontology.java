@@ -53,7 +53,7 @@ public class Ontology implements IOntology {
     protected final Map<String, Node> nodeMap = new HashMap<String, Node>();
     
     /**
-     * Set of {@link Node}s pontentially affected by the last incremental
+     * Set of {@link Node}s potentially affected by the last incremental
      * classification.
      */
     protected final Set<Node> lastAffectedNodes = new HashSet<Node>();

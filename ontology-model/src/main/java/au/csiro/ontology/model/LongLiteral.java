@@ -12,8 +12,15 @@ package au.csiro.ontology.model;
  */
 public class LongLiteral implements ILongLiteral {
 
-    private final long value;
-
+    private long value;
+    
+    /**
+     * 
+     */
+    public LongLiteral() {
+        
+    }
+    
     public LongLiteral(long value) {
         this.value = value;
     }
@@ -23,6 +30,13 @@ public class LongLiteral implements ILongLiteral {
      */
     public long getValue() {
         return value;
+    }
+
+    /**
+     * @param value the value to set
+     */
+    public void setValue(long value) {
+        this.value = value;
     }
 
     @Override

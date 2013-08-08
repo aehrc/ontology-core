@@ -15,7 +15,14 @@ public class Role implements INamedRole {
     /**
      * String identifier of this concept.
      */
-    protected final String id;
+    protected String id;
+    
+    /**
+     * 
+     */
+    public Role() {
+        
+    }
     
     /**
      * Creates a new Role.
@@ -35,6 +42,13 @@ public class Role implements INamedRole {
      */
     public String getId() {
         return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public void setId(String id) {
+        this.id = id;
     }
 
     @Override

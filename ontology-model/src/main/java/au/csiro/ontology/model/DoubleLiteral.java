@@ -12,8 +12,15 @@ package au.csiro.ontology.model;
  */
 public class DoubleLiteral implements IDoubleLiteral {
 
-    private final double value;
-
+    private double value;
+    
+    /**
+     * 
+     */
+    public DoubleLiteral() {
+        
+    }
+    
     /**
      * 
      * @param type
@@ -28,6 +35,13 @@ public class DoubleLiteral implements IDoubleLiteral {
      */
     public double getValue() {
         return value;
+    }
+
+    /**
+     * @param value the value to set
+     */
+    public void setValue(double value) {
+        this.value = value;
     }
 
     @Override

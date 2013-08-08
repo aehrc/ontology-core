@@ -8,7 +8,6 @@ package au.csiro.ontology.model;
  * This class represents a named concept (also referred to as a class in OWL).
  * 
  * @author Alejandro Metke
- * @param <T>
  * 
  */
 public class Concept implements INamedConcept {
@@ -41,8 +40,15 @@ public class Concept implements INamedConcept {
     /**
      * String identifier of this concept.
      */
-    protected final String id;
-
+    protected String id;
+    
+    /**
+     * No args constructor.
+     */
+    public Concept() {
+        
+    }
+    
     /**
      * Creates a new Concept.
      * 
@@ -61,6 +67,13 @@ public class Concept implements INamedConcept {
      */
     public String getId() {
         return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public void setId(String id) {
+        this.id = id;
     }
 
     @Override
@@ -105,6 +118,4 @@ public class Concept implements INamedConcept {
         return id.compareTo(((Concept)other).id);
     }
     
-    
-
 }

@@ -12,8 +12,15 @@ package au.csiro.ontology.model;
  */
 public class IntegerLiteral implements IIntegerLiteral {
 
-    private final int value;
-
+    private int value;
+    
+    /**
+     * 
+     */
+    public IntegerLiteral() {
+        
+    }
+    
     /**
      * Constructor.
      * 
@@ -28,6 +35,13 @@ public class IntegerLiteral implements IIntegerLiteral {
      */
     public int getValue() {
         return value;
+    }
+
+    /**
+     * @param value the value to set
+     */
+    public void setValue(int value) {
+        this.value = value;
     }
 
     @Override

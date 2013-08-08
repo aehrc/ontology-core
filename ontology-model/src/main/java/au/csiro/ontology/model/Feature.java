@@ -15,8 +15,15 @@ public class Feature implements INamedFeature {
     /**
      * String identifier of this concept.
      */
-    protected final String id;
-
+    protected String id;
+    
+    /**
+     * 
+     */
+    public Feature() {
+        
+    }
+    
     /**
      * Creates a new Concept.
      * 
@@ -35,6 +42,13 @@ public class Feature implements INamedFeature {
      */
     public String getId() {
         return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public void setId(String id) {
+        this.id = id;
     }
 
     @Override

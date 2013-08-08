@@ -15,7 +15,19 @@ public class Existential implements IExistential {
 
     private INamedRole role;
     private IConcept concept;
-
+    
+    /**
+     * 
+     */
+    public Existential() {
+        
+    }
+    
+    /**
+     * 
+     * @param role
+     * @param concept
+     */
     public Existential(INamedRole role, IConcept concept) {
         this.role = role;
         this.concept = concept;
@@ -32,6 +44,20 @@ public class Existential implements IExistential {
     
     public IConcept getConcept() {
         return concept;
+    }
+
+    /**
+     * @param role the role to set
+     */
+    public void setRole(INamedRole role) {
+        this.role = role;
+    }
+
+    /**
+     * @param concept the concept to set
+     */
+    public void setConcept(IConcept concept) {
+        this.concept = concept;
     }
 
     @Override

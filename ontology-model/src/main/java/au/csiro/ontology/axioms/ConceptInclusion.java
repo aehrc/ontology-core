@@ -18,13 +18,20 @@ public class ConceptInclusion implements IConceptInclusion {
     /**
      * The left hand side of the expression.
      */
-    final protected IConcept lhs;
+    protected IConcept lhs;
     
     /**
      * The right hand side of the expression.
      */
-    final protected IConcept rhs;
-
+    protected IConcept rhs;
+    
+    /**
+     * 
+     */
+    public ConceptInclusion() {
+        
+    }
+    
     /**
      * Creates a new ConceptInclusion.
      * 
@@ -65,6 +72,34 @@ public class ConceptInclusion implements IConceptInclusion {
     @Override
     public String toString() {
         return lhs + " \u2291 " + rhs;
+    }
+
+    /**
+     * @return the lhs
+     */
+    public IConcept getLhs() {
+        return lhs;
+    }
+
+    /**
+     * @param lhs the lhs to set
+     */
+    public void setLhs(IConcept lhs) {
+        this.lhs = lhs;
+    }
+
+    /**
+     * @return the rhs
+     */
+    public IConcept getRhs() {
+        return rhs;
+    }
+
+    /**
+     * @param rhs the rhs to set
+     */
+    public void setRhs(IConcept rhs) {
+        this.rhs = rhs;
     }
 
     @Override
