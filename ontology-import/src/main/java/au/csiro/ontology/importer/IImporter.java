@@ -7,7 +7,7 @@ package au.csiro.ontology.importer;
 import java.util.Iterator;
 import java.util.List;
 
-import au.csiro.ontology.IOntology;
+import au.csiro.ontology.Ontology;
 import au.csiro.ontology.util.IProgressMonitor;
 
 /**
@@ -20,35 +20,27 @@ import au.csiro.ontology.util.IProgressMonitor;
 public interface IImporter {
 
     /**
-     * <p>There are several models used to represent ontologies that have been
-     * adopted by different groups. In this implementation a model based on
-     * SNOMED's RF2 format is used because it contains features that are not 
-     * available in other formats.</p>
+     * <p>There are several models used to represent ontologies that have been adopted by different groups. In this 
+     * implementation a model based on SNOMED's RF2 format is used because it contains features that are not available 
+     * in other formats.</p>
      * 
-     * <p>An ontology in RF2 maps to a set of interdependent modules. This 
-     * method returns all the ontologies found in a set of files. 
-     * Implementations of importers for other file formats can simply return a
-     * single ontology.</p> 
+     * <p>An ontology in RF2 maps to a set of interdependent modules. This method returns all the ontologies found in a 
+     * set of files. Implementations of importers for other file formats can simply return a single ontology.</p> 
      * 
-     * <p>If the files contain related modules then all of them are returned as 
-     * a single ontology. This method returns an iterator that allows importing
-     * each ontology version.</p>
+     * <p>If the files contain related modules then all of them are returned as a single ontology. This method returns 
+     * an iterator that allows importing each ontology version.</p>
      * 
      * @param monitor A progress monitor.
      * 
-     * @return An interator that allows importing one ontology version at a 
-     * time.
+     * @return An interator that allows importing one ontology version at a time.
      * 
-     * @throws ImportException if a problem occurs when importing the 
-     * ontologies.
+     * @throws ImportException if a problem occurs when importing the ontologies.
      */
-    public Iterator<IOntology> getOntologyVersions(
-            IProgressMonitor monitor) throws ImportException;
+    public Iterator<Ontology> getOntologyVersions(IProgressMonitor monitor) throws ImportException;
     
     /**
-     * Returns a list of problems that happened during the import process. This
-     * method should be called after an {@link ImportException} is thrown to
-     * get a detailed list of problems.
+     * Returns a list of problems that happened during the import process. This method should be called after an 
+     * {@link ImportException} is thrown to get a detailed list of problems.
      * 
      * @return
      */

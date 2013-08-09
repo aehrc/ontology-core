@@ -7,17 +7,34 @@ package au.csiro.ontology.model;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * This class represents a date literal.
  * 
  * @author Alejandro Metke
  * 
  */
-public class DateLiteral implements IDateLiteral {
+@XmlRootElement
+public class DateLiteral extends Literal {
 
+    private static final long serialVersionUID = 1L;
+    
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-    private final Calendar value;
-
+    
+    private Calendar value;
+    
+    /**
+     * 
+     */
+    public DateLiteral() {
+        
+    }
+    
+    /**
+     * 
+     * @param value
+     */
     public DateLiteral(Calendar value) {
         this.value = value;
     }
@@ -27,6 +44,13 @@ public class DateLiteral implements IDateLiteral {
      */
     public Calendar getValue() {
         return value;
+    }
+
+    /**
+     * @param value the value to set
+     */
+    public void setValue(Calendar value) {
+        this.value = value;
     }
 
     @Override
@@ -59,7 +83,7 @@ public class DateLiteral implements IDateLiteral {
         return sdf.format(value.getTime());
     }
 
-    public int compareTo(ILiteral o) {
+    public int compareTo(Literal o) {
         DateLiteral dl = (DateLiteral) o;
         Calendar otherValue = dl.value;
         return value.compareTo(otherValue);

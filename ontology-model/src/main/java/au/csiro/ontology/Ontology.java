@@ -12,19 +12,17 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import au.csiro.ontology.axioms.IAxiom;
-import au.csiro.ontology.model.Concept;
+import au.csiro.ontology.model.Axiom;
+import au.csiro.ontology.model.NamedConcept;
 
 /**
- * Represents an ontology in our internal format. Includes the DL
- * representation (a collection of axioms) in stated form with additional 
- * information about every concept (which is needed for retrieval but not for 
- * classification).
+ * Represents an ontology in our internal format. Includes the DL representation (a collection of axioms) in stated 
+ * form with additional information about every concept (which is needed for retrieval but not for classification).
  * 
  * @author Alejandro Metke
  *
  */
-public class Ontology implements IOntology {
+public class Ontology {
     
     /**
      * The id of the ontology.
@@ -39,12 +37,12 @@ public class Ontology implements IOntology {
     /**
      * The collection of stated axioms that form the ontology.
      */
-    protected final Collection<IAxiom> statedAxioms;
+    protected final Collection<Axiom> statedAxioms;
     
     /**
      * The collection of inferred axioms that form the ontology.
      */
-    protected final Collection<IAxiom> inferredAxioms = new ArrayList<IAxiom>();
+    protected final Collection<Axiom> inferredAxioms = new ArrayList<Axiom>();
     
     /**
      * A map that contains references to all the nodes in the taxonomy indexed
@@ -53,7 +51,7 @@ public class Ontology implements IOntology {
     protected final Map<String, Node> nodeMap = new HashMap<String, Node>();
     
     /**
-     * Set of {@link Node}s pontentially affected by the last incremental
+     * Set of {@link Node}s potentially affected by the last incremental
      * classification.
      */
     protected final Set<Node> lastAffectedNodes = new HashSet<Node>();
@@ -67,20 +65,19 @@ public class Ontology implements IOntology {
      * @param nodeMap
      * @param lastAffectedNodes
      */
-    public Ontology(String id, String version, 
-            Collection<IAxiom> statedAxioms, Map<String, Node> nodeMap, 
+    public Ontology(String id, String version, Collection<Axiom> statedAxioms, Map<String, Node> nodeMap, 
             Set<Node> lastAffectedNodes) {
         this.id = id;
         this.version = version;
         if(statedAxioms == null) {
-            this.statedAxioms = new ArrayList<IAxiom>();
+            this.statedAxioms = new ArrayList<Axiom>();
         } else {
             this.statedAxioms = statedAxioms;
         }
         if(nodeMap != null)
-        	this.nodeMap.putAll(nodeMap);
+            this.nodeMap.putAll(nodeMap);
         if(lastAffectedNodes != null)
-        	this.lastAffectedNodes.addAll(lastAffectedNodes);
+            this.lastAffectedNodes.addAll(lastAffectedNodes);
     }
     
     /**
@@ -89,70 +86,57 @@ public class Ontology implements IOntology {
      * @param statedAxioms
      * @param nodeMap
      */
-    public Ontology(String id, String version, 
-            Collection<IAxiom> statedAxioms, Map<String, Node> nodeMap) {
+    public Ontology(String id, String version, Collection<Axiom> statedAxioms, Map<String, Node> nodeMap) {
     	this(id, version, statedAxioms, nodeMap, null);
     }
     
-    @Override
-    public Collection<IAxiom> getStatedAxioms() {
+    public Collection<Axiom> getStatedAxioms() {
         return statedAxioms;
     }
 
-    @Override
-    public Collection<IAxiom> getInferredAxioms() {
+    public Collection<Axiom> getInferredAxioms() {
         return inferredAxioms;
     }
     
-    @Override
     public Node getNode(String id) {
         return nodeMap.get(id);
     }
-    
-    @Override
+
     public Iterator<Node> nodeIterator() {
         Set<Node> set = new HashSet<Node>(nodeMap.values());
         return set.iterator();
     }
     
-    @Override
     public Map<String, Node> getNodeMap() {
         return nodeMap;
     }
 
-    @Override
     public Node getTopNode() {
-        return getNode(Concept.TOP);
+        return getNode(NamedConcept.TOP);
     }
     
-    @Override
     public Node getBottomNode() {
-        return getNode(Concept.BOTTOM);
+        return getNode(NamedConcept.BOTTOM);
     }
     
-    @Override
     public void setNodeMap(Map<String, Node> nodeMap) {
         this.nodeMap.clear();
         this.nodeMap.putAll(nodeMap);
     }
-    
-    @Override
+
     public Set<Node> getAffectedNodes() {
         return lastAffectedNodes;
     }
     
-    @Override
     public void setAffectedNodes(Set<Node> nodes) {
         lastAffectedNodes.clear();
         lastAffectedNodes.addAll(nodes);
     }
     
-    @Override
     public String getId() {
         return id;
     }
 
-    @Override
     public String getVersion() {
         return version;
     }

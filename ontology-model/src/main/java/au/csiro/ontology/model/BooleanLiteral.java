@@ -4,15 +4,27 @@
  */
 package au.csiro.ontology.model;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * This class represents a boolean literal.
  * 
  * @author Alejandro Metke
  * 
  */
-public class BooleanLiteral implements IBooleanLiteral {
+@XmlRootElement
+public class BooleanLiteral extends Literal {
 
-    private final boolean value;
+    private static final long serialVersionUID = 1L;
+    
+    private boolean value;
+    
+    /**
+     * 
+     */
+    public BooleanLiteral() {
+        super();
+    }
 
     /**
      * 
@@ -27,6 +39,13 @@ public class BooleanLiteral implements IBooleanLiteral {
      */
     public boolean getValue() {
         return value;
+    }
+
+    /**
+     * @param value the value to set
+     */
+    public void setValue(boolean value) {
+        this.value = value;
     }
 
     /**
@@ -64,7 +83,7 @@ public class BooleanLiteral implements IBooleanLiteral {
         return "false";
     }
 
-    public int compareTo(ILiteral o) {
+    public int compareTo(Literal o) {
         BooleanLiteral bl = (BooleanLiteral) o;
         boolean otherValue = bl.value;
         if (value == otherValue) {

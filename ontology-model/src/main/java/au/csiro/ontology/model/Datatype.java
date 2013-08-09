@@ -1,5 +1,7 @@
 package au.csiro.ontology.model;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * A datatype expression that represents a set of individuals that have a
  * property with a certain value. The expression consists of a feature, an
@@ -8,26 +10,37 @@ package au.csiro.ontology.model;
  * @author Alejandro Metke
  * 
  */
-public class Datatype implements IDatatype {
-    
-    private INamedFeature feature;
-    private Operator operator;
-    private ILiteral literal;
+@XmlRootElement
+public class Datatype extends Concept {
 
+    private static final long serialVersionUID = 1L;
+    
+    private NamedFeature feature;
+    
+    private Operator operator;
+    
+    private Literal literal;
+    
+    /**
+     * 
+     */
+    public Datatype() {
+        
+    }
+    
     /**
      * 
      * @param feature
      * @param operator
      * @param literal
      */
-    public Datatype(INamedFeature feature, Operator operator, 
-            ILiteral literal) {
+    public Datatype(NamedFeature feature, Operator operator, Literal literal) {
         this.feature = feature;
         this.operator = operator;
         this.literal = literal;
     }
 
-    public INamedFeature getFeature() {
+    public NamedFeature getFeature() {
         return feature;
     }
 
@@ -35,8 +48,29 @@ public class Datatype implements IDatatype {
         return operator;
     }
 
-    public ILiteral getLiteral() {
+    public Literal getLiteral() {
         return literal;
+    }
+
+    /**
+     * @param feature the feature to set
+     */
+    public void setFeature(NamedFeature feature) {
+        this.feature = feature;
+    }
+
+    /**
+     * @param operator the operator to set
+     */
+    public void setOperator(Operator operator) {
+        this.operator = operator;
+    }
+
+    /**
+     * @param literal the literal to set
+     */
+    public void setLiteral(Literal literal) {
+        this.literal = literal;
     }
 
     @Override
@@ -80,7 +114,7 @@ public class Datatype implements IDatatype {
     }
 
     @SuppressWarnings({ "rawtypes" })
-    public int compareTo(IConcept o) {
+    public int compareTo(Concept o) {
         Class thisClass = this.getClass();
         Class otherClass = o.getClass();
         if(thisClass.equals(otherClass)) {

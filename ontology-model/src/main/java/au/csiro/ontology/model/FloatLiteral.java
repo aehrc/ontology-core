@@ -4,16 +4,28 @@
  */
 package au.csiro.ontology.model;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * This class represents a float literal.
  * 
  * @author Alejandro Metke
  * 
  */
-public class FloatLiteral implements IFloatLiteral {
+@XmlRootElement
+public class FloatLiteral extends Literal {
 
-    private final float value;
-
+    private static final long serialVersionUID = 1L;
+    
+    private float value;
+    
+    /**
+     * 
+     */
+    public FloatLiteral() {
+        
+    }
+    
     /**
      * 
      * @param type
@@ -27,6 +39,13 @@ public class FloatLiteral implements IFloatLiteral {
      */
     public float getValue() {
         return value;
+    }
+
+    /**
+     * @param value the value to set
+     */
+    public void setValue(float value) {
+        this.value = value;
     }
 
     @Override
@@ -56,7 +75,7 @@ public class FloatLiteral implements IFloatLiteral {
         return String.valueOf(value);
     }
 
-    public int compareTo(ILiteral o) {
+    public int compareTo(Literal o) {
         FloatLiteral fl = (FloatLiteral) o;
         float otherValue = fl.value;
         return Float.compare(value, otherValue);

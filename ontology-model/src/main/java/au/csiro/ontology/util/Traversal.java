@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
-import au.csiro.ontology.IOntology;
+import au.csiro.ontology.Ontology;
 import au.csiro.ontology.Node;
 
 public interface Traversal {
@@ -67,7 +67,7 @@ public interface Traversal {
         }
     };
 
-    public void accept(IOntology ont, Visitor... visitors);
+    public void accept(Ontology ont, Visitor... visitors);
     public void accept(Node node, Visitor... visitors);
     
     static interface Visitor {
@@ -81,7 +81,7 @@ public interface Traversal {
          * @param ont
          * @return
          */
-        public static Map<Node, Object> computeStats(final IOntology ont) {
+        public static Map<Node, Object> computeStats(final Ontology ont) {
             final Map<Node, Object> result = new HashMap<Node, Object>();
             
             final Map<Node, Integer> minLevel = new HashMap<Node, Integer>();
@@ -119,7 +119,7 @@ public interface Traversal {
 
 abstract class AbstractTraversal implements Traversal {
     
-    public void accept(IOntology ont, Visitor... visitors) {
+    public void accept(Ontology ont, Visitor... visitors) {
         accept(ont.getTopNode(), visitors);
     }
     

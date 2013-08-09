@@ -4,6 +4,8 @@
  */
 package au.csiro.ontology.model;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * This class represents an existential (also known as an ObjectSomeValuesFrom
  * in OWL).
@@ -11,12 +13,28 @@ package au.csiro.ontology.model;
  * @author Alejandro Metke
  * 
  */
-public class Existential implements IExistential {
+@XmlRootElement
+public class Existential extends Concept {
 
-    private INamedRole role;
-    private IConcept concept;
-
-    public Existential(INamedRole role, IConcept concept) {
+    private static final long serialVersionUID = 1L;
+    
+    private NamedRole role;
+    
+    private Concept concept;
+    
+    /**
+     * 
+     */
+    public Existential() {
+        
+    }
+    
+    /**
+     * 
+     * @param role
+     * @param concept
+     */
+    public Existential(NamedRole role, Concept concept) {
         this.role = role;
         this.concept = concept;
     }
@@ -26,12 +44,26 @@ public class Existential implements IExistential {
         return role + "." + concept;
     }
     
-    public INamedRole getRole() {
+    public NamedRole getRole() {
         return role;
     }
     
-    public IConcept getConcept() {
+    public Concept getConcept() {
         return concept;
+    }
+
+    /**
+     * @param role the role to set
+     */
+    public void setRole(NamedRole role) {
+        this.role = role;
+    }
+
+    /**
+     * @param concept the concept to set
+     */
+    public void setConcept(Concept concept) {
+        this.concept = concept;
     }
 
     @Override
@@ -66,7 +98,7 @@ public class Existential implements IExistential {
     }
 
     @SuppressWarnings({ "rawtypes" })
-    public int compareTo(IConcept o) {
+    public int compareTo(Concept o) {
         Class thisClass = this.getClass();
         Class otherClass = o.getClass();
         if(thisClass.equals(otherClass)) {

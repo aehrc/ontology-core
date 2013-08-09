@@ -4,16 +4,28 @@
  */
 package au.csiro.ontology.model;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * This class represents an integer literal.
  * 
  * @author Alejandro Metke
  * 
  */
-public class IntegerLiteral implements IIntegerLiteral {
+@XmlRootElement
+public class IntegerLiteral extends Literal {
 
-    private final int value;
-
+    private static final long serialVersionUID = 1L;
+    
+    private int value;
+    
+    /**
+     * 
+     */
+    public IntegerLiteral() {
+        
+    }
+    
     /**
      * Constructor.
      * 
@@ -28,6 +40,13 @@ public class IntegerLiteral implements IIntegerLiteral {
      */
     public int getValue() {
         return value;
+    }
+
+    /**
+     * @param value the value to set
+     */
+    public void setValue(int value) {
+        this.value = value;
     }
 
     @Override
@@ -57,7 +76,7 @@ public class IntegerLiteral implements IIntegerLiteral {
         return String.valueOf(value);
     }
 
-    public int compareTo(ILiteral o) {
+    public int compareTo(Literal o) {
         return ((Integer) value).compareTo(((IntegerLiteral) o).value);
     }
 

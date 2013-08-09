@@ -4,16 +4,28 @@
  */
 package au.csiro.ontology.model;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * This class represents a literal that is best stored as a Java string.
  * 
  * @author Alejandro Metke
  * 
  */
-public class StringLiteral implements IStringLiteral {
+@XmlRootElement
+public class StringLiteral extends Literal {
 
-    private final String value;
-
+    private static final long serialVersionUID = 1L;
+    
+    private String value;
+    
+    /**
+     * 
+     */
+    public StringLiteral() {
+        
+    }
+    
     public StringLiteral(String value) {
         this.value = value;
     }
@@ -23,6 +35,13 @@ public class StringLiteral implements IStringLiteral {
      */
     public String getValue() {
         return value;
+    }
+
+    /**
+     * @param value the value to set
+     */
+    public void setValue(String value) {
+        this.value = value;
     }
 
     @Override
@@ -55,7 +74,7 @@ public class StringLiteral implements IStringLiteral {
         return value;
     }
 
-    public int compareTo(ILiteral o) {
+    public int compareTo(Literal o) {
         StringLiteral sl = (StringLiteral) o;
         String otherValue = sl.value;
         return value.compareTo(otherValue);
