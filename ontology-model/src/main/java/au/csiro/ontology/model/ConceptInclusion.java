@@ -2,28 +2,29 @@
  * Copyright CSIRO Australian e-Health Research Centre (http://aehrc.com).
  * All rights reserved. Use is subject to license terms and conditions.
  */
-package au.csiro.ontology.axioms;
+package au.csiro.ontology.model;
 
-import au.csiro.ontology.model.IConcept;
+import javax.xml.bind.annotation.XmlRootElement;
+
 
 /**
- * This class represents a concept inclusion axiom (also known as a SubClassOf
- * axiom in OWL).
+ * This class represents a concept inclusion axiom (also known as a SubClassOf axiom in OWL).
  * 
  * @author Alejandro Metke
  * 
  */
-public class ConceptInclusion implements IConceptInclusion {
+@XmlRootElement
+public class ConceptInclusion extends Axiom {
     
     /**
      * The left hand side of the expression.
      */
-    protected IConcept lhs;
+    private Concept lhs;
     
     /**
      * The right hand side of the expression.
      */
-    protected IConcept rhs;
+    private Concept rhs;
     
     /**
      * 
@@ -38,36 +39,18 @@ public class ConceptInclusion implements IConceptInclusion {
      * @param lhs
      * @param rhs
      */
-    public ConceptInclusion(final IConcept lhs, final IConcept rhs) {
+    public ConceptInclusion(final Concept lhs, final Concept rhs) {
         if (null == lhs) {
-            throw new IllegalArgumentException("LHS cannot be null (RHS = "
-                    + rhs + ")");
+            throw new IllegalArgumentException("LHS cannot be null (RHS = " + rhs + ")");
         }
         this.lhs = lhs;
         if (null == rhs) {
-            throw new IllegalArgumentException("RHS cannot be null (LHS = "
-                    + lhs + ")");
+            throw new IllegalArgumentException("RHS cannot be null (LHS = " + lhs + ")");
         }
         this.rhs = rhs;
     }
     
-    /**
-     * Returns the left hand side of the expression.
-     * 
-     * @return
-     */
-    public IConcept lhs() {
-        return lhs;
-    }
     
-    /**
-     * Returns the right hand side of the expression.
-     * 
-     * @return
-     */
-    public IConcept rhs() {
-        return rhs;
-    }
 
     @Override
     public String toString() {
@@ -77,28 +60,28 @@ public class ConceptInclusion implements IConceptInclusion {
     /**
      * @return the lhs
      */
-    public IConcept getLhs() {
+    public Concept getLhs() {
         return lhs;
     }
 
     /**
      * @param lhs the lhs to set
      */
-    public void setLhs(IConcept lhs) {
+    public void setLhs(Concept lhs) {
         this.lhs = lhs;
     }
 
     /**
      * @return the rhs
      */
-    public IConcept getRhs() {
+    public Concept getRhs() {
         return rhs;
     }
 
     /**
      * @param rhs the rhs to set
      */
-    public void setRhs(IConcept rhs) {
+    public void setRhs(Concept rhs) {
         this.rhs = rhs;
     }
 
@@ -133,13 +116,13 @@ public class ConceptInclusion implements IConceptInclusion {
         return true;
     }
 
-    public int compareTo(IAxiom o) {
-        if(!(o instanceof IConceptInclusion)) {
+    public int compareTo(Axiom o) {
+        if(!(o instanceof ConceptInclusion)) {
             return -1;
         } else {
-            IConceptInclusion otherCi = (IConceptInclusion)o;
-            int lhsRes = lhs.compareTo(otherCi.lhs());
-            int rhsRes = rhs.compareTo(otherCi.rhs());
+            ConceptInclusion otherCi = (ConceptInclusion) o;
+            int lhsRes = lhs.compareTo(otherCi.getLhs());
+            int rhsRes = rhs.compareTo(otherCi.getRhs());
             if(lhsRes == 0 && rhsRes == 0)
                 return 0;
             else if(lhsRes != 0)

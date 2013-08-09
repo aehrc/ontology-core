@@ -2,30 +2,31 @@
  * Copyright CSIRO Australian e-Health Research Centre (http://aehrc.com).
  * All rights reserved. Use is subject to license terms and conditions.
  */
-package au.csiro.ontology.axioms;
+package au.csiro.ontology.model;
 
 import java.util.Arrays;
 
-import au.csiro.ontology.model.IRole;
+import javax.xml.bind.annotation.XmlRootElement;
+
 
 /**
- * This class represents a role inclusion axiom (also known as a
- * SubObjectPropertyOf axiom in OWL).
+ * This class represents a role inclusion axiom (also known as a SubObjectPropertyOf axiom in OWL).
  * 
  * @author Alejandro Metke
  * 
  */
-public class RoleInclusion implements IRoleInclusion {
+@XmlRootElement
+public class RoleInclusion extends Axiom {
     
     /**
      * The left hand side of the expression.
      */
-    protected IRole[] lhs;
+    protected Role[] lhs;
     
     /**
      * The right hand side of the expression.
      */
-    protected IRole rhs;
+    protected Role rhs;
     
     /**
      * 
@@ -40,7 +41,7 @@ public class RoleInclusion implements IRoleInclusion {
      * @param lhs
      * @param rhs
      */
-    public RoleInclusion(final IRole[] lhs, final IRole rhs) {
+    public RoleInclusion(final Role[] lhs, final Role rhs) {
         this.lhs = lhs;
         this.rhs = rhs;
     }
@@ -51,54 +52,36 @@ public class RoleInclusion implements IRoleInclusion {
      * @param lhs
      * @param rhs
      */
-    public RoleInclusion(final IRole lhs, final IRole rhs) {
-        this.lhs = new IRole[]{lhs};
+    public RoleInclusion(final Role lhs, final Role rhs) {
+        this.lhs = new Role[]{ lhs };
         this.rhs = rhs;
-    }
-    
-    /**
-     * Returns the left hand side of the expression.
-     * 
-     * @return
-     */
-    public IRole[] lhs() {
-        return lhs;
-    }
-    
-    /**
-     * Returns the right hand side of the expression.
-     * 
-     * @return
-     */
-    public IRole rhs() {
-        return rhs;
     }
 
     /**
      * @return the lhs
      */
-    public IRole[] getLhs() {
+    public Role[] getLhs() {
         return lhs;
     }
 
     /**
      * @param lhs the lhs to set
      */
-    public void setLhs(IRole[] lhs) {
+    public void setLhs(Role[] lhs) {
         this.lhs = lhs;
     }
 
     /**
      * @return the rhs
      */
-    public IRole getRhs() {
+    public Role getRhs() {
         return rhs;
     }
 
     /**
      * @param rhs the rhs to set
      */
-    public void setRhs(IRole rhs) {
+    public void setRhs(Role rhs) {
         this.rhs = rhs;
     }
 
@@ -115,13 +98,13 @@ public class RoleInclusion implements IRoleInclusion {
         return sb.toString();
     }
 
-    public int compareTo(IAxiom o) {
-        if(!(o instanceof IRoleInclusion)) {
+    public int compareTo(Axiom o) {
+        if(!(o instanceof RoleInclusion)) {
             return 1;
         } else {
-            IRoleInclusion otherRi = (IRoleInclusion)o;
+            RoleInclusion otherRi = (RoleInclusion) o;
             int lhsRes = 0;
-            IRole[] oLhs = otherRi.lhs();
+            Role[] oLhs = otherRi.getLhs();
             if(!Arrays.equals(lhs, oLhs)) {
                 // If length is different put the shortest one first
                 if(lhs.length < oLhs.length) {
@@ -141,7 +124,7 @@ public class RoleInclusion implements IRoleInclusion {
                     }
                 }
             }
-            int rhsRes = rhs.compareTo(otherRi.rhs());
+            int rhsRes = rhs.compareTo(otherRi.getRhs());
             if(lhsRes == 0 && rhsRes == 0)
                 return 0;
             else if(lhsRes != 0)

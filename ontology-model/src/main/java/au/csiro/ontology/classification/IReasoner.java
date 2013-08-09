@@ -4,20 +4,16 @@ import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.Set;
 
-import au.csiro.ontology.Taxonomy;
-
-import au.csiro.ontology.IOntology;
-import au.csiro.ontology.axioms.IAxiom;
+import au.csiro.ontology.Ontology;
+import au.csiro.ontology.model.Axiom;
 
 /**
- * This interface represents the functionality of a reasoner. It uses the 
- * internal ontology model. This interface is included in this package because
- * it could have several implementations.
+ * This interface represents the functionality of a reasoner. It uses the internal ontology model. This interface is 
+ * included in this package because it could have several implementations.
  * 
  * @author Alejandro Metke
  *
  */
-@SuppressWarnings("deprecation")
 public interface IReasoner {
     
     /**
@@ -25,21 +21,21 @@ public interface IReasoner {
      * 
      * @param axioms
      */
-    public void loadAxioms(Set<IAxiom> axioms);
+    public void loadAxioms(Set<Axiom> axioms);
     
     /**
      * Loads and indexes the supplied axioms.
      * 
      * @param axioms
      */
-    public void loadAxioms(Iterator<IAxiom> axioms);
+    public void loadAxioms(Iterator<Axiom> axioms);
     
     /**
      * Loads and indexes the supplied axioms.
      * 
      * @param axioms
      */
-    public void loadAxioms(IOntology ont);
+    public void loadAxioms(Ontology ont);
     
     /**
      * Classifies the current axioms.
@@ -47,45 +43,6 @@ public interface IReasoner {
      * @return
      */
     public IReasoner classify();
-    
-    /**
-     * Classifies the supplied axioms. The first time this method is called it 
-     * will perform a full classification. Subsequent calls will trigger
-     * incremental classifications.
-     * 
-     * @param axioms The axioms in the base ontology.
-     * @return IReasoner
-     * @deprecated Use {@link IReasoner#loadAxioms(Set)}  and 
-     * {@link IReasoner#classify()} instead. 
-     */
-    public IReasoner classify(Set<IAxiom> axioms);
-    
-    /**
-     * Classifies the supplied axioms. The first time this method is called it 
-     * will perform a full classification. Subsequent calls will trigger
-     * incremental classifications.
-     * 
-     * @param axioms An iterator for the axioms. Implementations must be able
-     * to handle null values.
-     * @return IReasoner
-     * @deprecated Use {@link IReasoner#loadAxioms(Iterator)} and 
-     * {@link IReasoner#classify()} instead. 
-     */
-    public IReasoner classify(Iterator<IAxiom> axioms);
-    
-    /**
-     * Classifies the stated axioms in the supplied ontology. The first time 
-     * this method is called it will perform a full classification. Subsequent 
-     * calls will trigger incremental classifications.
-     * 
-     * @deprecated Use {@link IReasoner#loadAxioms(IOntology)} and 
-     * {@link IReasoner#classify()} instead. 
-     * instead.
-     * 
-     * @param ont An ontology.
-     * @return IReasoner
-     */
-    public IReasoner classify(IOntology ont);
     
     /**
      * Removes all the state in the classifier except the taxonomy generated
@@ -103,7 +60,7 @@ public interface IReasoner {
      * 
      * @return The classified ontology.
      */
-    public IOntology getClassifiedOntology();
+    public Ontology getClassifiedOntology();
     
     /**
      * Returns an {@link IOntology} that represents the generated taxonomy. 
@@ -112,7 +69,7 @@ public interface IReasoner {
      * 
      * @return The classified ontology.
      */
-    public IOntology getClassifiedOntology(IOntology ont);
+    public Ontology getClassifiedOntology(Ontology ont);
     
     /**
      * Saves this reasoner to the specified {@link OutputStream}.
@@ -128,14 +85,5 @@ public interface IReasoner {
      * hasn't.
      */
     public boolean isClassified();
-    
-    /**
-     * Returns the resulting {@link Taxonomy} after classification (or null if
-     * the ontology has not been classified yet).
-     * 
-     * @return The taxonomy.
-     * @deprecated Use {@link IReasoner#getClassifiedOntology()} instead.
-     */
-    public Taxonomy getTaxonomy();
 
 }

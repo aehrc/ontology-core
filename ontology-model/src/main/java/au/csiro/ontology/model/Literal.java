@@ -7,17 +7,13 @@ package au.csiro.ontology.model;
 import java.io.Serializable;
 
 /**
- * Defines the methods of a named concept.
+ * This interface represents a literal (also known as a Literal in OWL).
  * 
  * @author Alejandro Metke
- *
+ * 
  */
-public interface INamedConcept extends IConcept, Serializable {
-    
-    /**
-     * Returns the id of this named concept.
-     * 
-     * @return
-     */
-    public String getId();
+public abstract class Literal implements Comparable<Literal>, Serializable {
+
+    private static final long serialVersionUID = 1L;
+
 }

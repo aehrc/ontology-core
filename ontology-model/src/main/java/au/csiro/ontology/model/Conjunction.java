@@ -9,15 +9,21 @@ import java.util.Collection;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * This class represents a conjunction (also referred to as an ObjectIntersectionOf in OWL).
  * 
  * @author Alejandro Metke
  * 
  */
-public class Conjunction implements IConjunction {
+@XmlRootElement
+public class Conjunction extends Concept {
 
-    private IConcept[] concepts;
+    private static final long serialVersionUID = 1L;
+
+    private Concept[] concepts;
+    
     private int hashCode;
     
     /**
@@ -31,33 +37,33 @@ public class Conjunction implements IConjunction {
      * 
      * @param concepts
      */
-    public Conjunction(final IConcept[] concepts) {
+    public Conjunction(final Concept[] concepts) {
         setConcepts(concepts);
     }
 
-    public Conjunction(final Collection<? extends IConcept> concepts) {
+    public Conjunction(final Collection<? extends Concept> concepts) {
         // Store the concepts in hashCode order so that equals() is order
         // independent, i.e. conjunctions are reflexive (should also be
         // transitive, but Agile says STTCPW)
 
-        final SortedSet<IConcept> sorted = new TreeSet<IConcept>(concepts);
-        this.concepts = sorted.toArray(new IConcept[sorted.size()]);
+        final SortedSet<Concept> sorted = new TreeSet<Concept>(concepts);
+        this.concepts = sorted.toArray(new Concept[sorted.size()]);
         hashCode = sorted.hashCode();
     }
 
-    public IConcept[] getConcepts() {
+    public Concept[] getConcepts() {
         return concepts;
     }
 
     /**
      * @param concepts the concepts to set
      */
-    public void setConcepts(IConcept[] concepts) {
-        final SortedSet<IConcept> sorted = new TreeSet<IConcept>();
-        for (IConcept concept : concepts) {
+    public void setConcepts(Concept[] concepts) {
+        final SortedSet<Concept> sorted = new TreeSet<Concept>();
+        for (Concept concept : concepts) {
             sorted.add(concept);
         }
-        this.concepts = sorted.toArray(new IConcept[sorted.size()]);
+        this.concepts = sorted.toArray(new Concept[sorted.size()]);
         hashCode = sorted.hashCode();
     }
 
@@ -95,7 +101,7 @@ public class Conjunction implements IConjunction {
     }
 
     @SuppressWarnings("rawtypes")
-    public int compareTo(IConcept o) {
+    public int compareTo(Concept o) {
         Class thisClass = this.getClass();
         Class otherClass = o.getClass();
         if(thisClass.equals(otherClass)) {
