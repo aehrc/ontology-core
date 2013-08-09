@@ -26,11 +26,7 @@ import javax.xml.bind.JAXBException;
 
 import org.apache.log4j.Logger;
 
-import au.csiro.ontology.IOntology;
 import au.csiro.ontology.Ontology;
-import au.csiro.ontology.axioms.ConceptInclusion;
-import au.csiro.ontology.axioms.IAxiom;
-import au.csiro.ontology.axioms.RoleInclusion;
 import au.csiro.ontology.importer.BaseImporter;
 import au.csiro.ontology.importer.ImportException;
 import au.csiro.ontology.input.Input.InputType;
@@ -38,16 +34,16 @@ import au.csiro.ontology.input.Inputs;
 import au.csiro.ontology.input.ModuleInfo;
 import au.csiro.ontology.input.RF2Input;
 import au.csiro.ontology.input.Version;
+import au.csiro.ontology.model.Axiom;
 import au.csiro.ontology.model.Concept;
+import au.csiro.ontology.model.ConceptInclusion;
 import au.csiro.ontology.model.Conjunction;
 import au.csiro.ontology.model.Existential;
-import au.csiro.ontology.model.Feature;
-import au.csiro.ontology.model.IConcept;
-import au.csiro.ontology.model.IExistential;
-import au.csiro.ontology.model.INamedFeature;
-import au.csiro.ontology.model.INamedRole;
-import au.csiro.ontology.model.IRole;
+import au.csiro.ontology.model.NamedConcept;
+import au.csiro.ontology.model.NamedFeature;
+import au.csiro.ontology.model.NamedRole;
 import au.csiro.ontology.model.Role;
+import au.csiro.ontology.model.RoleInclusion;
 import au.csiro.ontology.snomed.refset.rf2.IModuleDependencyRefset;
 import au.csiro.ontology.snomed.refset.rf2.ModuleDependency;
 import au.csiro.ontology.util.IProgressMonitor;
@@ -185,23 +181,17 @@ public class RF2Importer extends BaseImporter {
      * @param metadata
      * @return
      */
-    protected IOntology transform(String id, String version, 
-            VersionRows vr, Map<String, String> metadata, 
+    protected Ontology transform(String id, String version, VersionRows vr, Map<String, String> metadata, 
             IProgressMonitor monitor) {
         
-        final Map<String, IConcept> ci = new HashMap<String, IConcept>();
-        final Map<String, INamedRole> ri = 
-                new HashMap<String, INamedRole>();
+        final Map<String, Concept> ci = new HashMap<String, Concept>();
+        final Map<String, NamedRole> ri = new HashMap<String, NamedRole>();
         
         final Map<String, String> primitive = new HashMap<String, String>();
-        final Map<String, Set<String>> parents = 
-                new HashMap<String, Set<String>>();
-        final Map<String, Set<String>> children = 
-                new HashMap<String, Set<String>>();
-        final Map<String, List<String[]>> rels = 
-                new HashMap<String, List<String[]>>();
-        final Map<String, Map<String, String>> roles = 
-                new HashMap<String, Map<String, String>>();
+        final Map<String, Set<String>> parents = new HashMap<String, Set<String>>();
+        final Map<String, Set<String>> children = new HashMap<String, Set<String>>();
+        final Map<String, List<String[]>> rels = new HashMap<String, List<String[]>>();
+        final Map<String, Map<String, String>> roles = new HashMap<String, Map<String, String>>();
 
         final String conceptDefinedId = metadata.get("conceptDefinedId");
         final String someId = metadata.get("someId");
@@ -211,13 +201,12 @@ public class RF2Importer extends BaseImporter {
         final String rightIdentityIds = metadata.get("rightIdentityIds");
         final String roleGroupId = metadata.get("roleGroupId");
 
-        final Collection<IAxiom> axioms = new ArrayList<IAxiom>();
+        final Collection<Axiom> axioms = new ArrayList<Axiom>();
 
         // Process concept rows
         for (ConceptRow cr : vr.getConceptRows()) {
             if ("1".equals(cr.getActive())) {
-                if (!conceptDefinedId.equals(
-                        cr.getDefinitionStatusId())) {
+                if (!conceptDefinedId.equals(cr.getDefinitionStatusId())) {
                     primitive.put(cr.getId(), "1");
                 } else {
                     primitive.put(cr.getId(), "0");
@@ -228,8 +217,7 @@ public class RF2Importer extends BaseImporter {
         // Process relationship rows
         for (RelationshipRow rr : vr.getRelationshipRows()) {
             if (!someId.equals(rr.getModifierId())) {
-                throw new RuntimeException("Only existentials are "
-                        + "supported.");
+                throw new RuntimeException("Only existentials are supported.");
             }
 
             // only process active concepts and defining relationships
@@ -247,25 +235,23 @@ public class RF2Importer extends BaseImporter {
             }
         }
 
-        populateRoles(children.get(conceptModelAttId), "", 
-                rightIdentityIds, children, roles);
+        populateRoles(children.get(conceptModelAttId), "", rightIdentityIds, children, roles);
 
         // Add role axioms
         for (String r1 : roles.keySet()) {
             String parentRole = roles.get(r1).get("parentrole");
 
             if (!"".equals(parentRole)) {
-                IRole lhs = getRole(r1, ri);
-                IRole rhs = getRole(parentRole, ri);
-                axioms.add(new RoleInclusion(new IRole[] { lhs }, rhs));
+                Role lhs = getRole(r1, ri);
+                Role rhs = getRole(parentRole, ri);
+                axioms.add(new RoleInclusion(new Role[] { lhs }, rhs));
             }
 
             String rightId = roles.get(r1).get("rightID");
             if (!"".equals(rightId)) {
-                IRole lhs1 = getRole(r1, ri);
-                IRole lhs2 = getRole(rightId, ri);
-                axioms.add(new RoleInclusion(
-                        new IRole[] { lhs1, lhs2 }, lhs1));
+                Role lhs1 = getRole(r1, ri);
+                Role lhs2 = getRole(rightId, ri);
+                axioms.add(new RoleInclusion(new Role[] { lhs1, lhs2 }, lhs1));
             }
         }
 
@@ -286,11 +272,11 @@ public class RF2Importer extends BaseImporter {
             if (numElems == 0) {
                 // do nothing
             } else if (numElems == 1) {
-                IConcept lhs = getConcept(c1, ci);
-                IConcept rhs = getConcept(prs.iterator().next(), ci);
+                Concept lhs = getConcept(c1, ci);
+                Concept rhs = getConcept(prs.iterator().next(), ci);
                 axioms.add(new ConceptInclusion(lhs, rhs));
             } else {
-                List<IConcept> conjs = new ArrayList<IConcept>();
+                List<Concept> conjs = new ArrayList<Concept>();
 
                 for (String pr : prs) {
                     conjs.add(getConcept(pr, ci));
@@ -299,17 +285,12 @@ public class RF2Importer extends BaseImporter {
                 if (relsVal != null) {
                     for (Set<RoleValuePair> rvs : groupRoles(relsVal)) {
                         if (rvs.size() > 1) {
-                            IConcept[] innerConjs = new IConcept[rvs
-                                    .size()];
+                            Concept[] innerConjs = new Concept[rvs.size()];
                             int j = 0;
                             for (RoleValuePair rv : rvs) {
-                                INamedRole role = getRole(
-                                        rv.role, ri);
-                                IConcept filler = getConcept(rv.value,
-                                        ci);
-                                Existential exis = 
-                                        new Existential(
-                                        role, filler);
+                                NamedRole role = getRole(rv.role, ri);
+                                Concept filler = getConcept(rv.value, ci);
+                                Existential exis = new Existential(role, filler);
                                 innerConjs[j++] = exis;
                             }
                             // Wrap with a role group
@@ -318,36 +299,29 @@ public class RF2Importer extends BaseImporter {
                                     innerConjs)));
                         } else {
                             RoleValuePair first = rvs.iterator().next();
-                            INamedRole role = getRole(
-                                    first.role, ri);
-                            IConcept filler = getConcept(first.value,
-                                    ci);
-                            IExistential exis = 
-                                    new Existential(
-                                    role, filler);
+                            NamedRole role = getRole(first.role, ri);
+                            Concept filler = getConcept(first.value, ci);
+                            Existential exis = new Existential(role, filler);
                             if (neverGroupedIds.contains(first.role)) {
                                 // Does not need a role group
                                 conjs.add(exis);
                             } else {
                                 // Needs a role group
-                                conjs.add(new Existential(
-                                    getRole(roleGroupId, ri), exis));
+                                conjs.add(new Existential(getRole(roleGroupId, ri), exis));
                             }
                         }
                     }
                 }
 
-                IConcept[] conjsArr = new IConcept[conjs.size()];
+                Concept[] conjsArr = new Concept[conjs.size()];
                 for (int j = 0; j < conjsArr.length; j++) {
                     conjsArr[j] = conjs.get(j);
                 }
 
-                axioms.add(new ConceptInclusion(getConcept(c1, ci),
-                        new Conjunction(conjsArr)));
+                axioms.add(new ConceptInclusion(getConcept(c1, ci), new Conjunction(conjsArr)));
 
                 if (primitive.get(c1).equals("0")) {
-                    axioms.add(new ConceptInclusion(new Conjunction(
-                            conjsArr), getConcept(c1, ci)));
+                    axioms.add(new ConceptInclusion(new Conjunction(conjsArr), getConcept(c1, ci)));
                 }
             }
         }
@@ -355,8 +329,7 @@ public class RF2Importer extends BaseImporter {
         return new Ontology(id, version, axioms, null);
     }
 
-    public Iterator<IOntology> getOntologyVersions(
-            IProgressMonitor monitor) throws ImportException {
+    public Iterator<Ontology> getOntologyVersions(IProgressMonitor monitor) throws ImportException {
         return new OntologyInterator(monitor);
     }
     
@@ -405,8 +378,7 @@ public class RF2Importer extends BaseImporter {
             }
             
             // Load relationships
-            Set<String> relationshipsFiles = 
-                    input.getStatedRelationshipsFiles();
+            Set<String> relationshipsFiles = input.getStatedRelationshipsFiles();
             if(relationshipsFiles == null || relationshipsFiles.isEmpty()) {
                 log.info("Read inferred relationships info");
                 relationshipsFiles = input.getRelationshipsFiles();
@@ -415,15 +387,12 @@ public class RF2Importer extends BaseImporter {
             }
             
             if(relationshipsFiles == null || relationshipsFiles.isEmpty()) {
-                throw new ImportException(
-                        "No relationships files was specified.");
+                throw new ImportException("No relationships files was specified.");
             }
             
             for(String relationshipsFile : relationshipsFiles) {
-                final String message = "Unable to load realtionships " +
-                        "file. Please check your input configuration " +
-                        "file. (input type = "+inputType+", file="+
-                        relationshipsFile+")";
+                final String message = "Unable to load realtionships file. Please check your input configuration " +
+                        "file. (input type = " + inputType+", file=" + relationshipsFile+")";
                 try {
                     loadRelationshipRows(modMap, relationshipMap, input.getInputStream(relationshipsFile));
                 } catch (NullPointerException e) {
@@ -444,8 +413,7 @@ public class RF2Importer extends BaseImporter {
         return vr;
     }
 
-    protected void loadRelationshipRows(Map<String, String> modMap,
-            Map<String, RelationshipRow> relationshipMap,
+    protected void loadRelationshipRows(Map<String, String> modMap, Map<String, RelationshipRow> relationshipMap,
             final InputStream inputStream) throws IOException {
         BufferedReader br = null;
         try {
@@ -480,40 +448,30 @@ public class RF2Importer extends BaseImporter {
                         idx5 < 0 || idx6 < 0 || idx7 < 0 || idx8 < 0 || 
                         idx9 < 0) {
                     br.close();
-                    throw new RuntimeException("Concepts: " +
-                        "Mis-formatted line, expected 10 " +
+                    throw new RuntimeException("Concepts: Mis-formatted line, expected 10 " +
                         "tab-separated fields, got: " + line);
                 }
       
                 final String id = line.substring(0, idx1);
-                final String effectiveTime = line.substring(idx1 + 1, 
-                        idx2);
+                final String effectiveTime = line.substring(idx1 + 1, idx2);
                 final String active = line.substring(idx2 + 1, idx3);
                 final String moduleId = line.substring(idx3 + 1, idx4);
                 final String sourceId = line.substring(idx4 + 1, idx5);
-                final String destinationId = line.substring(idx5 + 1, 
-                        idx6);
-                final String relationshipGroup = line.substring(
-                        idx6 + 1, idx7);
+                final String destinationId = line.substring(idx5 + 1, idx6);
+                final String relationshipGroup = line.substring(idx6 + 1, idx7);
                 final String typeId = line.substring(idx7 + 1, idx8);
-                final String characteristicTypeId = line.substring(
-                        idx8 + 1, idx9);
+                final String characteristicTypeId = line.substring(idx8 + 1, idx9);
                 final String modifierId = line.substring(idx9 + 1);
                 
                 String tgtVer = modMap.get(moduleId);
                 if(tgtVer == null) continue;
                 int rel = effectiveTime.compareTo(tgtVer);
                 if(rel <= 0) {
-                    RelationshipRow currRelationshipRow = 
-                            relationshipMap.get(id);
-                    if(currRelationshipRow == null || 
-                        effectiveTime.compareTo(
+                    RelationshipRow currRelationshipRow = relationshipMap.get(id);
+                    if(currRelationshipRow == null || effectiveTime.compareTo(
                             currRelationshipRow.getEffectiveTime()) > 0) {
-                        RelationshipRow rr = new RelationshipRow(id, 
-                                effectiveTime, active, moduleId, 
-                                sourceId, destinationId, 
-                                relationshipGroup, typeId, 
-                                characteristicTypeId, modifierId);
+                        RelationshipRow rr = new RelationshipRow(id, effectiveTime, active, moduleId, sourceId, 
+                                destinationId, relationshipGroup, typeId, characteristicTypeId, modifierId);
                         relationshipMap.put(id, rr);
                     }
                 }
@@ -525,14 +483,11 @@ public class RF2Importer extends BaseImporter {
         }
     }
 
-    protected void loadConceptRows(Map<String, String> modMap,
-            Map<String, ConceptRow> conceptMap, final InputStream inputStream)
-            throws IOException, UnsupportedEncodingException {
+    protected void loadConceptRows(Map<String, String> modMap, Map<String, ConceptRow> conceptMap, 
+            final InputStream inputStream) throws IOException, UnsupportedEncodingException {
         BufferedReader br = null;
         try {
-            br = new BufferedReader(
-                new InputStreamReader(
-                        inputStream));
+            br = new BufferedReader(new InputStreamReader(inputStream));
             String line = br.readLine(); // Skip first line
       
             while (null != (line = br.readLine())) {
@@ -553,31 +508,23 @@ public class RF2Importer extends BaseImporter {
       
                 if (idx1 < 0 || idx2 < 0 || idx3 < 0 || idx4 < 0) {
                     br.close();
-                    throw new RuntimeException(
-                        "Concepts: Mis-formatted "
-                        + "line, expected at least 5 tab-separated " +
+                    throw new RuntimeException("Concepts: Mis-formatted line, expected at least 5 tab-separated " +
                         "fields, got: " + line);
                 }
       
                 final String id = line.substring(0, idx1);
-                final String effectiveTime = line.substring(idx1 + 1, 
-                        idx2);
+                final String effectiveTime = line.substring(idx1 + 1, idx2);
                 final String active = line.substring(idx2 + 1, idx3);
                 final String moduleId = line.substring(idx3 + 1, idx4);
-                final String definitionStatusId = line.substring(
-                        idx4 + 1);
+                final String definitionStatusId = line.substring(idx4 + 1);
                 
                 String tgtVer = modMap.get(moduleId);
                 if(tgtVer == null) continue;
                 int rel = effectiveTime.compareTo(tgtVer);
                 if(rel <= 0) {
                     ConceptRow currConceptRow = conceptMap.get(id);
-                    if(currConceptRow == null || 
-                        effectiveTime.compareTo(
-                            currConceptRow.getEffectiveTime()) > 0) {
-                        ConceptRow cr = new ConceptRow(id, 
-                                effectiveTime, active, moduleId, 
-                                definitionStatusId);
+                    if(currConceptRow == null || effectiveTime.compareTo(currConceptRow.getEffectiveTime()) > 0) {
+                        ConceptRow cr = new ConceptRow(id, effectiveTime, active, moduleId, definitionStatusId);
                         conceptMap.put(id, cr);
                     }
                 }
@@ -589,37 +536,34 @@ public class RF2Importer extends BaseImporter {
         }
     }
 
-    protected IConcept getConcept(String id, Map<String, IConcept> ci) {
-        IConcept c = ci.get(id);
+    protected Concept getConcept(String id, Map<String, Concept> ci) {
+        Concept c = ci.get(id);
         if (c == null) {
-            c = new Concept(id);
+            c = new NamedConcept(id);
             ci.put(id, c);
         }
         return c;
     }
 
-    protected INamedRole getRole(String id,
-            Map<String, INamedRole> ri) {
-        INamedRole r = ri.get(id);
+    protected NamedRole getRole(String id, Map<String, NamedRole> ri) {
+        NamedRole r = ri.get(id);
         if (r == null) {
-            r = new Role(id);
+            r = new NamedRole(id);
             ri.put(id, r);
         }
         return r;
     }
 
-    protected INamedFeature getFeature(String id,
-            Map<String, INamedFeature> fi) {
-        INamedFeature f = fi.get(id);
+    protected NamedFeature getFeature(String id, Map<String, NamedFeature> fi) {
+        NamedFeature f = fi.get(id);
         if (f == null) {
-            f = new Feature(id);
+            f = new NamedFeature(id);
             fi.put(id, f);
         }
         return f;
     }
     
-    protected void populateParent(String src, String tgt, 
-            Map<String, Set<String>> parents) {
+    protected void populateParent(String src, String tgt, Map<String, Set<String>> parents) {
         Set<String> prs = parents.get(src);
         if (prs == null) {
             prs = new TreeSet<String>();
@@ -628,8 +572,7 @@ public class RF2Importer extends BaseImporter {
         prs.add(tgt);
     }
 
-    protected void populateChildren(String src, String tgt, 
-            Map<String, Set<String>> children) {
+    protected void populateChildren(String src, String tgt, Map<String, Set<String>> children) {
         Set<String> prs = children.get(src);
         if (prs == null) {
             prs = new TreeSet<String>();
@@ -638,8 +581,7 @@ public class RF2Importer extends BaseImporter {
         prs.add(tgt);
     }
     
-    protected void populateRels(
-            String comp, String src, String role, String tgt, String group,
+    protected void populateRels(String comp, String src, String role, String tgt, String group, 
             Map<String, List<String[]>> rels) {
         List<String[]> val = rels.get(src);
         if (val == null) {
@@ -649,9 +591,8 @@ public class RF2Importer extends BaseImporter {
         val.add(new String[] { comp, role, tgt, group });
     }
 
-    protected void populateRoles(Set<String> roles, String parentSCTID, 
-            String rightIdentityIds, Map<String, Set<String>> children, 
-            Map<String, Map<String, String>> rolesMap) {
+    protected void populateRoles(Set<String> roles, String parentSCTID, String rightIdentityIds, Map<String, 
+            Set<String>> children, Map<String, Map<String, String>> rolesMap) {
         if(roles == null) return;
         for (String role : roles) {
             Set<String> cs = children.get(role);
@@ -668,8 +609,8 @@ public class RF2Importer extends BaseImporter {
         }
     }
     
-    protected void populateRoleDef(String code, String rightId,
-            String parentRole, Map<String, Map<String, String>> roles) {
+    protected void populateRoleDef(String code, String rightId, String parentRole, Map<String, 
+            Map<String, String>> roles) {
         Map<String, String> vals = roles.get(code);
         if (vals == null) {
             vals = new HashMap<String, String>();
@@ -770,7 +711,7 @@ public class RF2Importer extends BaseImporter {
         }
     }
     
-    class OntologyInterator implements Iterator<IOntology> {
+    class OntologyInterator implements Iterator<Ontology> {
         
         private final List<ImportEntry> entries = new ArrayList<ImportEntry>();
         private final IProgressMonitor monitor;
@@ -783,8 +724,7 @@ public class RF2Importer extends BaseImporter {
             IModuleDependencyRefset mdr = loadModuleDependencies();
             
             if(mdr == null) {
-                throw new ImportException("Couldn't load module dependency " +
-                            "reference set for RF2 input files.");
+                throw new ImportException("Couldn't load module dependency reference set for RF2 input files.");
             }
             
             // Each map entry contains a map of modules indexed by version
@@ -815,8 +755,7 @@ public class RF2Importer extends BaseImporter {
                         depends.addAll(d.getDependencies());
                     }
                     
-                    entries.add(new ImportEntry(rootModuleId, ver, metadata, 
-                            modules));
+                    entries.add(new ImportEntry(rootModuleId, ver, metadata, modules));
                 }
             }
             log.info("Found "+entries.size()+" entries to import");
@@ -829,12 +768,11 @@ public class RF2Importer extends BaseImporter {
         /**
          * @throws RuntimeException in case an {@code ImportException} has occurred.
          */
-        public IOntology next() throws RuntimeException {
+        public Ontology next() throws RuntimeException {
             try {
                 ImportEntry entry = entries.remove(entries.size()-1);
                 VersionRows bundle = getBundle(entry);
-                return transform(entry.getRootModuleId(), 
-                        entry.getRootModuleVersion(), bundle, entry.getMetadata(), 
+                return transform(entry.getRootModuleId(), entry.getRootModuleVersion(), bundle, entry.getMetadata(), 
                         monitor);
             } catch (ImportException e) {
                 throw new RuntimeException(e);

@@ -17,17 +17,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import au.csiro.ontology.IOntology;
 import au.csiro.ontology.Ontology;
-import au.csiro.ontology.axioms.ConceptInclusion;
-import au.csiro.ontology.axioms.IAxiom;
-import au.csiro.ontology.axioms.RoleInclusion;
 import au.csiro.ontology.importer.BaseImporter;
+import au.csiro.ontology.model.Axiom;
 import au.csiro.ontology.model.Concept;
+import au.csiro.ontology.model.ConceptInclusion;
 import au.csiro.ontology.model.Conjunction;
 import au.csiro.ontology.model.Existential;
-import au.csiro.ontology.model.IConcept;
+import au.csiro.ontology.model.NamedConcept;
+import au.csiro.ontology.model.NamedRole;
 import au.csiro.ontology.model.Role;
+import au.csiro.ontology.model.RoleInclusion;
 import au.csiro.ontology.util.IProgressMonitor;
 import au.csiro.ontology.util.SnomedMetadata;
 import au.csiro.ontology.util.Statistics;
@@ -74,12 +74,12 @@ public class RF1Importer extends BaseImporter {
         this.version = version;
     }
     
-    public Iterator<IOntology> getOntologyVersions(
+    public Iterator<Ontology> getOntologyVersions(
             IProgressMonitor monitor) {
         return new OntologyInterator(monitor);
     }
     
-    class OntologyInterator implements Iterator<IOntology> {
+    class OntologyInterator implements Iterator<Ontology> {
         private boolean accessed = false;
         private IProgressMonitor monitor;
         
@@ -91,14 +91,14 @@ public class RF1Importer extends BaseImporter {
             return !accessed;
         }
 
-        public IOntology next() {
+        public Ontology next() {
             long start = System.currentTimeMillis();
             
             monitor.taskStarted("Loading axioms");
 
             // Extract the version rows
             VersionRows vr = extractVersionRows();
-            Collection<IAxiom> axioms = new ArrayList<IAxiom>();
+            Collection<Axiom> axioms = new ArrayList<Axiom>();
 
             // Process concept rows
             for (ConceptRow cr : vr.getConceptRows()) {
@@ -136,16 +136,13 @@ public class RF1Importer extends BaseImporter {
                 String parentRole = roles.get(r1).get("parentrole");
 
                 if (!"".equals(parentRole)) {
-                    axioms.add(new RoleInclusion(
-                            new Role(r1), 
-                            new Role(parentRole)));
+                    axioms.add(new RoleInclusion(new NamedRole(r1), new NamedRole(parentRole)));
                 }
 
                 String rightId = roles.get(r1).get("rightID");
                 if (!"".equals(rightId)) {
-                    axioms.add(new RoleInclusion(new Role[] { 
-                            new Role(r1), new Role(rightId) }, 
-                            new Role(r1)));
+                    axioms.add(new RoleInclusion(new Role[] { new NamedRole(r1), new NamedRole(rightId) }, 
+                            new NamedRole(r1)));
                 }
             }
 
@@ -166,66 +163,55 @@ public class RF1Importer extends BaseImporter {
                 if (numElems == 0) {
                     // do nothing
                 } else if (numElems == 1 && (prs != null && !prs.isEmpty())) {
-                    axioms.add(new ConceptInclusion(new Concept(c1), 
-                            new Concept(prs.iterator().next())));
+                    axioms.add(new ConceptInclusion(new NamedConcept(c1), new NamedConcept(prs.iterator().next())));
                 } else {
-                    List<IConcept> conjs = new ArrayList<IConcept>();
+                    List<Concept> conjs = new ArrayList<Concept>();
                     
                     if(prs != null) {
                         for (String pr : prs) {
-                            conjs.add(new Concept(pr));
+                            conjs.add(new NamedConcept(pr));
                         }
                     }
 
                     if (relsVal != null) {
                         for (Set<RoleValuePair> rvs : groupRoles(relsVal)) {
                             if (rvs.size() > 1) {
-                                List<IConcept> innerConjs = new ArrayList<IConcept>();
+                                List<Concept> innerConjs = new ArrayList<Concept>();
                                 for (RoleValuePair rv : rvs) {
-                                    Role role = new Role(rv.role);
-                                    Concept filler = new Concept(rv.value);
-                                    Existential exis = 
-                                            new Existential(role, filler);
+                                    NamedRole role = new NamedRole(rv.role);
+                                    Concept filler = new NamedConcept(rv.value);
+                                    Existential exis = new Existential(role, filler);
                                     innerConjs.add(exis);
                                 }
                                 // Wrap with a role group
-                                conjs.add(new Existential(
-                                        new Role("RoleGroup"), 
-                                        new Conjunction(innerConjs)));
+                                conjs.add(new Existential(new NamedRole("RoleGroup"), new Conjunction(innerConjs)));
                             } else {
                                 RoleValuePair first = rvs.iterator().next();
-                                Role role = new Role(first.role);
-                                Concept filler = new Concept(first.value);
-                                Existential exis = 
-                                        new Existential(role, filler);
-                                if (metadata.getNeverGroupedIds().contains(
-                                        first.role)) {
+                                NamedRole role = new NamedRole(first.role);
+                                Concept filler = new NamedConcept(first.value);
+                                Existential exis = new Existential(role, filler);
+                                if (metadata.getNeverGroupedIds().contains(first.role)) {
                                     // Does not need a role group
                                     conjs.add(exis);
                                 } else {
                                     // Needs a role group
-                                    conjs.add(new Existential(
-                                            new Role("RoleGroup"), exis));
+                                    conjs.add(new Existential(new NamedRole("RoleGroup"), exis));
                                 }
                             }
                         }
                     }
 
-                    axioms.add(new ConceptInclusion(new Concept(c1), 
-                            new Conjunction(conjs)));
+                    axioms.add(new ConceptInclusion(new NamedConcept(c1), new Conjunction(conjs)));
 
                     if (primitive.get(c1).equals("0")) {
-                        axioms.add(new ConceptInclusion(new Conjunction(conjs),
-                                new Concept(c1)));
+                        axioms.add(new ConceptInclusion(new Conjunction(conjs), new NamedConcept(c1)));
                     }
                 }
             }
             
-            Statistics.INSTANCE.setTime("rf1 loading", 
-                    System.currentTimeMillis() - start);
+            Statistics.INSTANCE.setTime("rf1 loading", System.currentTimeMillis() - start);
             accessed = true;
-            return new Ontology("snomed", vr.getVersionName(), axioms, 
-                    null);
+            return new Ontology("snomed", vr.getVersionName(), axioms, null);
         }
 
         public void remove() {
@@ -397,8 +383,7 @@ public class RF1Importer extends BaseImporter {
         BufferedReader br = null;
         
         try {
-            br = new BufferedReader(
-                    new InputStreamReader(conceptsFile));
+            br = new BufferedReader(new InputStreamReader(conceptsFile));
             String line = br.readLine(); // Skip first line
 
             while (null != (line = br.readLine())) {
@@ -434,8 +419,7 @@ public class RF1Importer extends BaseImporter {
                 final String snomedId = line.substring(idx4 + 1, idx5);
                 final String isPrimitive = line.substring(idx5 + 1);
 
-                crs.add(new ConceptRow(conceptId, conceptStatus, 
-                        fullySpecifiedName, ctv3Id, snomedId, isPrimitive));
+                crs.add(new ConceptRow(conceptId, conceptStatus, fullySpecifiedName, ctv3Id, snomedId, isPrimitive));
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -487,9 +471,8 @@ public class RF1Importer extends BaseImporter {
                 final String refinability = line.substring(idx5 + 1, idx6);
                 final String relationshipGroup = line.substring(idx6 + 1);
 
-                rrs.add(new RelationshipRow(relationshipId, conceptId1, 
-                        relationshipType, conceptId2, characteristicType, 
-                        refinability, relationshipGroup));
+                rrs.add(new RelationshipRow(relationshipId, conceptId1, relationshipType, conceptId2, 
+                        characteristicType, refinability, relationshipGroup));
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

@@ -4,14 +4,19 @@
  */
 package au.csiro.ontology.model;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * This class represents a double literal.
  * 
  * @author Alejandro Metke
  * 
  */
-public class DoubleLiteral implements IDoubleLiteral {
+@XmlRootElement
+public class DoubleLiteral extends Literal {
 
+    private static final long serialVersionUID = 1L;
+    
     private double value;
     
     /**
@@ -74,7 +79,7 @@ public class DoubleLiteral implements IDoubleLiteral {
         return String.valueOf(value);
     }
 
-    public int compareTo(ILiteral o) {
+    public int compareTo(Literal o) {
         DoubleLiteral dl = (DoubleLiteral) o;
         double otherValue = dl.value;
         return Double.compare(value, otherValue);

@@ -4,14 +4,19 @@
  */
 package au.csiro.ontology.model;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * This class represents a long literal.
  * 
  * @author Alejandro Metke
  * 
  */
-public class LongLiteral implements ILongLiteral {
+@XmlRootElement
+public class LongLiteral extends Literal {
 
+    private static final long serialVersionUID = 1L;
+    
     private long value;
     
     /**
@@ -66,7 +71,7 @@ public class LongLiteral implements ILongLiteral {
         return String.valueOf(value);
     }
 
-    public int compareTo(ILiteral o) {
+    public int compareTo(Literal o) {
         return ((Long) value).compareTo(((LongLiteral) o).value);
     }
 
