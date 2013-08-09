@@ -45,6 +45,20 @@
 		</dependency>
 	</dependencies>
 	
+	<profiles>
+	  <profile>
+        <id>extended-tests</id>
+        <activation>
+          <property>
+              <name>runAllTests</name>
+          </property>
+        </activation>
+        <modules>
+		    <module>ontology-tests</module>
+	    </modules>
+      </profile>
+	</profiles>
+	
   <distributionManagement>
     <repository>
       <id>aehrc-repository</id>
