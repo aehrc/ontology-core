@@ -86,4 +86,13 @@ public class NamedFeature extends Feature {
         return true;
     }
 
+    @Override
+    public int compareTo(Feature o) {
+        if(!(o instanceof NamedFeature)) {
+            return -1;
+        } else {
+            return id.compareTo(((NamedFeature) o).getId());
+        }
+    }
+
 }
