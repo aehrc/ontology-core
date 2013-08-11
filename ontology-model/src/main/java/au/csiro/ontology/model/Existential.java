@@ -18,7 +18,7 @@ public class Existential extends Concept {
 
     private static final long serialVersionUID = 1L;
     
-    private NamedRole role;
+    private Role role;
     
     private Concept concept;
     
@@ -34,7 +34,7 @@ public class Existential extends Concept {
      * @param role
      * @param concept
      */
-    public Existential(NamedRole role, Concept concept) {
+    public Existential(Role role, Concept concept) {
         this.role = role;
         this.concept = concept;
     }
@@ -44,7 +44,7 @@ public class Existential extends Concept {
         return role + "." + concept;
     }
     
-    public NamedRole getRole() {
+    public Role getRole() {
         return role;
     }
     
@@ -104,7 +104,7 @@ public class Existential extends Concept {
         if(thisClass.equals(otherClass)) {
             Existential other = (Existential)o;
             int res = 0;
-            res = role.getId().compareTo(other.role.getId());
+            res = role.compareTo(other.role);
             if(res != 0) return res;
             try {
                 res = concept.compareTo(other.concept);

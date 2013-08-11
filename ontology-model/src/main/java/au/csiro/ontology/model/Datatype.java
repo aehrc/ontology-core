@@ -15,7 +15,7 @@ public class Datatype extends Concept {
 
     private static final long serialVersionUID = 1L;
     
-    private NamedFeature feature;
+    private Feature feature;
     
     private Operator operator;
     
@@ -34,13 +34,13 @@ public class Datatype extends Concept {
      * @param operator
      * @param literal
      */
-    public Datatype(NamedFeature feature, Operator operator, Literal literal) {
+    public Datatype(Feature feature, Operator operator, Literal literal) {
         this.feature = feature;
         this.operator = operator;
         this.literal = literal;
     }
 
-    public NamedFeature getFeature() {
+    public Feature getFeature() {
         return feature;
     }
 
@@ -120,7 +120,7 @@ public class Datatype extends Concept {
         if(thisClass.equals(otherClass)) {
             Datatype other = (Datatype)o;
             int res = 0;
-            res = feature.getId().compareTo(other.feature.getId());
+            res = feature.compareTo(other.feature);
             if(res != 0) return res;
             res = operator.compareTo(other.operator);
             if(res != 0) return res;
