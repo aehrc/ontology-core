@@ -15,7 +15,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  */
 @XmlRootElement
-public abstract class Feature implements Serializable {
+public abstract class Feature implements Comparable<Feature>, Serializable {
     
     private static final long serialVersionUID = 1L;
 
