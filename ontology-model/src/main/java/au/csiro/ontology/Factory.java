@@ -36,15 +36,15 @@ import au.csiro.ontology.model.StringLiteral;
  */
 public class Factory {
 
-    public Concept createConcept(String id) {
+    public Concept createNamedConcept(String id) {
         return new NamedConcept(id);
     }
 
-    public Role createRole(String id) {
+    public Role createNamedRole(String id) {
         return new NamedRole(id);
     }
 
-    public Feature createFeature(String id) {
+    public Feature createNamedFeature(String id) {
         return new NamedFeature(id);
     }
 
@@ -52,11 +52,11 @@ public class Factory {
         return new Conjunction(concepts);
     }
 
-    public Concept createExistential(NamedRole role, Concept filler) {
+    public Concept createExistential(Role role, Concept filler) {
         return new Existential(role, filler);
     }
 
-    public Concept createDatatype(NamedFeature feature, Operator operator, Literal literal) {
+    public Concept createDatatype(Feature feature, Operator operator, Literal literal) {
         return new Datatype(feature, operator, literal);
     }
 
