@@ -1,5 +1,6 @@
 package au.csiro.ontology.util;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -19,31 +20,38 @@ public class AxiomUtilsTests {
 
     @Test
     public void testAxioms() {
-        String a1 = AxiomUtils.serialise(createAxiom("A", "B"));
-        String a2 = AxiomUtils.serialise(createAxiom("C", "D", "E", "F"));
-        String a3 = AxiomUtils.serialise(createAxiom("D", new Existential(new NamedRole("r"), new NamedConcept("V"))));
+        
+        Axiom ax1 = createAxiom("A", "B");
+        Axiom ax2 = createAxiom("C", "D", "E", "F");
+        Axiom ax3 = createAxiom("D", new Existential(new NamedRole("r"), new NamedConcept("V")));
+        String a1 = AxiomUtils.serialise(ax1);
+        String a2 = AxiomUtils.serialise(ax2);
+        String a3 = AxiomUtils.serialise(ax3);
         
         System.out.println("Axiom 1: "+a1);
         System.out.println("Axiom 2: "+a2);
         System.out.println("Axiom 3: "+a3);
         
-        Axiom ax1 = AxiomUtils.deserialise(a1);
-        assertTrue(ax1 instanceof ConceptInclusion);
-        ConceptInclusion ci1 = (ConceptInclusion) ax1;
+        Axiom ax1b = AxiomUtils.deserialise(a1);
+        assertTrue(ax1b instanceof ConceptInclusion);
+        ConceptInclusion ci1 = (ConceptInclusion) ax1b;
         assertTrue(ci1.getLhs() instanceof NamedConcept);
         assertTrue(ci1.getRhs() instanceof NamedConcept);
+        assertEquals(ax1, ax1b);
         
-        Axiom ax2 = AxiomUtils.deserialise(a2);
-        assertTrue(ax2 instanceof ConceptInclusion);
-        ConceptInclusion ci2 = (ConceptInclusion) ax2;
+        Axiom ax2b = AxiomUtils.deserialise(a2);
+        assertTrue(ax2b instanceof ConceptInclusion);
+        ConceptInclusion ci2 = (ConceptInclusion) ax2b;
         assertTrue(ci2.getLhs() instanceof NamedConcept);
         assertTrue(ci2.getRhs() instanceof Conjunction);
+        assertEquals(ax2, ax2b);
         
-        Axiom ax3 = AxiomUtils.deserialise(a3);
-        assertTrue(ax3 instanceof ConceptInclusion);
-        ConceptInclusion ci3 = (ConceptInclusion) ax3;
+        Axiom ax3b = AxiomUtils.deserialise(a3);
+        assertTrue(ax3b instanceof ConceptInclusion);
+        ConceptInclusion ci3 = (ConceptInclusion) ax3b;
         assertTrue(ci3.getLhs() instanceof NamedConcept);
         assertTrue(ci3.getRhs() instanceof Existential);
+        assertEquals(ax3, ax3b);
     }
 
     private Axiom createAxiom(String c1, Concept concept) {
