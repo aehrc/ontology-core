@@ -55,7 +55,7 @@ public class Existential extends Concept {
     /**
      * @param role the role to set
      */
-    public void setRole(NamedRole role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 
