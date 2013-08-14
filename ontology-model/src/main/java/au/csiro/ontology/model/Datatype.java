@@ -55,7 +55,7 @@ public class Datatype extends Concept {
     /**
      * @param feature the feature to set
      */
-    public void setFeature(NamedFeature feature) {
+    public void setFeature(Feature feature) {
         this.feature = feature;
     }
 
@@ -75,7 +75,7 @@ public class Datatype extends Concept {
 
     @Override
     public String toString() {
-        return feature + "." +literal;
+        return feature + ".(" + operator + "," + literal + ")";
     }
 
     @Override
@@ -84,8 +84,7 @@ public class Datatype extends Concept {
         int result = 1;
         result = prime * result + ((feature == null) ? 0 : feature.hashCode());
         result = prime * result + ((literal == null) ? 0 : literal.hashCode());
-        result = prime * result
-                + ((operator == null) ? 0 : operator.hashCode());
+        result = prime * result + ((operator == null) ? 0 : operator.hashCode());
         return result;
     }
 

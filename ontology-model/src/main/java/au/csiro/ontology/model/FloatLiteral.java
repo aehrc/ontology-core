@@ -74,7 +74,8 @@ public class FloatLiteral extends Literal {
     public String toString() {
         return String.valueOf(value);
     }
-
+    
+    @Override
     public int compareTo(Literal o) {
         FloatLiteral fl = (FloatLiteral) o;
         float otherValue = fl.value;

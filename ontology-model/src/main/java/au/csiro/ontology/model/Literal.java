@@ -13,7 +13,13 @@ import java.io.Serializable;
  * 
  */
 public abstract class Literal implements Comparable<Literal>, Serializable {
-
+    
     private static final long serialVersionUID = 1L;
+    
+    public abstract String toString();
+
+    public abstract int hashCode();
+
+    public abstract boolean equals(Object o);
 
 }
