@@ -98,9 +98,9 @@
 	  <plugin>
 		  <groupId>com.atlassian.maven.plugins</groupId>
 		  <artifactId>maven-jgitflow-plugin</artifactId>
-		  <version>1.0-alpha8</version>
+		  <version>1.0-alpha14</version>
 		  <configuration>
-		    <!--<pushChanges>false</pushChanges>-->
+		    <autoVersionSubmodules>true</autoVersionSubmodules>
 		  </configuration>
 	  </plugin>
 	  <plugin>
