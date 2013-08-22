@@ -29,6 +29,7 @@
 	<modules>
 		<module>ontology-model</module>
 		<module>ontology-import</module>
+		<module>ontology-tests</module>
 	</modules>
 	
 	<dependencies>
@@ -44,20 +45,6 @@
 		  <version>1.2.16</version>
 		</dependency>
 	</dependencies>
-	
-	<profiles>
-	  <profile>
-        <id>extended-tests</id>
-        <activation>
-          <property>
-              <name>runAllTests</name>
-          </property>
-        </activation>
-        <modules>
-		    <module>ontology-tests</module>
-	    </modules>
-      </profile>
-	</profiles>
 	
   <distributionManagement>
     <repository>
@@ -103,15 +90,6 @@
 		    <autoVersionSubmodules>true</autoVersionSubmodules>
 		  </configuration>
 	  </plugin>
-	  <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-		  <argLine> 
-		    -server -Xmx3G
-		  </argLine>
-        </configuration>
-     </plugin>
 	</plugins>
   </build>
   
