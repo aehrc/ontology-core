@@ -7,11 +7,12 @@ package au.csiro.ontology.model;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * This class represents a double literal.
+ * This class represents a double literal. This class is deprecated. Use DecimalLiteral instead.
  * 
  * @author Alejandro Metke
  * 
  */
+@Deprecated
 @XmlRootElement
 public class DoubleLiteral extends Literal {
 
