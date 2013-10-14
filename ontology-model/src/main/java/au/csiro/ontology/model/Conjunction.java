@@ -6,6 +6,7 @@ package au.csiro.ontology.model;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -13,9 +14,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * This class represents a conjunction (also referred to as an ObjectIntersectionOf in OWL).
- * 
+ *
  * @author Alejandro Metke
- * 
+ *
  */
 @XmlRootElement
 public class Conjunction extends Concept {
@@ -23,18 +24,18 @@ public class Conjunction extends Concept {
     private static final long serialVersionUID = 1L;
 
     private Concept[] concepts;
-    
+
     private int hashCode;
-    
+
     /**
-     * 
+     *
      */
     public Conjunction() {
-
+        this(Collections.EMPTY_SET);
     }
 
     /**
-     * 
+     *
      * @param concepts
      */
     public Conjunction(final Concept[] concepts) {
@@ -100,33 +101,34 @@ public class Conjunction extends Concept {
                 && Arrays.equals(concepts, other.concepts);
     }
 
+    @Override
     @SuppressWarnings("rawtypes")
     public int compareTo(Concept o) {
-        Class thisClass = this.getClass();
-        Class otherClass = o.getClass();
+        Class<? extends Conjunction> thisClass = this.getClass();
+        Class<? extends Concept> otherClass = o.getClass();
         if(thisClass.equals(otherClass)) {
             Conjunction other = (Conjunction)o;
             // Equal if all concepts equal
-            // Otherwise order depends on the length and then on the order of 
+            // Otherwise order depends on the length and then on the order of
             // first different concept
-            
+
             int res = 0;
             res = concepts.length - other.concepts.length;
             if(res != 0) return res;
-            
+
             for(int i = 0; i < concepts.length; i++) {
                 try {
                     res = concepts[i].compareTo(other.concepts[i]);
                 } catch(ClassCastException e) {
-                    // Need to catch this because elements in the conjunction 
+                    // Need to catch this because elements in the conjunction
                     // might be of different types
                     res = concepts[i].getClass().toString().compareTo(
                             other.concepts[i].getClass().toString());
                 }
-                
+
                 if(res != 0) return res;
             }
-    
+
             return 0;
         } else {
             return thisClass.toString().compareTo(otherClass.toString());

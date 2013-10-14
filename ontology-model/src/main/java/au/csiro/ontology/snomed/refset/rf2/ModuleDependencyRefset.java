@@ -120,7 +120,7 @@ public class ModuleDependencyRefset extends Refset implements IModuleDependencyR
      * 
      * @param index
      */
-    private void tc(Map<M, Set<M>> index) {
+    private static void tc(Map<M, Set<M>> index) {
         for (Entry<M, Set<M>> entry: index.entrySet()) {
             final M src = entry.getKey();
             final Set<M> dependents = entry.getValue();
@@ -157,6 +157,7 @@ public class ModuleDependencyRefset extends Refset implements IModuleDependencyR
         return md;
     }
 
+    @Override
     public Map<String, Map<String, ModuleDependency>> getModuleDependencies() {
         return dependencies;
     }
