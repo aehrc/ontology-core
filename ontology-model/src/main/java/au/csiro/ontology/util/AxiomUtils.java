@@ -17,12 +17,14 @@ import org.apache.log4j.Logger;
 import org.eclipse.persistence.jaxb.MarshallerProperties;
 
 import au.csiro.ontology.model.Axiom;
+import au.csiro.ontology.model.BigIntegerLiteral;
 import au.csiro.ontology.model.BooleanLiteral;
 import au.csiro.ontology.model.Concept;
 import au.csiro.ontology.model.ConceptInclusion;
 import au.csiro.ontology.model.Conjunction;
 import au.csiro.ontology.model.Datatype;
 import au.csiro.ontology.model.DateLiteral;
+import au.csiro.ontology.model.DecimalLiteral;
 import au.csiro.ontology.model.DoubleLiteral;
 import au.csiro.ontology.model.Existential;
 import au.csiro.ontology.model.FloatLiteral;
@@ -41,6 +43,7 @@ import au.csiro.ontology.model.StringLiteral;
  * @author Alejandro Metke
  *
  */
+@SuppressWarnings("deprecation")
 public class AxiomUtils {
     
     /**
@@ -56,8 +59,9 @@ public class AxiomUtils {
         try {
             JAXBContext jc = JAXBContext.newInstance(new Class[] { ConceptInclusion.class, RoleInclusion.class, 
                     NamedConcept.class, Conjunction.class, Existential.class, Datatype.class, NamedFeature.class, 
-                    NamedRole.class, IntegerLiteral.class, StringLiteral.class, FloatLiteral.class, LongLiteral.class, 
-                    DoubleLiteral.class, DateLiteral.class, BooleanLiteral.class}); 
+                    NamedRole.class, IntegerLiteral.class, StringLiteral.class, LongLiteral.class, DateLiteral.class, 
+                    DecimalLiteral.class, BigIntegerLiteral.class, FloatLiteral.class, DoubleLiteral.class, 
+                    BooleanLiteral.class}); 
             marshaller = jc.createMarshaller();
             marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             marshaller.setProperty(MarshallerProperties.MEDIA_TYPE, "application/json");

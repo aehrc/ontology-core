@@ -7,11 +7,12 @@ package au.csiro.ontology.model;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * This class represents a boolean literal.
+ * This class represents a boolean literal. This class is deprecated because OWL EL does not support booleans.
  * 
  * @author Alejandro Metke
  * 
  */
+@Deprecated
 @XmlRootElement
 public class BooleanLiteral extends Literal {
 

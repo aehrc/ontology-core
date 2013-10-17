@@ -4,15 +4,15 @@
  */
 package au.csiro.ontology.importer.owl;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
@@ -68,18 +68,17 @@ import au.csiro.ontology.Ontology;
 import au.csiro.ontology.importer.BaseImporter;
 import au.csiro.ontology.importer.ImportException;
 import au.csiro.ontology.model.Axiom;
-import au.csiro.ontology.model.BooleanLiteral;
+import au.csiro.ontology.model.BigIntegerLiteral;
 import au.csiro.ontology.model.Concept;
 import au.csiro.ontology.model.ConceptInclusion;
 import au.csiro.ontology.model.Conjunction;
 import au.csiro.ontology.model.Datatype;
 import au.csiro.ontology.model.DateLiteral;
-import au.csiro.ontology.model.DoubleLiteral;
+import au.csiro.ontology.model.DecimalLiteral;
 import au.csiro.ontology.model.Existential;
 import au.csiro.ontology.model.FloatLiteral;
 import au.csiro.ontology.model.IntegerLiteral;
 import au.csiro.ontology.model.Literal;
-import au.csiro.ontology.model.LongLiteral;
 import au.csiro.ontology.model.NamedConcept;
 import au.csiro.ontology.model.NamedFeature;
 import au.csiro.ontology.model.NamedRole;
@@ -102,15 +101,23 @@ public class OWLImporter extends BaseImporter {
     public static final String THING_IRI = "http://www.w3.org/2002/07/owl#Thing";
     public static final String NOTHING_IRI = "http://www.w3.org/2002/07/owl#Nothing";
     
-    private final Set<OWLDataPropertyRangeAxiom> dprAxioms = 
-            new HashSet<OWLDataPropertyRangeAxiom>();
-    private final Map<OWL2Datatype, Set<OWL2Datatype>> types = new HashMap<OWL2Datatype, Set<OWL2Datatype>>();
+    private final Set<OWLDataPropertyRangeAxiom> dprAxioms = new HashSet<OWLDataPropertyRangeAxiom>();
     private final List<String> problems = new ArrayList<String>();
     
     private OWLOntology ontology;
     private List<OWLAxiom> axioms;
     
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+    
+    /**
+     * The OWL EL spec only allows using the following types: owl:real, owl:rational, xsd:decimal, xsd:integer, 
+     * xsd:nonNegativeInteger. The Java types that most naturally correspond to these types are BigInteger and
+     * BigDecimal. However, the memory consumption increases and the performance decreases when using these types
+     * instead of the Java built-in types. When the following flags are set to true, the transformation uses the
+     * built-in data types instead of the math types.  
+     */
+    private boolean useSimpleInts = true;
+    private boolean useSimpleFloats = true;
     
     public OWLImporter(OWLOntology ontology) {
         this();
@@ -126,168 +133,35 @@ public class OWLImporter extends BaseImporter {
      * Private constructor.
      */
     private OWLImporter() {
-        Set<OWL2Datatype> set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.XSD_BYTE);
-        types.put(OWL2Datatype.XSD_BYTE, set);
+        
+    }
 
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.XSD_SHORT);
-        set.addAll(types.get(OWL2Datatype.XSD_BYTE));
-        types.put(OWL2Datatype.XSD_SHORT, set);
+    /**
+     * @return the useSimpleInts
+     */
+    public boolean isUseSimpleInts() {
+        return useSimpleInts;
+    }
 
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.XSD_INT);
-        set.addAll(types.get(OWL2Datatype.XSD_SHORT));
-        types.put(OWL2Datatype.XSD_INT, set);
+    /**
+     * @param useSimpleInts the useSimpleInts to set
+     */
+    public void setUseSimpleInts(boolean useSimpleInts) {
+        this.useSimpleInts = useSimpleInts;
+    }
 
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.XSD_LONG);
-        set.addAll(types.get(OWL2Datatype.XSD_INT));
-        types.put(OWL2Datatype.XSD_LONG, set);
+    /**
+     * @return the useSimpleFloats
+     */
+    public boolean isUseSimpleFloats() {
+        return useSimpleFloats;
+    }
 
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.XSD_UNSIGNED_BYTE);
-        types.put(OWL2Datatype.XSD_UNSIGNED_BYTE, set);
-
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.XSD_UNSIGNED_SHORT);
-        set.addAll(types.get(OWL2Datatype.XSD_UNSIGNED_BYTE));
-        types.put(OWL2Datatype.XSD_UNSIGNED_SHORT, set);
-
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.XSD_UNSIGNED_INT);
-        set.addAll(types.get(OWL2Datatype.XSD_UNSIGNED_SHORT));
-        types.put(OWL2Datatype.XSD_UNSIGNED_INT, set);
-
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.XSD_UNSIGNED_LONG);
-        set.addAll(types.get(OWL2Datatype.XSD_UNSIGNED_INT));
-        types.put(OWL2Datatype.XSD_UNSIGNED_LONG, set);
-
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.XSD_POSITIVE_INTEGER);
-        types.put(OWL2Datatype.XSD_POSITIVE_INTEGER, set);
-
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.XSD_NON_NEGATIVE_INTEGER);
-        set.addAll(types.get(OWL2Datatype.XSD_POSITIVE_INTEGER));
-        set.addAll(types.get(OWL2Datatype.XSD_UNSIGNED_LONG));
-        types.put(OWL2Datatype.XSD_NON_NEGATIVE_INTEGER, set);
-
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.XSD_NEGATIVE_INTEGER);
-        types.put(OWL2Datatype.XSD_NEGATIVE_INTEGER, set);
-
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.XSD_NON_POSITIVE_INTEGER);
-        set.addAll(types.get(OWL2Datatype.XSD_NEGATIVE_INTEGER));
-        types.put(OWL2Datatype.XSD_NON_POSITIVE_INTEGER, set);
-
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.XSD_INTEGER);
-        set.addAll(types.get(OWL2Datatype.XSD_NON_POSITIVE_INTEGER));
-        set.addAll(types.get(OWL2Datatype.XSD_NON_NEGATIVE_INTEGER));
-        set.addAll(types.get(OWL2Datatype.XSD_LONG));
-        types.put(OWL2Datatype.XSD_INTEGER, set);
-
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.XSD_DECIMAL);
-        set.addAll(types.get(OWL2Datatype.XSD_INTEGER));
-        types.put(OWL2Datatype.XSD_DECIMAL, set);
-
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.XSD_DOUBLE);
-        types.put(OWL2Datatype.XSD_DOUBLE, set);
-
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.XSD_FLOAT);
-        types.put(OWL2Datatype.XSD_FLOAT, set);
-
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.XSD_NCNAME);
-        types.put(OWL2Datatype.XSD_NCNAME, set);
-
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.XSD_NAME);
-        set.addAll(types.get(OWL2Datatype.XSD_NCNAME));
-        types.put(OWL2Datatype.XSD_NAME, set);
-
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.XSD_NMTOKEN);
-        types.put(OWL2Datatype.XSD_NMTOKEN, set);
-
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.XSD_LANGUAGE);
-        types.put(OWL2Datatype.XSD_LANGUAGE, set);
-
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.XSD_TOKEN);
-        set.addAll(types.get(OWL2Datatype.XSD_LANGUAGE));
-        set.addAll(types.get(OWL2Datatype.XSD_NMTOKEN));
-        set.addAll(types.get(OWL2Datatype.XSD_NAME));
-        types.put(OWL2Datatype.XSD_TOKEN, set);
-
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.XSD_NORMALIZED_STRING);
-        set.addAll(types.get(OWL2Datatype.XSD_TOKEN));
-        types.put(OWL2Datatype.XSD_NORMALIZED_STRING, set);
-
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.XSD_STRING);
-        set.addAll(types.get(OWL2Datatype.XSD_NORMALIZED_STRING));
-        types.put(OWL2Datatype.XSD_STRING, set);
-
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.XSD_BOOLEAN);
-        types.put(OWL2Datatype.XSD_BOOLEAN, set);
-
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.XSD_HEX_BINARY);
-        types.put(OWL2Datatype.XSD_HEX_BINARY, set);
-
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.XSD_BASE_64_BINARY);
-        types.put(OWL2Datatype.XSD_BASE_64_BINARY, set);
-
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.XSD_ANY_URI);
-        types.put(OWL2Datatype.XSD_ANY_URI, set);
-
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.XSD_DATE_TIME);
-        types.put(OWL2Datatype.XSD_DATE_TIME, set);
-
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.XSD_DATE_TIME_STAMP);
-        types.put(OWL2Datatype.XSD_DATE_TIME_STAMP, set);
-
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.OWL_RATIONAL);
-        types.put(OWL2Datatype.OWL_RATIONAL, set);
-
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.OWL_REAL);
-        types.put(OWL2Datatype.OWL_REAL, set);
-
-        try {
-            set = new HashSet<OWL2Datatype>();
-            set.add(OWL2Datatype.RDF_PLAIN_LITERAL);
-            types.put(OWL2Datatype.RDF_PLAIN_LITERAL, set);
-        } catch (NoSuchFieldError e) {
-            // ignore - this is thrown when working with older versions of the OWL API
-        }
-
-        try {
-            set = new HashSet<OWL2Datatype>();
-            set.add(OWL2Datatype.RDFS_LITERAL);
-            types.put(OWL2Datatype.RDFS_LITERAL, set);
-        } catch (NoSuchFieldError e) {
-            // ignore - this is thrown when working with older versions of the OWL API
-        }
-
-        set = new HashSet<OWL2Datatype>();
-        set.add(OWL2Datatype.RDF_XML_LITERAL);
-        types.put(OWL2Datatype.RDF_XML_LITERAL, set);
+    /**
+     * @param useSimpleFloats the useSimpleFloats to set
+     */
+    public void setUseSimpleFloats(boolean useSimpleFloats) {
+        this.useSimpleFloats = useSimpleFloats;
     }
 
     private Axiom transformOWLSubPropertyChainOfAxiom(OWLSubPropertyChainOfAxiom a) {
@@ -305,8 +179,7 @@ public class OWLImporter extends BaseImporter {
         if (lhss.length == 1 || lhss.length == 2) {
             return new RoleInclusion(lhss, rhs);
         } else {
-            problems.add("Unable to import axiom "+a.toString()+". " +
-            		"RoleChains longer than 2 not supported.");
+            problems.add("Unable to import axiom "+a.toString()+". RoleChains longer than 2 not supported.");
             return null;
         }
     }
@@ -323,12 +196,10 @@ public class OWLImporter extends BaseImporter {
 
     private Axiom transformOWLReflexiveObjectPropertyAxiom(OWLReflexiveObjectPropertyAxiom a) {
         OWLObjectPropertyExpression exp = a.getProperty();
-        return new RoleInclusion(new Role[] {}, 
-                new NamedRole(exp.asOWLObjectProperty().toStringID()));
+        return new RoleInclusion(new Role[] {}, new NamedRole(exp.asOWLObjectProperty().toStringID()));
     }
 
-    private Axiom transformOWLTransitiveObjectPropertyAxiom(
-            OWLTransitiveObjectPropertyAxiom a) {
+    private Axiom transformOWLTransitiveObjectPropertyAxiom(OWLTransitiveObjectPropertyAxiom a) {
         OWLObjectPropertyExpression exp = a.getProperty();
         Role r = new NamedRole(exp.asOWLObjectProperty().toStringID());
         return new RoleInclusion(new Role[] { r, r }, r);
@@ -410,8 +281,7 @@ public class OWLImporter extends BaseImporter {
         return axioms;
     }
 
-    private Set<Axiom> transform(List<OWLAxiom> axioms, 
-            IProgressMonitor monitor) throws ImportException {
+    private Set<Axiom> transform(List<OWLAxiom> axioms, IProgressMonitor monitor) throws ImportException {
         monitor.taskStarted("Loading axioms");
         final Set<Axiom> res = new HashSet<Axiom>();
         int totalAxioms = axioms.size();
@@ -468,8 +338,7 @@ public class OWLImporter extends BaseImporter {
                 // Do nothing
                 monitor.step(++workDone, totalAxioms);
             } else {
-                problems.add("The axiom " + axiom.toString() + 
-                    " is not currently supported by Snorocket.");
+                problems.add("The axiom " + axiom.toString() + " is not currently supported by Snorocket.");
             }
         }
 
@@ -478,9 +347,11 @@ public class OWLImporter extends BaseImporter {
         
         monitor.taskEnded();
         
+        /*
         if(!problems.isEmpty()) {
             throw new ImportException("Problems occurred during import. See getProblems()");
         }
+        */
         
         return res;
     }
@@ -497,58 +368,56 @@ public class OWLImporter extends BaseImporter {
     private Literal getLiteral(OWLLiteral l) {
         OWLDatatype dt = l.getDatatype();
         String literal = l.getLiteral();
-
+        
         Literal res = null;
-
-        if (dt.isBoolean()) {
-            res = new BooleanLiteral(Boolean.parseBoolean(literal));
-        } else if (dt.isDouble()) {
-            res = new DoubleLiteral(Double.parseDouble(literal));
-        } else if (dt.isFloat()) {
-            res = new FloatLiteral(Float.parseFloat(literal));
-        } else if (dt.isInteger()) {
-            res = new IntegerLiteral(Integer.parseInt(literal));
-        } else if (dt.isRDFPlainLiteral()) {
-            res = new StringLiteral(literal);
-        } else {
+        
+        if(dt.isBuiltIn()) {
             OWL2Datatype odt = dt.getBuiltInDatatype();
             switch (odt) {
-            case XSD_LONG:
-                res = new LongLiteral(Long.parseLong(literal));
-                break;
-            case XSD_DATE_TIME:
-                res = new DateLiteral(DatatypeConverter.parseDateTime(literal));
-                break;
-            default:
-                problems.add("Unsupported literal " + l);
+                case RDF_PLAIN_LITERAL:
+                case RDF_XML_LITERAL:
+                case XSD_STRING:
+                case XSD_NORMALIZED_STRING:
+                case XSD_NAME:
+                case XSD_NCNAME:
+                case XSD_NMTOKEN:
+                case XSD_HEX_BINARY:
+                case XSD_BASE_64_BINARY:
+                case XSD_ANY_URI:
+                case XSD_TOKEN:
+                    res = new StringLiteral(literal);
+                    break;
+                case XSD_INTEGER:
+                case XSD_NON_NEGATIVE_INTEGER:
+                    if(useSimpleInts) {
+                        res = new IntegerLiteral(Integer.parseInt(literal));
+                    } else {
+                        res = new BigIntegerLiteral(new BigInteger(literal));
+                    }
+                    break;
+                case XSD_DATE_TIME:
+                    res = new DateLiteral(DatatypeConverter.parseDateTime(literal));
+                    break;
+                case OWL_RATIONAL:
+                case OWL_REAL:
+                case XSD_DECIMAL:
+                    if(useSimpleFloats) {
+                        res = new FloatLiteral(Float.parseFloat(literal));
+                    } else {
+                        res = new DecimalLiteral(new BigDecimal(literal));
+                    }
+                    break;
+                default:
+                    problems.add("Unsupported literal " + l);
             }
+        } else {
+            problems.add("Datatype is not built in: " + dt);
         }
 
-        return res;
-    }
-
-    /**
-     * Determines if the datatype specified in a property is compatible with an
-     * actual datatype.
-     * 
-     * @param propertyType
-     * @param actualType
-     * @return
-     */
-    private boolean compatibleTypes(OWLDatatype propertyType,
-            OWLDatatype actualType) {
-        OWL2Datatype pt = propertyType.getBuiltInDatatype();
-        OWL2Datatype at = actualType.getBuiltInDatatype();
-        Set<OWL2Datatype> compatible = types.get(pt);
-        boolean res = false;
-        if (compatible != null && compatible.contains(at)) {
-            res = true;
-        }
         return res;
     }
     
-    private void checkInconsistentProperty(OWLDataProperty dp, 
-            OWLDatatype type) {
+    private void checkInconsistentProperty(OWLDataProperty dp, OWLDatatype type) {
         for (OWLDataPropertyRangeAxiom a : dprAxioms) {
             OWLDataPropertyExpression pe = a.getProperty();
             OWLDataRange r = a.getRange();
@@ -557,21 +426,12 @@ public class OWLImporter extends BaseImporter {
             OWLDatatype otype = r.asOWLDatatype();
 
             if (!pe.isAnonymous()) {
-                OWLDataProperty odp = pe.asOWLDataProperty();
-
-                if (dp.equals(odp)) {
-                    boolean compatible = compatibleTypes(otype, type);
-                    if (!compatible) {
-                        // throw new InconsistentOntologyException();
-                        problems.add("The literal value restriction "
-                                + dp + " is inconsistent with the data "
-                                + "property range axiom " + a);
-                    }
+                if (!otype.equals(type)) {
+                    problems.add("The literal value restriction " + dp + " is inconsistent with the data property " +
+                    		"range axiom " + a);
                 }
             } else {
-                problems.add("Found anonymous data property "
-                        + "expression in data property range axiom: "
-                        + pe);
+                problems.add("Found anonymous data property expression in data property range axiom: " + pe);
             }
         }
     }
@@ -586,8 +446,7 @@ public class OWLImporter extends BaseImporter {
         desc.accept(new OWLClassExpressionVisitor() {
 
             private void unimplemented(OWLClassExpression e) {
-                String message = "The class expression "+
-                        e.getClassExpressionType().getName()+
+                String message = "The class expression "+ e.getClassExpressionType().getName()+
                         " is not currently supported by Snorocket.";
                 throw new UnsupportedOperationException(message);
             }
