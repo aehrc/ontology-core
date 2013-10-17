@@ -30,6 +30,7 @@ public class Conjunction extends Concept {
     /**
      *
      */
+    @SuppressWarnings("unchecked")
     public Conjunction() {
         this(Collections.EMPTY_SET);
     }
