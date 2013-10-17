@@ -30,9 +30,9 @@ public class ModuleDependencyRefsetTest {
             }
         });
         Set<ModuleDependencyRow> members = new HashSet<ModuleDependencyRow>();
-        members.add(new ModuleDependencyRow("a", "2", true, "A", "A", "B", "2", "1"));
-        members.add(new ModuleDependencyRow("b", "1", true, "B", "A", "C", "1", "1"));
-        members.add(new ModuleDependencyRow("c", "2", true, "A", "A", "C", "2", "1"));
+        members.add(new ModuleDependencyRow("a", "20010101", true, "A", "A", "B", "20010101", "10010101"));
+        members.add(new ModuleDependencyRow("b", "10010101", true, "B", "A", "C", "10010101", "10010101"));
+        members.add(new ModuleDependencyRow("c", "20010101", true, "A", "A", "C", "20010101", "10010101"));
         new ModuleDependencyRefset(members);
     }
 
@@ -56,8 +56,8 @@ public class ModuleDependencyRefsetTest {
             }
         });
         Set<ModuleDependencyRow> members = new HashSet<ModuleDependencyRow>();
-        members.add(new ModuleDependencyRow("a", "2", true, "A", "A", "B", "2", "1"));
-        members.add(new ModuleDependencyRow("b", "1", true, "B", "A", "C", "1", "1"));
+        members.add(new ModuleDependencyRow("a", "20010101", true, "A", "A", "B", "20010101", "10010101"));
+        members.add(new ModuleDependencyRow("b", "10010101", true, "B", "A", "C", "10010101", "10010101"));
         new ModuleDependencyRefset(members);
     }
 
