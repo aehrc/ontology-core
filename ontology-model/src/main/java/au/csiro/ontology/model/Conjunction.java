@@ -30,6 +30,7 @@ public class Conjunction extends Concept {
     /**
      *
      */
+    @SuppressWarnings("unchecked")
     public Conjunction() {
         this(Collections.EMPTY_SET);
     }
@@ -102,7 +103,6 @@ public class Conjunction extends Concept {
     }
 
     @Override
-    @SuppressWarnings("rawtypes")
     public int compareTo(Concept o) {
         Class<? extends Conjunction> thisClass = this.getClass();
         Class<? extends Concept> otherClass = o.getClass();
