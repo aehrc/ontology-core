@@ -6,6 +6,7 @@ package au.csiro.ontology.model;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -29,8 +30,9 @@ public class Conjunction extends Concept {
     /**
      * 
      */
+    @SuppressWarnings("unchecked")
     public Conjunction() {
-
+        this(Collections.EMPTY_SET);
     }
 
     /**
