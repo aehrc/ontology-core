@@ -62,14 +62,14 @@ public class RF2Importer extends BaseImporter {
     private final static Logger log = Logger.getLogger(RF2Importer.class);
 
     /**
-     * The object that contains the information about the input files to use.
-     */
-    protected final Inputs inputs;
-
-    /**
      * List of problems found while importing.
      */
     protected final List<String> problems = new ArrayList<String>();
+    
+    /**
+     * Queue with the inputs to process.
+     */
+    protected final Queue<RF2Input> inputs = new LinkedList<RF2Input>();
 
     /**
      * Imports a set of ontologies.
@@ -80,7 +80,7 @@ public class RF2Importer extends BaseImporter {
      */
     public RF2Importer(InputStream inputsStream) throws ImportException {
         try {
-            inputs = Inputs.load(inputsStream);
+            loadInputs(Inputs.load(inputsStream));
         } catch (JAXBException e) {
             log.error("Malformed input file.", e);
             throw new ImportException("Malformed input file.", e);
@@ -96,7 +96,7 @@ public class RF2Importer extends BaseImporter {
         final String configFile = "/config.xml";
         final String message = "Malformed input file: " + configFile;
         try {
-            inputs = Inputs.load(this.getClass().getResourceAsStream(configFile));
+            loadInputs(Inputs.load(this.getClass().getResourceAsStream(configFile)));
         } catch (NullPointerException e) {
             log.error(message, e);
             throw new ImportException(message, e);
@@ -112,38 +112,43 @@ public class RF2Importer extends BaseImporter {
      * @param inputs
      */
     public RF2Importer(Inputs inputs) {
-        this.inputs = inputs;
+        loadInputs(inputs);
+    }
+    
+    /**
+     * 
+     * @param in
+     */
+    private void loadInputs(Inputs in) {
+        inputs.addAll(in.getRf2Inputs());
     }
 
     /**
-     * Loads all the module dependency information from all RF2 inputs into a
+     * Loads all the module dependency information from an {@link RF2Input} into a
      * single {@link IModuleDependencyRefset}.
      *
      * @return
      * @throws ImportException
      */
-    protected IModuleDependencyRefset loadModuleDependencies() throws ImportException {
+    protected IModuleDependencyRefset loadModuleDependencies(RF2Input input) throws ImportException {
         Set<InputStream> iss = new HashSet<InputStream>();
-        for(RF2Input input : inputs.getRf2Inputs()) {
-            InputType inputType = input.getInputType();
-            for(String md : input.getModuleDependenciesRefsetFiles()) {
-                final String message = "Unable to load module " +
-                        "dependencias. Please check your input configuration " +
-                        "file. (input type = "+inputType+", file="+md+")";
-                try {
-                    iss.add(input.getInputStream(md));
-                } catch (NullPointerException e) {
-                    log.error(message, e);
-                    throw new ImportException(message, e);
-                } catch (IOException e) {
-                    log.error(message, e);
-                    throw new ImportException(message, e);
-                }
+        InputType inputType = input.getInputType();
+        for(String md : input.getModuleDependenciesRefsetFiles()) {
+            final String message = "Unable to load module " +
+                    "dependencias. Please check your input configuration " +
+                    "file. (input type = "+inputType+", file="+md+")";
+            try {
+                iss.add(input.getInputStream(md));
+            } catch (NullPointerException e) {
+                log.error(message, e);
+                throw new ImportException(message, e);
+            } catch (IOException e) {
+                log.error(message, e);
+                throw new ImportException(message, e);
             }
         }
 
-        IModuleDependencyRefset res =
-                RefsetImporter.importModuleDependencyRefset(iss);
+        IModuleDependencyRefset res = RefsetImporter.importModuleDependencyRefset(iss);
         return res;
     }
 
@@ -154,19 +159,17 @@ public class RF2Importer extends BaseImporter {
      *
      * @return
      */
-    protected Map<String, Set<Version>> getModuleVersionsToLoad() {
+    protected Map<String, Set<Version>> getModuleVersionsToLoad(RF2Input in) {
         Map<String, Set<Version>> res = new HashMap<String, Set<Version>>();
-        for(RF2Input in : inputs.getRf2Inputs()) {
-            for(ModuleInfo mi : in.getModules()) {
-                String moduleId = mi.getId();
-                Set<Version> versionsToLoad = res.get(moduleId);
-                if(versionsToLoad == null) {
-                    versionsToLoad = new HashSet<Version>();
-                    res.put(moduleId, versionsToLoad);
-                }
-                for(Version v : mi.getVersions()) {
-                    versionsToLoad.add(v);
-                }
+        for(ModuleInfo mi : in.getModules()) {
+            String moduleId = mi.getId();
+            Set<Version> versionsToLoad = res.get(moduleId);
+            if(versionsToLoad == null) {
+                versionsToLoad = new HashSet<Version>();
+                res.put(moduleId, versionsToLoad);
+            }
+            for(Version v : mi.getVersions()) {
+                versionsToLoad.add(v);
             }
         }
 
@@ -358,53 +361,52 @@ public class RF2Importer extends BaseImporter {
 
         // Map needed to find the correct version of each relationship to load
         // for this import entry
-        Map<String, RelationshipRow> relationshipMap =
-                new HashMap<String, RelationshipRow>();
-
-        for (RF2Input input : inputs.getRf2Inputs()) {
-            InputType inputType = input.getInputType();
-            Set<String> conceptsFiles = input.getConceptsFiles();
-            log.info("Read concepts info");
-            for(String conceptsFile : conceptsFiles) {
-                final String message = "Unable to load concepts file. " +
-                        "Please check your input configuration file. " +
-                        "(input type = "+inputType+", file="+conceptsFile+")";
-                try {
-                    loadConceptRows(modMap, conceptMap, input.getInputStream(conceptsFile));
-                } catch (NullPointerException e) {
-                    log.error(message, e);
-                    throw new ImportException(message, e);
-                } catch (IOException e) {
-                    log.error(message, e);
-                    throw new ImportException(message, e);
-                }
+        Map<String, RelationshipRow> relationshipMap = new HashMap<String, RelationshipRow>();
+        
+        RF2Input input = (RF2Input) entry.getInput();
+        
+        InputType inputType = input.getInputType();
+        Set<String> conceptsFiles = input.getConceptsFiles();
+        log.info("Read concepts info");
+        for(String conceptsFile : conceptsFiles) {
+            final String message = "Unable to load concepts file. " +
+                    "Please check your input configuration file. " +
+                    "(input type = "+inputType+", file="+conceptsFile+")";
+            try {
+                loadConceptRows(modMap, conceptMap, input.getInputStream(conceptsFile));
+            } catch (NullPointerException e) {
+                log.error(message, e);
+                throw new ImportException(message, e);
+            } catch (IOException e) {
+                log.error(message, e);
+                throw new ImportException(message, e);
             }
+        }
 
-            // Load relationships
-            Set<String> relationshipsFiles = input.getStatedRelationshipsFiles();
-            if(relationshipsFiles == null || relationshipsFiles.isEmpty()) {
-                log.info("Read inferred relationships info");
-                relationshipsFiles = input.getRelationshipsFiles();
-            } else {
-                log.info("Read stated relationships info");
-            }
+        // Load relationships
+        Set<String> relationshipsFiles = input.getStatedRelationshipsFiles();
+        if(relationshipsFiles == null || relationshipsFiles.isEmpty()) {
+            log.info("Read inferred relationships info");
+            relationshipsFiles = input.getRelationshipsFiles();
+        } else {
+            log.info("Read stated relationships info");
+        }
 
-            if(relationshipsFiles == null || relationshipsFiles.isEmpty()) {
-                throw new ImportException("No relationships files was specified.");
-            }
+        if(relationshipsFiles == null || relationshipsFiles.isEmpty()) {
+            throw new ImportException("No relationships files was specified.");
+        }
 
-            for(String relationshipsFile : relationshipsFiles) {
-                final String message = "Unable to load realtionships file. Please check your input configuration " +
-                        "file. (input type = " + inputType+", file=" + relationshipsFile+")";
-                try {
-                    loadRelationshipRows(modMap, relationshipMap, input.getInputStream(relationshipsFile));
-                } catch (NullPointerException e) {
-                    log.error(message, e);
-                    throw new ImportException(message, e);
-                } catch (IOException e) {
-                    log.error(message, e);
-                    throw new ImportException(message, e);
-                }
+        for(String relationshipsFile : relationshipsFiles) {
+            final String message = "Unable to load realtionships file. Please check your input configuration " +
+                    "file. (input type = " + inputType+", file=" + relationshipsFile+")";
+            try {
+                loadRelationshipRows(modMap, relationshipMap, input.getInputStream(relationshipsFile));
+            } catch (NullPointerException e) {
+                log.error(message, e);
+                throw new ImportException(message, e);
+            } catch (IOException e) {
+                log.error(message, e);
+                throw new ImportException(message, e);
             }
         }
 
@@ -717,15 +719,15 @@ public class RF2Importer extends BaseImporter {
 
     class OntologyInterator implements Iterator<Ontology> {
 
-        private final List<ImportEntry> entries = new ArrayList<ImportEntry>();
+        private final Queue<ImportEntry> entries = new LinkedList<ImportEntry>();
         private final IProgressMonitor monitor;
-
-        public OntologyInterator(IProgressMonitor monitor) throws ImportException {
-            this.monitor = monitor;
-
+        
+        private void processNext() throws ImportException {
+            RF2Input in = inputs.remove(); 
+            
             // 1. Load module dependencies
             log.info("Loading module dependencies");
-            IModuleDependencyRefset mdr = loadModuleDependencies();
+            IModuleDependencyRefset mdr = loadModuleDependencies(in);
 
             if(mdr == null) {
                 throw new ImportException("Couldn't load module dependency reference set for RF2 input files.");
@@ -737,7 +739,7 @@ public class RF2Importer extends BaseImporter {
 
             // 2. Determine which modules and versions must be loaded
             log.info("Determining which root modules and versions to load");
-            Map<String, Set<Version>> toLoad = getModuleVersionsToLoad();
+            Map<String, Set<Version>> toLoad = getModuleVersionsToLoad(in);
 
             // 3. Create import entries
             log.info("Creating import entries");
@@ -749,8 +751,7 @@ public class RF2Importer extends BaseImporter {
                     ModuleDependency md = deps.get(rootModuleId).get(ver);
                     Set<Module> modules = new HashSet<Module>();
 
-                    Queue<ModuleDependency> depends =
-                            new LinkedList<ModuleDependency>();
+                    Queue<ModuleDependency> depends = new LinkedList<ModuleDependency>();
                     depends.add(md);
 
                     while (!depends.isEmpty()) {
@@ -759,15 +760,21 @@ public class RF2Importer extends BaseImporter {
                         depends.addAll(d.getDependencies());
                     }
 
-                    entries.add(new ImportEntry(rootModuleId, ver, metadata, modules));
+                    entries.add(new ImportEntry(rootModuleId, ver, metadata, modules, in));
                 }
             }
             log.info("Found "+entries.size()+" entries to import");
         }
 
+        public OntologyInterator(IProgressMonitor monitor) throws ImportException {
+            this.monitor = monitor;
+
+            processNext();
+        }
+
         @Override
         public boolean hasNext() {
-            return !entries.isEmpty();
+            return !entries.isEmpty() || !inputs.isEmpty();
         }
 
         /**
@@ -776,7 +783,8 @@ public class RF2Importer extends BaseImporter {
         @Override
         public Ontology next() throws RuntimeException {
             try {
-                ImportEntry entry = entries.remove(entries.size()-1);
+                if(entries.isEmpty()) processNext();
+                ImportEntry entry = entries.remove();
                 log.info("Start " + entry.getRootModuleId() + "\t" + entry.getRootModuleVersion());
                 VersionRows bundle = getBundle(entry);
                 return transform(entry.getRootModuleId(), entry.getRootModuleVersion(), bundle, entry.getMetadata(),

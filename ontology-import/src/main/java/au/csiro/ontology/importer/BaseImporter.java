@@ -7,6 +7,8 @@ package au.csiro.ontology.importer;
 import java.util.Map;
 import java.util.Set;
 
+import au.csiro.ontology.input.Input;
+
 /**
  * @author Alejandro Metke
  *
@@ -38,13 +40,15 @@ public abstract class BaseImporter implements IImporter {
         private final String rootModuleVersion;
         private final Map<String, String> metadata;
         private final Set<Module> modules;
+        private final Input input;
         
         public ImportEntry(String rootModuleId, String rootModuleVersion,
-                Map<String, String> metadata, Set<Module> modules) {
+                Map<String, String> metadata, Set<Module> modules, Input input) {
             this.rootModuleId = rootModuleId;
             this.rootModuleVersion = rootModuleVersion;
             this.metadata = metadata;
             this.modules = modules;
+            this.input = input;
         }
         
         public String getRootModuleId() {
@@ -61,6 +65,10 @@ public abstract class BaseImporter implements IImporter {
         
         public Set<Module> getModules() {
             return modules;
+        }
+
+        public Input getInput() {
+            return input;
         }
         
     }
