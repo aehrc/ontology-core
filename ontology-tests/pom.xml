@@ -1,14 +1,4 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <!-- ! Copyright (c) 2009 International Health Terminology Standards Development 
-    Organisation ! ! Licensed under the Apache License, Version 2.0 (the "License"); 
-    ! you may not use this file except in compliance with the License. ! You 
-    may obtain a copy of the License at ! ! http://www.apache.org/licenses/LICENSE-2.0 
-    ! ! Unless required by applicable law or agreed to in writing, software ! 
-    distributed under the License is distributed on an "AS IS" BASIS, ! WITHOUT 
-    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. ! See the 
-    License for the specific language governing permissions and ! limitations 
-    under the License. -->
-
   <modelVersion>4.0.0</modelVersion>
   <artifactId>ontology-core-tests</artifactId>
   <packaging>jar</packaging>
@@ -41,12 +31,12 @@
     <dependency>
       <groupId>au.csiro</groupId>
       <artifactId>ontology-model</artifactId>
-      <version>2.2.3</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>au.csiro</groupId>
       <artifactId>ontology-import</artifactId>
-      <version>2.2.3</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>au.csiro</groupId>
@@ -58,6 +48,12 @@
       <groupId>au.csiro</groupId>
       <artifactId>snomed-int-rf2</artifactId>
       <version>20130131</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>au.csiro</groupId>
+      <artifactId>amtv3</artifactId>
+      <version>20130901</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -97,32 +93,32 @@
         <version>2.15</version>
         <configuration>
           <argLine>-server -Xmx8G</argLine>
-		    <skipTests>true</skipTests>
+		  <skipTests>true</skipTests>
         </configuration>
       </plugin>
     </plugins>
   </build>
   
   <profiles>
-	  <profile>
-        <id>extended-tests</id>
-        <activation>
-          <property>
-              <name>runAllTests</name>
-          </property>
-        </activation>
-        <build>
-			<plugins>
-			  <plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-				  <argLine>-server -Xmx8G</argLine>
-				  <skipTests>false</skipTests>
-				</configuration>
-			  </plugin>
-			</plugins>
-		  </build>
-      </profile>
-	</profiles>
+    <profile>
+      <id>extended-tests</id>
+      <activation>
+        <property>
+          <name>runAllTests</name>
+        </property>
+      </activation>
+      <build>
+	    <plugins>
+	      <plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-surefire-plugin</artifactId>
+			<configuration>
+		      <argLine>-server -Xmx8G</argLine>
+			  <skipTests>false</skipTests>
+			</configuration>
+		  </plugin>
+		</plugins>
+	  </build>
+    </profile>
+  </profiles>
 </project>
