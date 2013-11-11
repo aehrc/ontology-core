@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <inputs>
-  <rf2Inputs>
+  <inputs xsi:type="rf2Input" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <inputType>CLASSPATH</inputType>
     <releaseType>SNAPSHOT</releaseType>
 
@@ -99,6 +99,6 @@
         </metadata>
       </versions>
     </modules>
-  </rf2Inputs>
+  </inputs>
 </inputs>
 

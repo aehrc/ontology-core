@@ -24,13 +24,12 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.xml.bind.JAXBException;
-
 import org.apache.log4j.Logger;
 
 import au.csiro.ontology.Ontology;
 import au.csiro.ontology.importer.BaseImporter;
 import au.csiro.ontology.importer.ImportException;
+import au.csiro.ontology.input.Input;
 import au.csiro.ontology.input.Input.InputType;
 import au.csiro.ontology.input.Inputs;
 import au.csiro.ontology.input.ModuleInfo;
@@ -80,55 +79,16 @@ public class RF2Importer extends BaseImporter {
     protected final Queue<RF2Input> inputs = new LinkedList<RF2Input>();
 
     /**
-     * Imports a set of ontologies.
-     *
-     * @param inputsStream An input stream with the contents of the XML
-     * configuration file.
-     * @throws ImportException
-     */
-    public RF2Importer(InputStream inputsStream) throws ImportException {
-        try {
-            loadInputs(Inputs.load(inputsStream));
-        } catch (JAXBException e) {
-            log.error("Malformed input file.", e);
-            throw new ImportException("Malformed input file.", e);
-        }
-    }
-
-    /**
-     * Imports a set of ontologies. Loads the configuration file from the class
-     * path.
-     * @throws ImportException
-     */
-    public RF2Importer() throws ImportException {
-        final String configFile = "/config.xml";
-        final String message = "Malformed input file: " + configFile;
-        try {
-            loadInputs(Inputs.load(this.getClass().getResourceAsStream(configFile)));
-        } catch (NullPointerException e) {
-            log.error(message, e);
-            throw new ImportException(message, e);
-        } catch (JAXBException e) {
-            log.error(message, e);
-            throw new ImportException(message, e);
-        }
-    }
-
-    /**
      * Imports a set of ontologies using the supplied configuration object.
      *
      * @param inputs
      */
-    public RF2Importer(Inputs inputs) {
-        loadInputs(inputs);
-    }
-    
-    /**
-     * 
-     * @param in
-     */
-    private void loadInputs(Inputs in) {
-        inputs.addAll(in.getRf2Inputs());
+    public RF2Importer(Collection<Input> inputs) {
+        for(Input in : inputs) {
+            if(in instanceof RF2Input) {
+                this.inputs.add((RF2Input) in);
+            }
+        }     
     }
     
     @Override

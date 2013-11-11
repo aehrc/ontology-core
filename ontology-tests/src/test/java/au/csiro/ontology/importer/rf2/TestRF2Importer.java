@@ -6,12 +6,15 @@ package au.csiro.ontology.importer.rf2;
 
 import java.util.Iterator;
 
+import javax.xml.bind.JAXBException;
+
 import junit.framework.Assert;
 
 import org.junit.Test;
 
 import au.csiro.ontology.Ontology;
 import au.csiro.ontology.importer.ImportException;
+import au.csiro.ontology.input.Inputs;
 import au.csiro.ontology.model.Axiom;
 import au.csiro.ontology.model.Concept;
 import au.csiro.ontology.model.ConceptInclusion;
@@ -38,10 +41,12 @@ public class TestRF2Importer {
      * Tests the main functionality of the importer. The results are based on the meta data file which contains 
      * information only for the 20110731 and 20120131 releases.
      * @throws ImportException 
+     * @throws JAXBException 
      */
     @Test
-    public void testGetOntologyVersions() throws ImportException {
-        RF2Importer rf2i = new RF2Importer(this.getClass().getResourceAsStream("/config-snomed.xml"));
+    public void testGetOntologyVersions() throws ImportException, JAXBException {
+        Inputs in = Inputs.load(this.getClass().getResourceAsStream("/config-snomed.xml"));
+        RF2Importer rf2i = new RF2Importer(in.getInputs());
 
         Iterator<Ontology> it = rf2i.getOntologyVersions(new NullProgressMonitor());
         
@@ -57,10 +62,12 @@ public class TestRF2Importer {
     /**
      * Tests the concrete domains import functionality.
      * @throws ImportException 
+     * @throws JAXBException 
      */
     @Test
-    public void testConcreteDomains() throws ImportException {
-        RF2Importer rf2i = new RF2Importer(this.getClass().getResourceAsStream("/config-amtv3.xml"));
+    public void testConcreteDomains() throws ImportException, JAXBException {
+        Inputs in = Inputs.load(this.getClass().getResourceAsStream("/config-amtv3.xml"));
+        RF2Importer rf2i = new RF2Importer(in.getInputs());
 
         Iterator<Ontology> it = rf2i.getOntologyVersions(new NullProgressMonitor());
         Assert.assertTrue(it.hasNext());

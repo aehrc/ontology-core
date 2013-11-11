@@ -30,7 +30,7 @@ public class InputsUtil {
         
         // Input for SNOMED international
         RF2Input in1 = new RF2Input();
-        in.getRf2Inputs().add(in1);
+        in.getInputs().add(in1);
         
         in1.setInputType(InputType.CLASSPATH);
         in1.getConceptsFiles().add("/snomed_int_full_rf2/Terminology/sct2_Concept_Full_INT_20120131.txt");
@@ -81,7 +81,7 @@ public class InputsUtil {
         
         // Input for UK release
         RF2Input in2 = new RF2Input();
-        in.getRf2Inputs().add(in2);
+        in.getInputs().add(in2);
         
         in2.setInputType(InputType.CLASSPATH);
         in2.getConceptsFiles().add("/SnomedCT_GB1000000_20121001/RF2Release/Full/Terminology/xsct2_Concept_Full_GB1000000_20121001.txt");
@@ -146,7 +146,7 @@ public class InputsUtil {
         
         try {
             StringWriter writer = new StringWriter();
-            JAXBContext context = JAXBContext.newInstance(Inputs.class);
+            JAXBContext context = JAXBContext.newInstance(Inputs.class, RF2Input.class);
             Marshaller m = context.createMarshaller();
             m.marshal(in, writer);
     
