@@ -34,14 +34,9 @@ public class Inputs {
     };
     
     /**
-     * List of RF2 input files.
+     * List of input files.
      */
-    protected List<RF2Input> rf2Inputs = new ArrayList<RF2Input>();
-    
-    /**
-     * List of OWL input files.
-     */
-    protected List<OWLInput> owlInputs = new ArrayList<OWLInput>();
+    protected List<Input> inputs = new ArrayList<Input>();
     
     /**
      * Loads an {@link Inputs} object from am XML file.
@@ -51,7 +46,7 @@ public class Inputs {
      * @throws JAXBException 
      */
     public static Inputs load(InputStream in) throws JAXBException {
-        JAXBContext context = JAXBContext.newInstance(Inputs.class);
+        JAXBContext context = JAXBContext.newInstance(Inputs.class, RF2Input.class);
         Unmarshaller u = context.createUnmarshaller();
         Inputs inputs = (Inputs) u.unmarshal(in);
         return inputs;
@@ -67,31 +62,17 @@ public class Inputs {
     }
 
     /**
-     * @return the rf2Inputs
+     * @return the inputs
      */
-    public List<RF2Input> getRf2Inputs() {
-        return rf2Inputs;
+    public List<Input> getInputs() {
+        return inputs;
     }
 
     /**
-     * @param rf2Inputs the rf2Inputs to set
+     * @param inputs the inputs to set
      */
-    public void setRf2Inputs(List<RF2Input> rf2Inputs) {
-        this.rf2Inputs = rf2Inputs;
-    }
-
-    /**
-     * @return the owlInputs
-     */
-    public List<OWLInput> getOwlInputs() {
-        return owlInputs;
-    }
-
-    /**
-     * @param owlInputs the owlInputs to set
-     */
-    public void setOwlInputs(List<OWLInput> owlInputs) {
-        this.owlInputs = owlInputs;
+    public void setInputs(List<Input> inputs) {
+        this.inputs = inputs;
     }
     
 }

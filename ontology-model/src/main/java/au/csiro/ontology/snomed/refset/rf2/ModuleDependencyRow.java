@@ -4,28 +4,32 @@
  */
 package au.csiro.ontology.snomed.refset.rf2;
 
+import org.apache.log4j.Logger;
+
 /**
  * Simple implementation of a module dependency refset member.
- * 
+ *
  * @author Alejandro Metke
  *
  */
 public class ModuleDependencyRow {
-    
+
+    final static private Logger log = Logger.getLogger(ModuleDependencyRow.class);
+
     protected final String id;
-    
+
     protected final String effectiveTime;
-    
+
     protected final boolean active;
-    
+
     protected final String moduleId;
-    
+
     protected final String refsetId;
-    
+
     protected final String referencedComponentId;
-    
+
     protected final String sourceEffectiveTime;
-    
+
     protected final String targetEffectiveTime;
 
     public ModuleDependencyRow(String id, String effectiveTime, boolean active,
@@ -40,6 +44,13 @@ public class ModuleDependencyRow {
         this.referencedComponentId = referencedComponentId;
         this.sourceEffectiveTime = sourceEffectiveTime;
         this.targetEffectiveTime = targetEffectiveTime;
+
+        if (!effectiveTime.equals(sourceEffectiveTime)) {
+            log.error("effectiveTime and sourceEffectiveTime must be equal: " + this);
+        }
+        if (ModuleDependencyRefset.parseTime(sourceEffectiveTime).compareTo(ModuleDependencyRefset.parseTime(targetEffectiveTime)) < 0) {
+            log.error("sourceEfectiveTime cannot be earlier than targetEffectiveTime: " + this);
+        }
     }
 
     /**
@@ -173,5 +184,5 @@ public class ModuleDependencyRow {
             return false;
         return true;
     }
-    
+
 }

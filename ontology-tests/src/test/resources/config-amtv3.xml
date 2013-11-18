@@ -1,0 +1,104 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<inputs>
+  <inputs xsi:type="rf2Input" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <inputType>CLASSPATH</inputType>
+    <releaseType>SNAPSHOT</releaseType>
+
+    <associationRefsetFiles>/Delivery_V239_1_23/RF2Release/Snapshot/Refset/Content/der2_cRefset_AssociationReferenceSnapshot_AU1000036_20121231.txt</associationRefsetFiles>
+    <conceptsFiles>/Delivery_V239_1_23/RF2Release/Snapshot/Terminology/sct2_Concept_Snapshot_AU1000036_20121231.txt</conceptsFiles>
+    <descriptionsFiles>/Delivery_V239_1_23/RF2Release/Snapshot/Terminology/sct2_Description_Snapshot-en-AU_AU1000036_20121231.txt</descriptionsFiles>
+    <relationshipsFiles>/Delivery_V239_1_23/RF2Release/Snapshot/Terminology/sct2_Relationship_Snapshot_AU1000036_20121231.txt</relationshipsFiles>
+    <statedRelationshipsFiles>/Delivery_V239_1_23/RF2Release/Snapshot/Terminology/sct2_Relationship_Snapshot_AU1000036_20121231.txt</statedRelationshipsFiles>
+    <identifiersFiles>/Delivery_V239_1_23/RF2Release/Snapshot/Terminology/sct2_Identifier_Snapshot_AU1000036_20121231.txt</identifiersFiles>
+
+    <descriptionFormatRefsetFiles>/Delivery_V239_1_23/RF2Release/Snapshot/Refset/Metadata/der2_ciRefset_DescriptionTypeSnapshot_AU1000036_20121231.txt</descriptionFormatRefsetFiles>
+    <languageRefsetFiles>/Delivery_V239_1_23/RF2Release/Snapshot/Refset/Language/der2_cRefset_LanguageSnapshot-en-AU_AU1000036_20121231.txt</languageRefsetFiles>
+    <moduleDependenciesRefsetFiles>/Delivery_V239_1_23/RF2Release/Snapshot/Refset/Metadata/der2_ssRefset_ModuleDependencySnapshot_AU1000036_20121231.txt</moduleDependenciesRefsetFiles>
+    <refsetDescriptorRefsetFiles>/Delivery_V239_1_23/RF2Release/Snapshot/Refset/Metadata/der2_cciRefset_RefsetDescriptorSnapshot_AU1000036_20121231.txt</refsetDescriptorRefsetFiles>
+
+    <concreteDomainRefsetFiles>/Delivery_V239_1_23/RF2Release/Snapshot/Refset/Content/der2_ccsRefset_StrengthSnapshot_AU1000036_20121231.txt</concreteDomainRefsetFiles>
+    <concreteDomainRefsetFiles>/Delivery_V239_1_23/RF2Release/Snapshot/Refset/Content/der2_ccsRefset_SubpackQuantitySnapshot_AU1000036_20121231.txt</concreteDomainRefsetFiles>
+    <concreteDomainRefsetFiles>/Delivery_V239_1_23/RF2Release/Snapshot/Refset/Content/der2_ccsRefset_UnitOfUseQuantitySnapshot_AU1000036_20121231.txt</concreteDomainRefsetFiles>
+    <concreteDomainRefsetFiles>/Delivery_V239_1_23/RF2Release/Snapshot/Refset/Content/der2_ccsRefset_UnitOfUseSizeSnapshot_AU1000036_20121231.txt</concreteDomainRefsetFiles>
+
+    <modules>
+      <id>900062011000036108</id>
+      <versions>
+        <id>20130901</id>
+        <metadata>
+          <entry>
+            <key>roleGroupId</key>
+            <value>roleGroup</value>
+          </entry>
+          <entry>
+            <key>conceptModelAttId</key>
+            <value>410662002</value>
+          </entry>
+          <entry>
+            <key>rightIdentityIds</key>
+            <value>363701004,127489000</value>
+          </entry>
+          <entry>
+            <key>conceptDefinedId</key>
+            <value>900000000000073002</value>
+          </entry>
+          <entry>
+            <key>fsnId</key>
+            <value>900000000000003001</value>
+          </entry>
+          <entry>
+            <key>neverGroupedIds</key>
+            <value>123005000,127489000,272741003,411116001</value>
+          </entry>
+          <entry>
+            <key>someId</key>
+            <value>900000000000451002</value>
+          </entry>
+          <entry>
+            <key>allId</key>
+            <value>900000000000452009</value>
+          </entry>
+          <entry>
+            <key>isAId</key>
+            <value>116680003</value>
+          </entry>
+          <entry>
+            <key>synonymId</key>
+            <value>900000000000013009</value>
+          </entry>
+          <entry>
+            <key>definitionId</key>
+            <value>900000000000550004</value>
+          </entry>
+          <entry>
+            <key>preferredId</key>
+            <value>900000000000548007</value>
+          </entry>
+          <entry>
+            <key>lateralityId</key>
+            <value>272741003</value>
+          </entry>
+
+          <!-- for concrete domains -->
+          <entry>
+            <key>floatTypeId</key>
+            <value>151711000036108</value>
+          </entry>
+          <entry>
+            <key>intTypeId</key>
+            <value>151891000036107</value>
+          </entry>
+          <entry>
+            <key>equalsOperatorId</key>
+            <value>700000051000036108</value>
+          </entry>
+          <entry>
+            <key>unitRoleId</key>
+            <value>UNIT</value>
+          </entry>
+        </metadata>
+      </versions>
+    </modules>
+  </inputs>
+</inputs>
+

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <inputs>
-  <rf2Inputs>
+  <inputs xsi:type="rf2Input" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <inputType>CLASSPATH</inputType>
     <associationRefsetFiles>/snomed_int_full_rf2/Refset/Content/der2_cRefset_AssociationReferenceFull_INT_20120131.txt</associationRefsetFiles>
     <attributeValueRefsetFiles>/snomed_int_full_rf2/Refset/Content/der2_cRefset_AttributeValueFull_INT_20120131.txt</attributeValueRefsetFiles>
@@ -135,8 +135,8 @@
     <simpleRefsetFiles>/snomed_int_full_rf2/Refset/Content/der2_Refset_SimpleFull_INT_20120131.txt</simpleRefsetFiles>
     <statedRelationshipsFile>/snomed_int_full_rf2/Terminology/sct2_StatedRelationship_Full_INT_20120131.txt</statedRelationshipsFile>
     <textDefinitionsFile>/snomed_int_full_rf2/Terminology/sct2_TextDefinition_Full_INT_20120131.txt</textDefinitionsFile>
-  </rf2Inputs>
-  <rf2Inputs>
+  </inputs>
+  <inputs xsi:type="rf2Input" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <inputType>CLASSPATH</inputType>
     <associationRefsetFiles>/SnomedCT_GB1000000_20121001/RF2Release/Full/Refset/Content/xder2_cRefset_AssociationReferenceFull_GB1000000_20121001.txt</associationRefsetFiles>
     <attributeValueRefsetFiles>/SnomedCT_GB1000000_20121001/RF2Release/Full/Refset/Content/xder2_cRefset_AssociationReferenceFull_GB1000000_20121001.txt</attributeValueRefsetFiles>
@@ -348,5 +348,5 @@
     <simpleRefsetFiles>/SnomedCT_GB1000000_20121001/RF2Release/Full/Refset/Content/StandardsConsultingGroup/Religions/xder2_Refset_ReligionsSimpleFull_GB1000000_20121001.txt</simpleRefsetFiles>
     <statedRelationshipsFile>/SnomedCT_GB1000000_20121001/RF2Release/Full/Terminology/xsct2_StatedRelationship_Full_GB1000000_20121001.txt</statedRelationshipsFile>
     <textDefinitionsFile>/SnomedCT_GB1000000_20121001/RF2Release/Full/Terminology/xsct2_TextDefinition_Full_GB1000000_20121001.txt</textDefinitionsFile>
-  </rf2Inputs>
+  </inputs>
 </inputs>
