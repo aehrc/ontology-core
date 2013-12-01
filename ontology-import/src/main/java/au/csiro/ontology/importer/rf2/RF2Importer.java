@@ -77,7 +77,16 @@ public class RF2Importer extends BaseImporter {
      * Queue with the inputs to process.
      */
     protected final Queue<RF2Input> inputs = new LinkedList<RF2Input>();
-
+    
+    /**
+     * Imports an ontology using the supplied configuration object.
+     * 
+     * @param input
+     */
+    public RF2Importer(RF2Input input) {
+        this.inputs.add(input);
+    }
+    
     /**
      * Imports a set of ontologies using the supplied configuration object.
      *
