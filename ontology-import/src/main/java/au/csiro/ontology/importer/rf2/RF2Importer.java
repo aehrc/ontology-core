@@ -889,7 +889,7 @@ public class RF2Importer extends BaseImporter {
             }
         }
 
-        Ontology build() throws URISyntaxException {
+        protected Ontology build() throws URISyntaxException {
             // Process concept rows
             log.info("Processing " + vr.getConceptRows().size() + " concept rows");
             for (ConceptRow cr : vr.getConceptRows()) {
