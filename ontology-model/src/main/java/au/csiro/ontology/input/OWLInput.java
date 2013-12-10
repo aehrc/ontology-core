@@ -2,9 +2,8 @@ package au.csiro.ontology.input;
 
 public class OWLInput extends Input {
     protected String owlFile;
-    
-    public OWLInput() {
 
+    public OWLInput() {
     }
 
     /**
@@ -13,5 +12,8 @@ public class OWLInput extends Input {
     public String getOwlFile() {
         return owlFile;
     }
-    
+
+    public void setOwlFile(String owlFile) {
+        this.owlFile = owlFile;
+    }
 }
