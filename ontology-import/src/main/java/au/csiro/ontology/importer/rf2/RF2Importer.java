@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -40,8 +41,8 @@ import au.csiro.ontology.model.Concept;
 import au.csiro.ontology.model.ConceptInclusion;
 import au.csiro.ontology.model.Conjunction;
 import au.csiro.ontology.model.Datatype;
+import au.csiro.ontology.model.DecimalLiteral;
 import au.csiro.ontology.model.Existential;
-import au.csiro.ontology.model.FloatLiteral;
 import au.csiro.ontology.model.IntegerLiteral;
 import au.csiro.ontology.model.Literal;
 import au.csiro.ontology.model.NamedConcept;
@@ -1093,7 +1094,7 @@ public class RF2Importer extends BaseImporter {
             if (type.equals("int")) {
                 value = new IntegerLiteral(Integer.parseInt(datatype[2]));
             } else if (type.equals("float")) {
-                value = new FloatLiteral(Float.parseFloat(datatype[2]));
+                value = new DecimalLiteral(new BigDecimal(datatype[2]));
             } else {
                 log.error("Unknown type: " + type);
                 return;
