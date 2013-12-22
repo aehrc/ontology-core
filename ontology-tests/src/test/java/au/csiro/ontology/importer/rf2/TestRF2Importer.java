@@ -4,6 +4,7 @@
  */
 package au.csiro.ontology.importer.rf2;
 
+import java.math.BigDecimal;
 import java.util.Iterator;
 
 import javax.xml.bind.JAXBException;
@@ -20,8 +21,8 @@ import au.csiro.ontology.model.Concept;
 import au.csiro.ontology.model.ConceptInclusion;
 import au.csiro.ontology.model.Conjunction;
 import au.csiro.ontology.model.Datatype;
+import au.csiro.ontology.model.DecimalLiteral;
 import au.csiro.ontology.model.Existential;
-import au.csiro.ontology.model.FloatLiteral;
 import au.csiro.ontology.model.NamedConcept;
 import au.csiro.ontology.model.NamedFeature;
 import au.csiro.ontology.model.NamedRole;
@@ -110,8 +111,8 @@ public class TestRF2Importer {
                         Datatype dt1 = (Datatype) conj1c.getConcepts()[0];
                         NamedFeature f1 = (NamedFeature) dt1.getFeature();
                         Assert.assertEquals("700000111000036105", f1.getId());
-                        FloatLiteral lit = (FloatLiteral) dt1.getLiteral();
-                        Assert.assertEquals(8, lit.getValue(), 0.001f);
+                        DecimalLiteral lit = (DecimalLiteral) dt1.getLiteral();
+                        Assert.assertEquals(new BigDecimal("8"), lit.getValue());
                         Assert.assertTrue(dt1.getOperator() == Operator.EQUALS);
                         Assert.assertEquals("1979011000036106", ((NamedConcept) conj1b.getConcepts()[1]).getId());
                         Existential e1d = (Existential) conj1c.getConcepts()[1];
@@ -139,8 +140,8 @@ public class TestRF2Importer {
                         Datatype dt2 = (Datatype) conj2c.getConcepts()[0];
                         NamedFeature f2 = (NamedFeature) dt2.getFeature();
                         Assert.assertEquals("700000111000036105", f2.getId());
-                        FloatLiteral lit2 = (FloatLiteral) dt2.getLiteral();
-                        Assert.assertEquals(500, lit2.getValue(), 0.001f);
+                        DecimalLiteral lit2 = (DecimalLiteral) dt2.getLiteral();
+                        Assert.assertEquals(new BigDecimal("500"), lit2.getValue());
                         Assert.assertTrue(dt2.getOperator() == Operator.EQUALS);
                         Assert.assertEquals("2442011000036104", ((NamedConcept) conj2b.getConcepts()[1]).getId());
                         Existential e2d = (Existential) conj2c.getConcepts()[1];
@@ -167,8 +168,8 @@ public class TestRF2Importer {
                         Datatype dt4 = (Datatype) conj4b.getConcepts()[0];
                         NamedFeature f4 = (NamedFeature) dt4.getFeature();
                         Assert.assertEquals("700000141000036106", f4.getId());
-                        FloatLiteral lit4 = (FloatLiteral) dt4.getLiteral();
-                        Assert.assertEquals(1, lit4.getValue(), 0.001f);
+                        DecimalLiteral lit4 = (DecimalLiteral) dt4.getLiteral();
+                        Assert.assertEquals(new BigDecimal("1"), lit4.getValue());
                         Assert.assertTrue(dt4.getOperator() == Operator.EQUALS);
                         Existential e4d = (Existential) conj4b.getConcepts()[1];
                         Assert.assertEquals("63011000036109", ((NamedConcept) e4d.getConcept()).getId());
