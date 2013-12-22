@@ -185,4 +185,12 @@ public class ModuleDependencyRow {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return "ModuleDependencyRow [id=" + id + ", effectiveTime=" + effectiveTime + ", active=" + active
+                + ", moduleId=" + moduleId + ", refsetId=" + refsetId + ", referencedComponentId="
+                + referencedComponentId + ", sourceEffectiveTime=" + sourceEffectiveTime + ", targetEffectiveTime="
+                + targetEffectiveTime + "]";
+    }
+
 }
