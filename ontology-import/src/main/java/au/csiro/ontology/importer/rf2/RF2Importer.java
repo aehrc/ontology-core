@@ -202,7 +202,7 @@ public class RF2Importer extends BaseImporter {
                 String[] fields = line.split("\t");
 
                 if (fields.length < 6) {
-                    throw new RuntimeException("Concepts: Mis-formatted line, expected >= 6 tab-separated fields, " +
+                    throw new RuntimeException("Refset: Mis-formatted line, expected >= 6 tab-separated fields, " +
                     		"got: " + line);
                 }
 
@@ -306,7 +306,7 @@ public class RF2Importer extends BaseImporter {
         }
 
         for(String relationshipsFile : relationshipsFiles) {
-            final String message = "Unable to load realtionships file. Please check your input configuration " +
+            final String message = "Unable to load relationships file. Please check your input configuration " +
                     "file. (input type = " + inputType+", file=" + relationshipsFile+")";
             try {
                 loadRelationshipRows(modMap, relationshipMap, input.getInputStream(relationshipsFile));
@@ -376,7 +376,7 @@ public class RF2Importer extends BaseImporter {
                         idx5 < 0 || idx6 < 0 || idx7 < 0 || idx8 < 0 ||
                         idx9 < 0) {
                     br.close();
-                    throw new RuntimeException("Concepts: Mis-formatted line, expected 10 " +
+                    throw new RuntimeException("Relationships: Mis-formatted line, expected 10 " +
                         "tab-separated fields, got: " + line);
                 }
 
