@@ -26,7 +26,10 @@ public class ModuleDependencyRefsetTest {
 
             @Override
             protected void append(LoggingEvent event) {
-                throw new AssertionError("Should not log: " + event.getMessage());
+                final String message = String.valueOf(event.getMessage());
+                if (!message.startsWith("MDRS entry for version:")) {
+                    throw new AssertionError("Should not log: " + message);
+                }
             }
         });
         Set<ModuleDependencyRow> members = new HashSet<ModuleDependencyRow>();
