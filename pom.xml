@@ -85,7 +85,7 @@
 	  <plugin>
 		  <groupId>com.atlassian.maven.plugins</groupId>
 		  <artifactId>maven-jgitflow-plugin</artifactId>
-		  <version>1.0-alpha27</version>
+		  <version>1.0-alpha21.1</version>
 		  <configuration>
 		    <autoVersionSubmodules>true</autoVersionSubmodules>
 		  </configuration>
