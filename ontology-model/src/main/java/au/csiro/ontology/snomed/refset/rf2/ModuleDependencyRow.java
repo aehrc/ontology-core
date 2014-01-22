@@ -32,10 +32,12 @@ public class ModuleDependencyRow {
 
     protected final String targetEffectiveTime;
 
+    private boolean malformed = false;
+
     public ModuleDependencyRow(String id, String effectiveTime, boolean active,
             String moduleId, String refsetId, String referencedComponentId,
             String sourceEffectiveTime, String targetEffectiveTime) {
-        super();
+
         this.id = id;
         this.effectiveTime = effectiveTime;
         this.active = active;
@@ -45,12 +47,23 @@ public class ModuleDependencyRow {
         this.sourceEffectiveTime = sourceEffectiveTime;
         this.targetEffectiveTime = targetEffectiveTime;
 
+        if (!refsetId.equals("900000000000534007")) {
+            malformed = true;
+            log.error("refsetId does not match that for the MDRS (900000000000534007): " + this);
+        }
+
         if (!effectiveTime.equals(sourceEffectiveTime)) {
+            malformed = true;
             log.error("effectiveTime and sourceEffectiveTime must be equal: " + this);
         }
         if (ModuleDependencyRefset.parseTime(sourceEffectiveTime).compareTo(ModuleDependencyRefset.parseTime(targetEffectiveTime)) < 0) {
+            malformed = true;
             log.error("sourceEfectiveTime cannot be earlier than targetEffectiveTime: " + this);
         }
+    }
+
+    boolean isMalformed() {
+        return malformed;
     }
 
     /**
@@ -183,6 +196,14 @@ public class ModuleDependencyRow {
         } else if (!targetEffectiveTime.equals(other.targetEffectiveTime))
             return false;
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return "ModuleDependencyRow [id=" + id + ", effectiveTime=" + effectiveTime + ", active=" + active
+                + ", moduleId=" + moduleId + ", refsetId=" + refsetId + ", referencedComponentId="
+                + referencedComponentId + ", sourceEffectiveTime=" + sourceEffectiveTime + ", targetEffectiveTime="
+                + targetEffectiveTime + "]";
     }
 
 }

@@ -112,6 +112,8 @@ public class ModuleDependencyRefset extends Refset implements IModuleDependencyR
      * @param members
      */
     public ModuleDependencyRefset(Set<ModuleDependencyRow> members) {
+        id = "900000000000534007";
+
         // Index the dependency rows
         final Map<M, Set<M>> index = new HashMap<M, Set<M>>();
         for (ModuleDependencyRow member : members) {
@@ -121,6 +123,10 @@ public class ModuleDependencyRefset extends Refset implements IModuleDependencyR
                 log.warn("Inactive dependency: " + version + " to\t" + requiredModule);
                 continue;
             }
+            if (member.isMalformed()) {
+                log.warn("Ignoring malformed MDRS entry: " + version + " to\t" + requiredModule);
+                continue;
+            }
 
             Set<M> vals = index.get(version);
             if (vals == null) {
@@ -128,6 +134,13 @@ public class ModuleDependencyRefset extends Refset implements IModuleDependencyR
                 index.put(version, vals);
             }
             vals.add(requiredModule);
+        }
+
+        if (log.isInfoEnabled()) {
+            // Use a TreeSet to get the output sorted
+            for (final M version: new TreeSet<M>(index.keySet())) {
+                log.info("MDRS entry for version: " + version);
+            }
         }
 
         // Compute the transitive closure of the required modules.
