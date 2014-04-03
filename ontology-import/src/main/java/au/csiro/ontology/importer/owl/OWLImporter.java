@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EmptyStackException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -481,7 +482,12 @@ public class OWLImporter extends BaseImporter {
                 checkInconsistentProperty(dp, type);
 
                 NamedFeature f = new NamedFeature(dp.toStringID());
-                push(new Datatype(f, Operator.EQUALS, getLiteral(l)));
+                Literal lit = getLiteral(l);
+                if(lit != null) {
+                    push(new Datatype(f, Operator.EQUALS,lit));
+                } else {
+                    problems.add("Axiom " + e + " will be ignored because of the unsupported literal.");
+                }
             }
 
             public void visit(OWLDataAllValuesFrom e) {
@@ -511,7 +517,12 @@ public class OWLImporter extends BaseImporter {
                     checkInconsistentProperty(dp, type);
                     
                     NamedFeature f = new NamedFeature(dp.toStringID());
-                    push(new Datatype(f, Operator.EQUALS, getLiteral(l)));
+                    Literal lit = getLiteral(l);
+                    if(lit != null) {
+                        push(new Datatype(f, Operator.EQUALS, lit));
+                    } else {
+                        problems.add("Axiom " + e + " will be ignored because of the unsupported literal.");
+                    }
                 } else if(range instanceof OWLDatatypeRestriction) {
                     NamedFeature f = new NamedFeature(dp.toStringID());
                     
@@ -521,31 +532,38 @@ public class OWLImporter extends BaseImporter {
                     List<Datatype> conjuncts = new ArrayList<Datatype>();
                     for(OWLFacetRestriction fr : frs) {
                         OWLLiteral l = fr.getFacetValue();
-                        checkInconsistentProperty(dp, l.getDatatype()); 
-                        OWLFacet facet = fr.getFacet();
                         
-                        switch(facet) {
-                            case MAX_EXCLUSIVE:
-                                conjuncts.add(new Datatype(f, Operator.LESS_THAN, getLiteral(l)));
-                                break;
-                            case MAX_INCLUSIVE:
-                                conjuncts.add(new Datatype(f, Operator.LESS_THAN_EQUALS, getLiteral(l)));
-                                break;
-                            case MIN_EXCLUSIVE:
-                                conjuncts.add(new Datatype(f, Operator.GREATER_THAN, getLiteral(l)));
-                                break;
-                            case MIN_INCLUSIVE:
-                                conjuncts.add(new Datatype(f, Operator.GREATER_THAN_EQUALS, getLiteral(l)));
-                                break;
-                            default:
-                                throw new RuntimeException("Unsupported facet "+facet);  
+                        Literal lit = getLiteral(l);
+                        
+                        if(lit != null) {
+                            checkInconsistentProperty(dp, l.getDatatype()); 
+                            OWLFacet facet = fr.getFacet();
+                            
+                            switch(facet) {
+                                case MAX_EXCLUSIVE:
+                                    conjuncts.add(new Datatype(f, Operator.LESS_THAN, lit));
+                                    break;
+                                case MAX_INCLUSIVE:
+                                    conjuncts.add(new Datatype(f, Operator.LESS_THAN_EQUALS, lit));
+                                    break;
+                                case MIN_EXCLUSIVE:
+                                    conjuncts.add(new Datatype(f, Operator.GREATER_THAN, lit));
+                                    break;
+                                case MIN_INCLUSIVE:
+                                    conjuncts.add(new Datatype(f, Operator.GREATER_THAN_EQUALS, lit));
+                                    break;
+                                default:
+                                    throw new RuntimeException("Unsupported facet "+facet);  
+                            }
+                        } else {
+                            problems.add("Axiom " + e + " will be ignored because of the unsupported literal.");
                         }
                     }
                     
                     // Create conjunctions with all restrictions
                     if(conjuncts.size() == 1) {
                         push(conjuncts.get(0));
-                    } else {
+                    } else if(!conjuncts.isEmpty()){
                         push(new Conjunction(conjuncts));
                     }
                 } else {
@@ -601,7 +619,11 @@ public class OWLImporter extends BaseImporter {
             public void visit(OWLObjectSomeValuesFrom e) {
                 NamedRole r = new NamedRole(e.getProperty().asOWLObjectProperty().toStringID());
                 e.getFiller().accept(this);
-                push(new Existential(r, pop()));
+                try {
+                    push(new Existential(r, pop()));
+                } catch(EmptyStackException ex) {
+                    problems.add("Unable to add axiom " + e + " because of previous problems.");
+                }
             }
 
             public void visit(OWLObjectComplementOf e) {
@@ -617,11 +639,17 @@ public class OWLImporter extends BaseImporter {
                 
                 for (OWLClassExpression desc : e.getOperands()) {
                     desc.accept(this);
-                    items.add(pop());
+                    try {
+                        items.add(pop());
+                    } catch(EmptyStackException ex) {
+                        problems.add("Unable to add conjunct " + desc + " because of previous problems.");
+                    }
                 }
-
-                Conjunction conj = new Conjunction(items);
-                push(conj);
+                
+                if(!items.isEmpty()) {
+                    Conjunction conj = new Conjunction(items);
+                    push(conj);
+                }
             }
 
             public void visit(OWLClass e) {
