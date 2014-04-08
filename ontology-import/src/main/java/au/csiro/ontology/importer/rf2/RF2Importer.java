@@ -73,21 +73,21 @@ public class RF2Importer extends BaseImporter {
      * List of problems found while importing.
      */
     protected final List<String> problems = new ArrayList<String>();
-    
+
     /**
      * Queue with the inputs to process.
      */
     protected final Queue<RF2Input> inputs = new LinkedList<RF2Input>();
-    
+
     /**
      * Imports an ontology using the supplied configuration object.
-     * 
+     *
      * @param input
      */
     public RF2Importer(RF2Input input) {
         this.inputs.add(input);
     }
-    
+
     /**
      * Imports a set of ontologies using the supplied configuration object.
      *
@@ -98,14 +98,14 @@ public class RF2Importer extends BaseImporter {
             if(in instanceof RF2Input) {
                 this.inputs.add((RF2Input) in);
             }
-        }     
+        }
     }
-    
+
     @Override
     public Iterator<Ontology> getOntologyVersions(IProgressMonitor monitor) throws ImportException {
         return new OntologyInterator(monitor);
     }
-    
+
     @Override
     public List<String> getProblems() {
         return problems;
@@ -164,7 +164,7 @@ public class RF2Importer extends BaseImporter {
 
     /**
      * Populates concrete domains information.
-     * 
+     *
      * @param cdMap
      * @param referencedComponentId
      * @param featureId
@@ -172,7 +172,7 @@ public class RF2Importer extends BaseImporter {
      * @param value
      * @param unit
      */
-    protected void populateCDs(Map<String, List<String[]>> cdMap, String referencedComponentId, String featureId, 
+    protected void populateCDs(Map<String, List<String[]>> cdMap, String referencedComponentId, String featureId,
             String operator, String value, String unit) {
         List<String[]> list;
         // my ( $comp, $feature, $op, $value, $unit ) = @_;
@@ -251,7 +251,7 @@ public class RF2Importer extends BaseImporter {
      * @throws ImportException
      */
     protected VersionRows getBundle(ImportEntry entry) throws ImportException {
-        
+
         // Add module information to map for easy lookup
         Map<String, String> modMap = new HashMap<String, String>();
         for (Module module : entry.getModules()) {
@@ -269,11 +269,11 @@ public class RF2Importer extends BaseImporter {
         // Map needed to find the correct version of each relationship to load
         // for this import entry
         Map<String, RelationshipRow> relationshipMap = new HashMap<String, RelationshipRow>();
-        
+
         Map<String, RefsetRow> cdMap = new HashMap<String, RefsetRow>();
-        
+
         RF2Input input = (RF2Input) entry.getInput();
-        
+
         InputType inputType = input.getInputType();
         Set<String> conceptsFiles = input.getConceptsFiles();
         log.info("Read concepts info");
@@ -317,14 +317,14 @@ public class RF2Importer extends BaseImporter {
                 log.error(message, e);
                 throw new ImportException(message, e);
             }
-            
+
             // Load concrete domains refsets
             log.info("Read concrete domains reference set info");
             for (String filename : input.getConcreteDomainRefsetFiles()) {
                 try {
                     loadReferenceSet(input, filename, modMap, cdMap, IRefsetFactory.CD);
                 } catch (ArrayIndexOutOfBoundsException e) {
-                    final String msg = "Error loading concrete domains reference set: " + filename + 
+                    final String msg = "Error loading concrete domains reference set: " + filename +
                             ". Possibly has wrong number of columns.";
                     log.error(msg, e);
                     throw new ImportException(msg, e);
@@ -586,24 +586,24 @@ public class RF2Importer extends BaseImporter {
         }
         return res;
     }
-    
+
     /**
      * Hook method for subclasses to override.
-     * 
+     *
      * @param vr
      * @param rootModuleId
      * @param rootModuleVersion
      * @param includeInactiveAxioms
      * @return
      */
-    protected OntologyBuilder getOntologyBuilder(VersionRows vr, String rootModuleId, String rootModuleVersion, 
+    protected OntologyBuilder getOntologyBuilder(VersionRows vr, String rootModuleId, String rootModuleVersion,
             Map<String, String> metadata) {
         return new OntologyBuilder(vr, rootModuleId, rootModuleVersion, metadata);
     }
-    
+
     /**
      * Represents a role-value pair.
-     * 
+     *
      * @author Alejandro Metke
      *
      */
@@ -660,10 +660,10 @@ public class RF2Importer extends BaseImporter {
         private final Queue<ImportEntry> entries = new LinkedList<ImportEntry>();
         @SuppressWarnings("unused")
         private final IProgressMonitor monitor;
-        
+
         private void processNext() throws ImportException {
-            RF2Input in = inputs.remove(); 
-            
+            RF2Input in = inputs.remove();
+
             // 1. Load module dependencies
             log.info("Loading module dependencies");
             IModuleDependencyRefset mdr = loadModuleDependencies(in);
@@ -727,7 +727,7 @@ public class RF2Importer extends BaseImporter {
                 VersionRows bundle = getBundle(entry);
                 String ontologyId = entry.getRootModuleId();
                 String ontologyVersion = entry.getRootModuleVersion();
-                
+
                 log.info("Building ontology " + ontologyId + " (" + ontologyVersion + ")");
                 OntologyBuilder builder = getOntologyBuilder(bundle, ontologyId, ontologyVersion, entry.getMetadata());
                 return builder.build();
@@ -746,10 +746,10 @@ public class RF2Importer extends BaseImporter {
         }
 
     }
-    
+
     /**
      * Class that knows how to build an {@link Ontology} from a set of RF2 files.
-     * 
+     *
      * @author Alejandro Metke
      *
      */
@@ -790,7 +790,7 @@ public class RF2Importer extends BaseImporter {
 
         protected final Map<String, List<String[]>> cdsMap = new HashMap<String, List<String[]>>();
 
-        public OntologyBuilder(VersionRows vr, String rootModuleId, String rootModuleVersion, 
+        public OntologyBuilder(VersionRows vr, String rootModuleId, String rootModuleVersion,
                 Map<String, String> metadata) {
             this.vr = vr;
             this.rootModuleId = rootModuleId;
@@ -939,7 +939,7 @@ public class RF2Importer extends BaseImporter {
                     // &populateCDs( $values[5], $values[4], $values[7],
                     // $values[8], $values[6] );
                     final String[] extras = rr.getExtras();
-                    populateCDs(cdsMap, rr.getReferencedComponentId(), rr.getRefsetId(), extras[1], extras[2], 
+                    populateCDs(cdsMap, rr.getReferencedComponentId(), rr.getRefsetId(), extras[1], extras[2],
                             extras[0]);
                     // WARNING: Assumes refsets are immediate children
                     if (parents.get(rr.getRefsetId()).contains(measurementTypeFloat)) {
@@ -991,9 +991,13 @@ public class RF2Importer extends BaseImporter {
 
                 int numElems = numParents + numRels + numCds;
 
+                if (numParents == 0 && numElems > 0) {
+                    log.warn("Root concept " + c1 + " has non-ISA relationships but no ISA relationships.");
+                }
+
                 if (numElems == 0) {
                     // do nothing
-                } else if (numElems == 1) {
+                } else if (numElems == 1 && numParents == 1) {
                     Concept lhs = getConcept(c1, ci);
                     Concept rhs = getConcept(prs.iterator().next(), ci);
                     statedAxioms.add(new ConceptInclusion(lhs, rhs));
@@ -1001,8 +1005,10 @@ public class RF2Importer extends BaseImporter {
                     List<Concept> conjs = new ArrayList<Concept>();
 
                     // Add parents
-                    for (String pr : prs) {
-                        conjs.add(getConcept(pr, ci));
+                    if (prs != null) {
+                        for (String pr : prs) {
+                            conjs.add(getConcept(pr, ci));
+                        }
                     }
 
                     // Process concrete domains
@@ -1031,7 +1037,7 @@ public class RF2Importer extends BaseImporter {
             }
 
             log.info("Finished building ontology");
-            
+
             return new Ontology(rootModuleId, rootModuleVersion, statedAxioms, null);
         }
 
