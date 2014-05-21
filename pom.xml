@@ -78,21 +78,14 @@
   </dependencies>
   
   <distributionManagement>
-    <repository>
-      <uniqueVersion>false</uniqueVersion>
-      <id>sonatype</id>
-      <name>Sonatype Repository</name>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-      <layout>default</layout>
-    </repository>
     <snapshotRepository>
-      <uniqueVersion>false</uniqueVersion>
-      <id>sonatypeSnap</id>
-      <name>Sonatype Snapshots</name>
+      <id>ossrh</id>
       <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-      <layout>default</layout>
     </snapshotRepository>
-    <downloadUrl>https://oss.sonatype.org/content/groups/public</downloadUrl>
+	<repository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
   </distributionManagement>
 	
 	<build>
@@ -129,8 +122,20 @@
 		  <argLine> 
 		    -server -Xmx3G
 		  </argLine>
-        </configuration>
-     </plugin>
+      </configuration>
+    </plugin>
+	 <!--
+	 <plugin>
+      <groupId>org.sonatype.plugins</groupId>
+      <artifactId>nexus-staging-maven-plugin</artifactId>
+      <version>1.6</version>
+      <extensions>true</extensions>
+      <configuration>
+        <serverId>ossrh</serverId>
+        <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+      </configuration>
+    </plugin>
+	-->
 	</plugins>
   </build>
   
@@ -145,6 +150,19 @@
         </activation>
         <build>
           <plugins>
+		      <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.2.1</version>
+                <executions>
+                  <execution>
+                   <id>attach-sources</id>
+                   <goals>
+                    <goal>jar-no-fork</goal>
+                  </goals>
+                </execution>
+              </executions>
+            </plugin>
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-gpg-plugin</artifactId>
