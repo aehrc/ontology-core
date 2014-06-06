@@ -276,7 +276,7 @@ public class RF2Importer extends BaseImporter {
 
         InputType inputType = input.getInputType();
         Set<String> conceptsFiles = input.getConceptsFiles();
-        log.info("Read concepts info");
+        log.info("Reading concepts info: " + conceptsFiles.size());
         for(String conceptsFile : conceptsFiles) {
             final String message = "Unable to load concepts file. " +
                     "Please check your input configuration file. " +
@@ -295,10 +295,10 @@ public class RF2Importer extends BaseImporter {
         // Load relationships
         Set<String> relationshipsFiles = input.getStatedRelationshipsFiles();
         if(relationshipsFiles == null || relationshipsFiles.isEmpty()) {
-            log.info("Read inferred relationships info");
             relationshipsFiles = input.getRelationshipsFiles();
+            log.info("Reading inferred relationships info: " + relationshipsFiles.size());
         } else {
-            log.info("Read stated relationships info");
+            log.info("Reading stated relationships info: " + relationshipsFiles.size());
         }
 
         if(relationshipsFiles == null || relationshipsFiles.isEmpty()) {
@@ -319,8 +319,9 @@ public class RF2Importer extends BaseImporter {
             }
 
             // Load concrete domains refsets
-            log.info("Read concrete domains reference set info");
-            for (String filename : input.getConcreteDomainRefsetFiles()) {
+            final Set<String> concreteDomainRefsetFiles = input.getConcreteDomainRefsetFiles();
+            log.info("Reading concrete domains reference set info: " + concreteDomainRefsetFiles.size());
+            for (String filename : concreteDomainRefsetFiles) {
                 try {
                     loadReferenceSet(input, filename, modMap, cdMap, IRefsetFactory.CD);
                 } catch (ArrayIndexOutOfBoundsException e) {
@@ -687,7 +688,11 @@ public class RF2Importer extends BaseImporter {
                 for(Version version : versions) {
                     String ver = version.getId();
                     Map<String, String> metadata = version.getMetadata();
-                    ModuleDependency md = deps.get(rootModuleId).get(ver);
+                    Map<String, ModuleDependency> versionMap = deps.get(rootModuleId);
+                    if (null == versionMap) {
+                        throw new ImportException("Root module not found in MDRS: " + rootModuleId);
+                    }
+                    ModuleDependency md = versionMap.get(ver);
                     Set<Module> modules = new HashSet<Module>();
 
                     Queue<ModuleDependency> depends = new LinkedList<ModuleDependency>();

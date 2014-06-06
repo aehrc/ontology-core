@@ -18,6 +18,7 @@ import au.csiro.ontology.importer.ImportException;
 import au.csiro.ontology.snomed.refset.rf2.IModuleDependencyRefset;
 import au.csiro.ontology.snomed.refset.rf2.ModuleDependencyRefset;
 import au.csiro.ontology.snomed.refset.rf2.ModuleDependencyRow;
+import au.csiro.ontology.snomed.refset.rf2.ValidationException;
 
 /**
  * Imports RF2 reference sets.
@@ -79,8 +80,11 @@ public class RefsetImporter {
             }
         }
 
-        IModuleDependencyRefset res = new ModuleDependencyRefset(members);
-        return res;
+        try {
+            return new ModuleDependencyRefset(members, !Boolean.getBoolean("mdrs.ignoreErrors"));
+        } catch (ValidationException e) {
+            throw new ImportException("Can not continue import with invalid MDRS", e);
+        }
     }
 
 }
