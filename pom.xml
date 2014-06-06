@@ -1,68 +1,92 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-<!-- 
- !  Copyright (c) 2009 International Health Terminology Standards Development Organisation
- !
- !  Licensed under the Apache License, Version 2.0 (the "License");
- !  you may not use this file except in compliance with the License.
- !  You may obtain a copy of the License at
- ! 
- !      http://www.apache.org/licenses/LICENSE-2.0
- !
- !  Unless required by applicable law or agreed to in writing, software
- !  distributed under the License is distributed on an "AS IS" BASIS,
- !  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- !  See the License for the specific language governing permissions and
- !  limitations under the License.
- -->
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>au.csiro</groupId>
+  <artifactId>ontology-parent</artifactId>
+  <version>2.7.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  
+  <name>Ontology Core</name>
+  <description>Internal model to represent ontologies and utilities to import ontologies from different formats.</description>
+   <url>https://github.com/aehrc/ontology-core</url>
 
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>au.csiro</groupId>
-	<artifactId>ontology-parent</artifactId>
-	<packaging>pom</packaging>
-	<version>2.6.0-SNAPSHOT</version>
-	<name>Ontology Core</name>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  
+  <scm>
+    <url>git@github.com:aehrc/ontology-core.git</url>
+    <connection>scm:git:git@github.com:aehrc/ontology-core.git</connection>
+    <developerConnection>scm:git:git@github.com:aehrc/ontology-core.git</developerConnection>
+    <tag>HEAD</tag>
+  </scm>
+  
+  <organization>
+    <name>Australian e-Health Research Centre</name>
+    <url>http://www.aehrc.com</url>
+  </organization>
+  
+  <developers>
+    <developer>
+      <id>ametke</id>
+      <name>Alejandro Metke</name>
+      <email>alejandro.metke@csiro.au</email>
+      <organization>Australian e-Health Research Centre, CSIRO</organization>
+      <organizationUrl>http://www.aehrc.com</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>10</timezone>
+    </developer>
+	<developer>
+      <id>lawley</id>
+      <name>Michael Lawley</name>
+      <email>michael.lawley@csiro.au</email>
+      <organization>Australian e-Health Research Centre, CSIRO</organization>
+      <organizationUrl>http://www.aehrc.com</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>10</timezone>
+    </developer>
+  </developers>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
 	
-    <properties>
-	   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-	
-	<modules>
-		<module>ontology-model</module>
-		<module>ontology-import</module>
-		<module>ontology-tests</module>
-	</modules>
-	
-	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.0</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-		  <groupId>log4j</groupId>
-		  <artifactId>log4j</artifactId>
-		  <version>1.2.16</version>
-		</dependency>
-	</dependencies>
-	
+  <modules>
+    <module>ontology-model</module>
+    <module>ontology-import</module>
+  </modules>
+  
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+		<groupId>log4j</groupId>
+		<artifactId>log4j</artifactId>
+	   <version>1.2.16</version>
+    </dependency>
+  </dependencies>
+  
   <distributionManagement>
-    <repository>
-      <id>aehrc-repository</id>
-      <url>scp://ict-ehrclf-cbr.vm.csiro.au/srv/aehrc.com/maven2</url>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+	<repository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
   </distributionManagement>
-
-  <repositories>
-    <repository>
-      <id>ehrc-public-repo</id>
-      <name>AeHRC Public</name>
-      <url>http://aehrc.com/maven2</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-    </repository>
-  </repositories>
 	
 	<build>
 	 <extensions>
@@ -98,15 +122,79 @@
 		  <argLine> 
 		    -server -Xmx3G
 		  </argLine>
-        </configuration>
-     </plugin>
+      </configuration>
+    </plugin>
+	 <!--
+	 <plugin>
+      <groupId>org.sonatype.plugins</groupId>
+      <artifactId>nexus-staging-maven-plugin</artifactId>
+      <version>1.6</version>
+      <extensions>true</extensions>
+      <configuration>
+        <serverId>ossrh</serverId>
+        <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+      </configuration>
+    </plugin>
+	-->
 	</plugins>
   </build>
   
-  <scm>
-    <connection>scm:git:ssh://git@stash.csiro.au:7999/sno/ontology-core.git</connection>
-    <developerConnection>scm:git:ssh://git@stash.csiro.au:7999/sno/ontology-core.git</developerConnection>
-    <url>https://stash.csiro.au/scm/sno/ontology-core.git</url>
-    <tag>HEAD</tag>
-  </scm>
+  <profiles>
+    <profile>
+      <id>release-sign-artifacts</id>
+        <activation>
+          <property>
+            <name>performRelease</name>
+            <value>true</value>
+          </property>
+        </activation>
+        <build>
+          <plugins>
+		      <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.2.1</version>
+                <executions>
+                  <execution>
+                   <id>attach-sources</id>
+                   <goals>
+                    <goal>jar-no-fork</goal>
+                  </goals>
+                </execution>
+              </executions>
+            </plugin>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-gpg-plugin</artifactId>
+              <executions>
+                <execution>
+                  <id>sign-artifacts</id>
+                  <phase>verify</phase>
+                  <goals>
+                    <goal>sign</goal>
+                  </goals>
+                </execution>
+              </executions>
+            </plugin>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-javadoc-plugin</artifactId>
+              <version>2.8.1</version>
+              <executions>
+                <execution>
+                  <id>attach-javadocs</id>
+                  <goals>
+                    <goal>jar</goal>
+                  </goals>
+                  <configuration>
+                    <maxmemory>512m</maxmemory>
+                    <minmemory>128m</minmemory>
+                  </configuration>
+                </execution>
+              </executions>
+            </plugin>
+          </plugins>
+        </build>
+      </profile>
+    </profiles>
 </project>
