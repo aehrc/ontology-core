@@ -6,10 +6,12 @@ package au.csiro.ontology.snomed.refset.rf2;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
@@ -111,8 +113,10 @@ public class ModuleDependencyRefset extends Refset implements IModuleDependencyR
      *
      * @param members
      */
-    public ModuleDependencyRefset(Set<ModuleDependencyRow> members) {
+    public ModuleDependencyRefset(Set<ModuleDependencyRow> members, boolean validate) throws ValidationException {
         id = "900000000000534007";
+
+        final List<String> problems = new ArrayList<String>();
 
         // Index the dependency rows
         final Map<M, Set<M>> index = new HashMap<M, Set<M>>();
@@ -120,11 +124,15 @@ public class ModuleDependencyRefset extends Refset implements IModuleDependencyR
             final M version = new M(member.getModuleId(), member.getSourceEffectiveTime());
             final M requiredModule = new M(member.getReferencedComponentId(), member.getTargetEffectiveTime());
             if (!member.isActive()) {
-                log.warn("Inactive dependency: " + version + " to\t" + requiredModule);
+                final String message = "Inactive dependency: " + version + " to\t" + requiredModule;
+                problems.add(message);
+                log.warn(message);
                 continue;
             }
             if (member.isMalformed()) {
-                log.warn("Ignoring malformed MDRS entry: " + version + " to\t" + requiredModule);
+                final String message = "Ignoring malformed MDRS entry: " + version + " to\t" + requiredModule;
+                problems.add(message);
+                log.warn(message);
                 continue;
             }
 
@@ -134,6 +142,10 @@ public class ModuleDependencyRefset extends Refset implements IModuleDependencyR
                 index.put(version, vals);
             }
             vals.add(requiredModule);
+        }
+
+        if (validate && !problems.isEmpty()) {
+            throw new ValidationException("Malformed Module Dependency Reference Set", problems);
         }
 
         if (log.isInfoEnabled()) {
