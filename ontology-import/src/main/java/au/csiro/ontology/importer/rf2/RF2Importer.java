@@ -342,6 +342,14 @@ public class RF2Importer extends BaseImporter {
         return vr;
     }
 
+    /**
+     *
+     * @param modMap The MDRS data for this version
+     * @param relationshipMap Map from Relationship SCTID to parsed row
+     * @param inputStream Stream to parse, filtering based on MDRS data
+     * @throws IOException
+     * @throws UnsupportedEncodingException
+     */
     protected void loadRelationshipRows(Map<String, String> modMap, Map<String, RelationshipRow> relationshipMap,
             final InputStream inputStream) throws IOException {
         BufferedReader br = null;
@@ -412,6 +420,14 @@ public class RF2Importer extends BaseImporter {
         }
     }
 
+    /**
+     *
+     * @param modMap The MDRS data for this version
+     * @param conceptMap Map from Concept SCTID to parsed row
+     * @param inputStream Stream to parse, filtering based on MDRS data
+     * @throws IOException
+     * @throws UnsupportedEncodingException
+     */
     protected void loadConceptRows(Map<String, String> modMap, Map<String, ConceptRow> conceptMap,
             final InputStream inputStream) throws IOException, UnsupportedEncodingException {
         BufferedReader br = null;
