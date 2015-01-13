@@ -25,7 +25,8 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import au.csiro.ontology.Ontology;
 import au.csiro.ontology.importer.BaseImporter;
@@ -67,7 +68,7 @@ public class RF2Importer extends BaseImporter {
     /**
      * Logger.
      */
-    private final static Logger log = Logger.getLogger(RF2Importer.class);
+    private final static Logger log = LoggerFactory.getLogger(RF2Importer.class);
 
     /**
      * List of problems found while importing.
@@ -233,7 +234,7 @@ public class RF2Importer extends BaseImporter {
                 }
             }
         } catch (Throwable t) {
-            log.error(t);
+            log.error(t.getMessage());
             throw new ImportException("Unable to load reference set file. Please check your input configuration file " +
                     "(input type = " + input.getInputType() + ", file=" + refsetFile + ")");
         } finally {
@@ -737,10 +738,10 @@ public class RF2Importer extends BaseImporter {
                 OntologyBuilder builder = getOntologyBuilder(bundle, ontologyId, ontologyVersion, entry.getMetadata());
                 return builder.build();
             } catch (ImportException e) {
-                log.error(e);
+                log.error(e.getMessage());
                 throw new RuntimeException(e);
             } catch (URISyntaxException e) {
-                log.error(e);
+                log.error(e.getMessage());
                 throw new RuntimeException(e);
             }
         }

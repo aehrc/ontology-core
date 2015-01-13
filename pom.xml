@@ -56,6 +56,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <junit.version>4.0</junit.version>
+    <sl4j.version>1.7.10</sl4j.version>
   </properties>
 	
   <modules>
@@ -67,13 +69,20 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.0</version>
+      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-		<groupId>log4j</groupId>
-		<artifactId>log4j</artifactId>
-	   <version>1.2.16</version>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${sl4j.version}</version>
+    </dependency>
+    <!-- Declared with scope test so no bindings are included in the library. -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>${sl4j.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
   
