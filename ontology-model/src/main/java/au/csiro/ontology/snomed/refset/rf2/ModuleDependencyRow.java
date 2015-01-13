@@ -4,7 +4,8 @@
  */
 package au.csiro.ontology.snomed.refset.rf2;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Simple implementation of a module dependency refset member.
@@ -14,7 +15,7 @@ import org.apache.log4j.Logger;
  */
 public class ModuleDependencyRow {
 
-    final static private Logger log = Logger.getLogger(ModuleDependencyRow.class);
+    final static private Logger log = LoggerFactory.getLogger(ModuleDependencyRow.class);
 
     protected final String id;
 
