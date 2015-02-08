@@ -12,7 +12,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import au.csiro.ontology.importer.ImportException;
 import au.csiro.ontology.snomed.refset.rf2.IModuleDependencyRefset;
@@ -29,7 +30,7 @@ import au.csiro.ontology.snomed.refset.rf2.ValidationException;
 public class RefsetImporter {
 
     // Logger
-    private final static Logger log = Logger.getLogger(RefsetImporter.class);
+    private final static Logger log = LoggerFactory.getLogger(RefsetImporter.class);
 
     /**
      * Imports a module dependency reference set from a {@link Set} of

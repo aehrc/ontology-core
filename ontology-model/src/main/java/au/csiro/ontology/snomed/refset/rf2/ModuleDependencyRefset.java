@@ -19,7 +19,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class represents a module dependency reference set.
@@ -29,7 +30,7 @@ import org.apache.log4j.Logger;
  */
 public class ModuleDependencyRefset extends Refset implements IModuleDependencyRefset {
 
-    private final static Logger log = Logger.getLogger(ModuleDependencyRefset.class);
+    private final static Logger log = LoggerFactory.getLogger(ModuleDependencyRefset.class);
 
     private final static class M implements Comparable<M> {
         final private String module;

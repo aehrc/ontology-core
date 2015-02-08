@@ -13,7 +13,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.eclipse.persistence.jaxb.MarshallerProperties;
 
 import au.csiro.ontology.model.Axiom;
@@ -49,7 +50,7 @@ public class AxiomUtils {
     /**
      * Logger.
      */
-    private final static Logger log = Logger.getLogger(AxiomUtils.class);
+    private final static Logger log = LoggerFactory.getLogger(AxiomUtils.class);
     
     private static Marshaller marshaller;
     private static Unmarshaller unmarshaller;

@@ -25,7 +25,8 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import au.csiro.ontology.Ontology;
 import au.csiro.ontology.importer.BaseImporter;
@@ -67,7 +68,7 @@ public class RF2Importer extends BaseImporter {
     /**
      * Logger.
      */
-    private final static Logger log = Logger.getLogger(RF2Importer.class);
+    private final static Logger log = LoggerFactory.getLogger(RF2Importer.class);
 
     /**
      * List of problems found while importing.
@@ -233,7 +234,7 @@ public class RF2Importer extends BaseImporter {
                 }
             }
         } catch (Throwable t) {
-            log.error(t);
+            log.error(t.getMessage());
             throw new ImportException("Unable to load reference set file. Please check your input configuration file " +
                     "(input type = " + input.getInputType() + ", file=" + refsetFile + ")");
         } finally {
@@ -709,6 +710,10 @@ public class RF2Importer extends BaseImporter {
                         throw new ImportException("Root module not found in MDRS: " + rootModuleId);
                     }
                     ModuleDependency md = versionMap.get(ver);
+                    if(md == null) {
+                        throw new ImportException("Version " + ver + " of module " + rootModuleId + 
+                                " was not found in MDRS.");
+                    }
                     Set<Module> modules = new HashSet<Module>();
 
                     Queue<ModuleDependency> depends = new LinkedList<ModuleDependency>();
@@ -753,10 +758,10 @@ public class RF2Importer extends BaseImporter {
                 OntologyBuilder builder = getOntologyBuilder(bundle, ontologyId, ontologyVersion, entry.getMetadata());
                 return builder.build();
             } catch (ImportException e) {
-                log.error(e);
+                log.error(e.getMessage());
                 throw new RuntimeException(e);
             } catch (URISyntaxException e) {
-                log.error(e);
+                log.error(e.getMessage());
                 throw new RuntimeException(e);
             }
         }
@@ -962,10 +967,15 @@ public class RF2Importer extends BaseImporter {
                     final String[] extras = rr.getExtras();
                     populateCDs(cdsMap, rr.getReferencedComponentId(), rr.getRefsetId(), extras[1], extras[2],
                             extras[0]);
-                    // WARNING: Assumes refsets are immediate children
-                    if (parents.get(rr.getRefsetId()).contains(measurementTypeFloat)) {
+                    Set<String> allParents = parents.get(rr.getRefsetId());
+                    if(allParents == null) {
+                        log.error("Could not find refset id " + rr.getRefsetId() + " in meta-data hierarchy. There "
+                                + "might be a problem with the concrete domains definitions.");
+                        continue;
+                    }
+                    if (allParents.contains(measurementTypeFloat)) {
                         featureType.put(rr.getRefsetId(), "float");
-                    } else if (parents.get(rr.getRefsetId()).contains(measurementTypeInt)) {
+                    } else if (allParents.contains(measurementTypeInt)) {
                         featureType.put(rr.getRefsetId(), "int");
                     } else {
                         untypedFeatures.add(rr.getRefsetId());
@@ -1113,6 +1123,11 @@ public class RF2Importer extends BaseImporter {
         protected void mapDatatype(List<Concept> conjs, String[] datatype) {
             NamedFeature feature = getFeature(datatype[0], fi);
             String type = featureType.get(datatype[0]);
+            if(type == null) {
+                log.error("Ignoring feature " + datatype[0] + " (it has no type). There might be a problem with the "
+                        + "concrete domains definitions.");
+                return;
+            }
 
             String operatorId = datatype[1];
             String unitId = datatype[3];
