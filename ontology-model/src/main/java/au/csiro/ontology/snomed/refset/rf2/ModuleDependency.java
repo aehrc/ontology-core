@@ -27,8 +27,12 @@ public class ModuleDependency {
      * @param version not null
      */
     public ModuleDependency(String id, String version) {
-        assert id != null;
-        assert version != null;
+        if (id == null) {
+            throw new IllegalArgumentException("Module id cannot be null");
+        }
+        if (version == null) {
+            throw new IllegalArgumentException("Module version cannot be null");
+        }
 
         this.id = id;
         this.version = version;

@@ -149,10 +149,10 @@ public class ModuleDependencyRefset extends Refset implements IModuleDependencyR
             throw new ValidationException("Malformed Module Dependency Reference Set", problems);
         }
 
-        if (log.isInfoEnabled()) {
+        if (log.isTraceEnabled()) {
             // Use a TreeSet to get the output sorted
             for (final M version: new TreeSet<M>(index.keySet())) {
-                log.info("MDRS entry for version: " + version);
+                log.trace("MDRS entry for version: " + version);
             }
         }
 
