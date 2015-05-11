@@ -29,7 +29,7 @@
 	<dependency>
       <groupId>net.sourceforge.owlapi</groupId>
       <artifactId>owlapi-api</artifactId>
-      <version>3.3</version>
+      <version>[4.0.2,4.1)</version>
     </dependency>
   </dependencies>
   
