@@ -126,8 +126,7 @@ public class ModuleDependencyRefset extends Refset implements IModuleDependencyR
             final M requiredModule = new M(member.getReferencedComponentId(), member.getTargetEffectiveTime());
             if (!member.isActive()) {
                 final String message = "Inactive dependency: " + version + " to\t" + requiredModule;
-                problems.add(message);
-                log.warn(message);
+                log.info(message);
                 continue;
             }
             if (member.isMalformed()) {

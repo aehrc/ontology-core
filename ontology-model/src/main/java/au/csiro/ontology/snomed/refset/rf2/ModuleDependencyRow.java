@@ -53,13 +53,17 @@ public class ModuleDependencyRow {
             log.error("refsetId does not match that for the MDRS (900000000000534007): " + this);
         }
 
-        if (!effectiveTime.equals(sourceEffectiveTime)) {
+        if (active && !effectiveTime.equals(sourceEffectiveTime)) {
             malformed = true;
             log.error("effectiveTime and sourceEffectiveTime must be equal: " + this);
         }
+        if (ModuleDependencyRefset.parseTime(effectiveTime).compareTo(ModuleDependencyRefset.parseTime(sourceEffectiveTime)) < 0) {
+            malformed = true;
+            log.error("effectiveTime cannot be earlier than sourceEffectiveTime: " + this);
+        }
         if (ModuleDependencyRefset.parseTime(sourceEffectiveTime).compareTo(ModuleDependencyRefset.parseTime(targetEffectiveTime)) < 0) {
             malformed = true;
-            log.error("sourceEfectiveTime cannot be earlier than targetEffectiveTime: " + this);
+            log.error("sourceEffectiveTime cannot be earlier than targetEffectiveTime: " + this);
         }
     }
 
