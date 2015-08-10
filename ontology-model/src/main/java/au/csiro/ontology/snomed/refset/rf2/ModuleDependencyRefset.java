@@ -126,8 +126,7 @@ public class ModuleDependencyRefset extends Refset implements IModuleDependencyR
             final M requiredModule = new M(member.getReferencedComponentId(), member.getTargetEffectiveTime());
             if (!member.isActive()) {
                 final String message = "Inactive dependency: " + version + " to\t" + requiredModule;
-                problems.add(message);
-                log.warn(message);
+                log.info(message);
                 continue;
             }
             if (member.isMalformed()) {
@@ -149,10 +148,10 @@ public class ModuleDependencyRefset extends Refset implements IModuleDependencyR
             throw new ValidationException("Malformed Module Dependency Reference Set", problems);
         }
 
-        if (log.isInfoEnabled()) {
+        if (log.isTraceEnabled()) {
             // Use a TreeSet to get the output sorted
             for (final M version: new TreeSet<M>(index.keySet())) {
-                log.info("MDRS entry for version: " + version);
+                log.trace("MDRS entry for version: " + version);
             }
         }
 

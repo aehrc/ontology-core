@@ -70,6 +70,7 @@ public class InputsUtil {
         md.put("rightIdentityIds", "363701004,127489000");
         md.put("roleGroupId", "roleGroup");
         md.put("preferredId", "900000000000548007");
+        md.put("acceptableId", "900000000000549004");
 
         ModuleInfo m900000000000207008 = new ModuleInfo("900000000000207008");
 
