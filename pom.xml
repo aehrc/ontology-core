@@ -198,6 +198,7 @@
                   <configuration>
                     <maxmemory>512m</maxmemory>
                     <minmemory>128m</minmemory>
+                    <additionalparam>-Xdoclint:none</additionalparam>
                   </configuration>
                 </execution>
               </executions>
