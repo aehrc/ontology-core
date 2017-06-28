@@ -239,7 +239,7 @@ public class RF2Importer extends BaseImporter {
                     "(input type = " + input.getInputType() + ", file=" + refsetFile + ")");
         } finally {
             for (String moduleId : unknownModules) {
-                log.warn("Refset: No version information known for " + moduleId + " found in " + refsetFile);
+                log.info("Refset: Ignored data from module '" + moduleId + "' found in " + refsetFile);
             }
         }
     }
@@ -261,7 +261,7 @@ public class RF2Importer extends BaseImporter {
             modMap.put(modId, modVer);
         }
         for (Entry<String, String> mapEntry: modMap.entrySet()) {
-            log.info("Modules: " + mapEntry.getKey() + "\t" + mapEntry.getValue());
+            log.info("Modules: '" + mapEntry.getKey() + "'\t'" + mapEntry.getValue() + "'");
         }
 
         // Map needed to find the correct version of each concept to load for this import entry
@@ -711,7 +711,7 @@ public class RF2Importer extends BaseImporter {
                     }
                     ModuleDependency md = versionMap.get(ver);
                     if(md == null) {
-                        throw new ImportException("Version " + ver + " of module " + rootModuleId + 
+                        throw new ImportException("Version " + ver + " of module " + rootModuleId +
                                 " was not found in MDRS.");
                     }
                     Set<Module> modules = new HashSet<Module>();
