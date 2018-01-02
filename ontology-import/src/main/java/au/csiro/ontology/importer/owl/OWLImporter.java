@@ -1,6 +1,6 @@
 /**
  * Copyright CSIRO Australian e-Health Research Centre (http://aehrc.com).
- * All rights reserved. Use is subject to license terms and conditions. 
+ * All rights reserved. Use is subject to license terms and conditions.
  */
 package au.csiro.ontology.importer.owl;
 
@@ -43,6 +43,7 @@ import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLEquivalentClassesAxiom;
 import org.semanticweb.owlapi.model.OWLEquivalentObjectPropertiesAxiom;
 import org.semanticweb.owlapi.model.OWLFacetRestriction;
+import org.semanticweb.owlapi.model.OWLFunctionalDataPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObjectAllValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectComplementOf;
@@ -78,6 +79,7 @@ import au.csiro.ontology.model.DateLiteral;
 import au.csiro.ontology.model.DecimalLiteral;
 import au.csiro.ontology.model.Existential;
 import au.csiro.ontology.model.FloatLiteral;
+import au.csiro.ontology.model.FunctionalFeature;
 import au.csiro.ontology.model.IntegerLiteral;
 import au.csiro.ontology.model.Literal;
 import au.csiro.ontology.model.NamedConcept;
@@ -93,48 +95,48 @@ import au.csiro.ontology.util.Statistics;
 /**
  * Imports axioms in OWL format into the internal representation used by
  * Snorocket. This initial implementation does not support versions.
- * 
+ *
  * @author Alejandro Metke
- * 
+ *
  */
 public class OWLImporter extends BaseImporter {
-    
+
     public static final String THING_IRI = "http://www.w3.org/2002/07/owl#Thing";
     public static final String NOTHING_IRI = "http://www.w3.org/2002/07/owl#Nothing";
-    
+
     private final Set<OWLDataPropertyRangeAxiom> dprAxioms = new HashSet<OWLDataPropertyRangeAxiom>();
     private final List<String> problems = new ArrayList<String>();
-    
+
     private OWLOntology ontology;
     private List<OWLAxiom> axioms;
-    
+
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-    
+
     /**
-     * The OWL EL spec only allows using the following types: owl:real, owl:rational, xsd:decimal, xsd:integer, 
+     * The OWL EL spec only allows using the following types: owl:real, owl:rational, xsd:decimal, xsd:integer,
      * xsd:nonNegativeInteger. The Java types that most naturally correspond to these types are BigInteger and
      * BigDecimal. However, the memory consumption increases and the performance decreases when using these types
      * instead of the Java built-in types. When the following flags are set to true, the transformation uses the
-     * built-in data types instead of the math types.  
+     * built-in data types instead of the math types.
      */
     private boolean useSimpleInts = true;
     private boolean useSimpleFloats = true;
-    
+
     public OWLImporter(OWLOntology ontology) {
         this();
         this.ontology = ontology;
     }
-    
+
     public OWLImporter(List<OWLAxiom> axioms) {
         this();
         this.axioms = axioms;
     }
-    
+
     /**
      * Private constructor.
      */
     private OWLImporter() {
-        
+
     }
 
     /**
@@ -206,10 +208,16 @@ public class OWLImporter extends BaseImporter {
         return new RoleInclusion(new Role[] { r, r }, r);
     }
 
+    private Axiom transformOWLFunctionalDataPropertyAxiom(OWLFunctionalDataPropertyAxiom a) {
+        OWLDataPropertyExpression prop = a.getProperty();
+        NamedFeature feature = new NamedFeature(prop.asOWLDataProperty().toStringID());
+        return new FunctionalFeature(feature);
+    }
+
     private Axiom transformOWLSubClassOfAxiom(OWLSubClassOfAxiom a) {
         OWLClassExpression sub = a.getSubClass();
         OWLClassExpression sup = a.getSuperClass();
-        
+
         try {
             Concept subConcept = getConcept(sub);
             Concept superConcept = getConcept(sup);
@@ -253,13 +261,13 @@ public class OWLImporter extends BaseImporter {
             for (OWLClassExpression exp : exps) {
                 concepts.add(getConcept(exp));
             }
-    
+
             Concept[] conjs = new Concept[concepts.size()];
             int i = 0;
             for (; i < concepts.size(); i++) {
                 conjs[i] = concepts.get(i);
             }
-    
+
             return new ConceptInclusion(new Conjunction(conjs), NamedConcept.BOTTOM_CONCEPT);
         } catch(UnsupportedOperationException e) {
             problems.add(e.getMessage());
@@ -275,7 +283,7 @@ public class OWLImporter extends BaseImporter {
             OWLObjectPropertyExpression sup = ax.getSuperProperty();
 
             axioms.add(
-                    new RoleInclusion(new NamedRole(sub.asOWLObjectProperty().toStringID()), 
+                    new RoleInclusion(new NamedRole(sub.asOWLObjectProperty().toStringID()),
                     new NamedRole(sup.asOWLObjectProperty().toStringID()))
             );
         }
@@ -335,6 +343,10 @@ public class OWLImporter extends BaseImporter {
                 OWLEquivalentObjectPropertiesAxiom a = (OWLEquivalentObjectPropertiesAxiom) axiom;
                 res.addAll(transformOWLEquivalentObjectPropertiesAxiom(a));
                 monitor.step(++workDone, totalAxioms);
+            } else if (axiom instanceof OWLFunctionalDataPropertyAxiom) {
+                OWLFunctionalDataPropertyAxiom a = (OWLFunctionalDataPropertyAxiom) axiom;
+                res.add(transformOWLFunctionalDataPropertyAxiom(a));
+                monitor.step(++workDone, totalAxioms);
             } else if (axiom instanceof OWLAnnotationAssertionAxiom) {
                 // Do nothing
                 monitor.step(++workDone, totalAxioms);
@@ -345,33 +357,33 @@ public class OWLImporter extends BaseImporter {
 
         // TODO: deal with other axioms types even if Snorocket does not
         // currently support them
-        
+
         monitor.taskEnded();
-        
+
         /*
         if(!problems.isEmpty()) {
             throw new ImportException("Problems occurred during import. See getProblems()");
         }
         */
-        
+
         return res;
     }
 
-    private Set<Axiom> transform(OWLOntology ont, IProgressMonitor monitor) throws ImportException {
+	private Set<Axiom> transform(OWLOntology ont, IProgressMonitor monitor) throws ImportException {
         return transform(Collections.list(Collections.enumeration(ont.getAxioms())), monitor);
     }
 
     /**
-     * 
+     *
      * @param l
      * @return
      */
     private Literal getLiteral(OWLLiteral l) {
         OWLDatatype dt = l.getDatatype();
         String literal = l.getLiteral();
-        
+
         Literal res = null;
-        
+
         if(dt.isBuiltIn()) {
             OWL2Datatype odt = dt.getBuiltInDatatype();
             switch (odt) {
@@ -417,7 +429,7 @@ public class OWLImporter extends BaseImporter {
 
         return res;
     }
-    
+
     private void checkInconsistentProperty(OWLDataProperty dp, OWLDatatype type) {
         for (OWLDataPropertyRangeAxiom a : dprAxioms) {
             OWLDataPropertyExpression pe = a.getProperty();
@@ -438,7 +450,7 @@ public class OWLImporter extends BaseImporter {
     }
 
     /**
-     * 
+     *
      * @param desc
      * @return
      */
@@ -460,23 +472,27 @@ public class OWLImporter extends BaseImporter {
                 stack.push(concept);
             }
 
+            @Override
             public void visit(OWLDataMaxCardinality e) {
                 unimplemented(e);
             }
 
+            @Override
             public void visit(OWLDataExactCardinality e) {
                 unimplemented(e);
             }
 
+            @Override
             public void visit(OWLDataMinCardinality e) {
                 unimplemented(e);
             }
 
+            @Override
             public void visit(OWLDataHasValue e) {
                 OWLDataPropertyExpression dpe = e.getProperty();
                 // TODO: consider the case where dpe is anonymous
                 OWLDataProperty dp = dpe.asOWLDataProperty();
-                OWLLiteral l = e.getValue();
+                OWLLiteral l = e.getFiller();
                 OWLDatatype type = l.getDatatype();
 
                 checkInconsistentProperty(dp, type);
@@ -490,19 +506,21 @@ public class OWLImporter extends BaseImporter {
                 }
             }
 
+            @Override
             public void visit(OWLDataAllValuesFrom e) {
                 unimplemented(e);
             }
 
+            @Override
             public void visit(OWLDataSomeValuesFrom e) {
                 OWLDataProperty dp = e.getProperty().asOWLDataProperty();
                 OWLDataRange range = e.getFiller();
-                
-                /* 
-                 * An OWLDataRange can be one of the following: 
+
+                /*
+                 * An OWLDataRange can be one of the following:
                  * Datatype | DataIntersectionOf | DataUnionOf |
                  * DataComplementOf | DataOneOf | DatatypeRestriction
-                 * 
+                 *
                  * We initially support only DataOneOf.
                  */
                 if(range instanceof OWLDataOneOf) {
@@ -515,7 +533,7 @@ public class OWLImporter extends BaseImporter {
                     OWLLiteral l = (OWLLiteral)values.toArray()[0];
                     OWLDatatype type = l.getDatatype();
                     checkInconsistentProperty(dp, type);
-                    
+
                     NamedFeature f = new NamedFeature(dp.toStringID());
                     Literal lit = getLiteral(l);
                     if(lit != null) {
@@ -525,20 +543,20 @@ public class OWLImporter extends BaseImporter {
                     }
                 } else if(range instanceof OWLDatatypeRestriction) {
                     NamedFeature f = new NamedFeature(dp.toStringID());
-                    
+
                     OWLDatatypeRestriction dtr = (OWLDatatypeRestriction)range;
                     Set<OWLFacetRestriction> frs = dtr.getFacetRestrictions();
-                    
+
                     List<Datatype> conjuncts = new ArrayList<Datatype>();
                     for(OWLFacetRestriction fr : frs) {
                         OWLLiteral l = fr.getFacetValue();
-                        
+
                         Literal lit = getLiteral(l);
-                        
+
                         if(lit != null) {
-                            checkInconsistentProperty(dp, l.getDatatype()); 
+                            checkInconsistentProperty(dp, l.getDatatype());
                             OWLFacet facet = fr.getFacet();
-                            
+
                             switch(facet) {
                                 case MAX_EXCLUSIVE:
                                     conjuncts.add(new Datatype(f, Operator.LESS_THAN, lit));
@@ -553,13 +571,13 @@ public class OWLImporter extends BaseImporter {
                                     conjuncts.add(new Datatype(f, Operator.GREATER_THAN_EQUALS, lit));
                                     break;
                                 default:
-                                    throw new RuntimeException("Unsupported facet "+facet);  
+                                    throw new RuntimeException("Unsupported facet "+facet);
                             }
                         } else {
                             problems.add("Axiom " + e + " will be ignored because of the unsupported literal.");
                         }
                     }
-                    
+
                     // Create conjunctions with all restrictions
                     if(conjuncts.size() == 1) {
                         push(conjuncts.get(0));
@@ -572,50 +590,58 @@ public class OWLImporter extends BaseImporter {
                 }
             }
 
+            @Override
             public void visit(OWLObjectOneOf e) {
                 // TODO: implement to support EL profile
                 unimplemented(e);
             }
 
+            @Override
             public void visit(OWLObjectHasSelf e) {
                 // TODO: implement to support EL profile
-                
+
                 // There is no model object to support this.
-                
+
                 /*
                  * A self-restriction ObjectHasSelf( OPE ) consists of an object
-                 * property expression OPE, and it contains all those 
+                 * property expression OPE, and it contains all those
                  * individuals that are connected by OPE to themselves.
                  */
-                
+
                 /*Role r = new Role<>(e.getProperty().asOWLObjectProperty().toStringID());*/
 
                 unimplemented(e);
             }
 
+            @Override
             public void visit(OWLObjectMaxCardinality e) {
                 unimplemented(e);
             }
 
+            @Override
             public void visit(OWLObjectExactCardinality e) {
                 unimplemented(e);
             }
 
+            @Override
             public void visit(OWLObjectMinCardinality e) {
                 unimplemented(e);
             }
 
+            @Override
             public void visit(OWLObjectHasValue e) {
                 // TODO: implement to support EL profile
-                
+
                 // We do not support individuals
                 unimplemented(e);
             }
 
+            @Override
             public void visit(OWLObjectAllValuesFrom e) {
                 unimplemented(e);
             }
 
+            @Override
             public void visit(OWLObjectSomeValuesFrom e) {
                 NamedRole r = new NamedRole(e.getProperty().asOWLObjectProperty().toStringID());
                 e.getFiller().accept(this);
@@ -626,17 +652,20 @@ public class OWLImporter extends BaseImporter {
                 }
             }
 
+            @Override
             public void visit(OWLObjectComplementOf e) {
                 unimplemented(e);
             }
 
+            @Override
             public void visit(OWLObjectUnionOf e) {
                 unimplemented(e);
             }
 
+            @Override
             public void visit(OWLObjectIntersectionOf e) {
                 List<Concept> items = new ArrayList<Concept>();
-                
+
                 for (OWLClassExpression desc : e.getOperands()) {
                     desc.accept(this);
                     try {
@@ -645,13 +674,14 @@ public class OWLImporter extends BaseImporter {
                         problems.add("Unable to add conjunct " + desc + " because of previous problems.");
                     }
                 }
-                
+
                 if(!items.isEmpty()) {
                     Conjunction conj = new Conjunction(items);
                     push(conj);
                 }
             }
 
+            @Override
             public void visit(OWLClass e) {
                 String id = e.toStringID();
                 if (("<"+THING_IRI+">").equals(id) || THING_IRI.equals(id))
@@ -682,29 +712,33 @@ public class OWLImporter extends BaseImporter {
     /**
      * @return the problems
      */
+    @Override
     public List<String> getProblems() {
         return problems;
     }
 
+    @Override
     public Iterator<Ontology> getOntologyVersions(IProgressMonitor monitor) {
         return new OntologyInterator(monitor);
     }
-    
+
     class OntologyInterator implements Iterator<Ontology> {
         private boolean accessed = false;
         private IProgressMonitor monitor;
-        
+
         public OntologyInterator(IProgressMonitor monitor) {
             this.monitor = monitor;
         }
-        
+
+        @Override
         public boolean hasNext() {
             return !accessed;
         }
 
+        @Override
         public Ontology next() throws IllegalArgumentException, RuntimeException {
             long start = System.currentTimeMillis();
-            
+
             Set<Axiom> ont = null;
             try {
                 if(ontology != null) {
@@ -717,26 +751,27 @@ public class OWLImporter extends BaseImporter {
             } catch (ImportException e) {
                 throw new RuntimeException(e);
             }
-            
+
             String id = null;
             if(ontology != null) {
                 id = ontology.getOntologyID().toString();
             } else {
                 id = "incremental";
             }
-            
+
             String version = sdf.format(new Date());
-            
+
             Ontology res = new Ontology(id, version, ont, null);
             Statistics.INSTANCE.setTime("owl loading", System.currentTimeMillis() - start);
             accessed = true;
             return res;
         }
 
+        @Override
         public void remove() {
             throw new UnsupportedOperationException();
         }
-        
+
     }
-    
+
 }
