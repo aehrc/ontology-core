@@ -44,6 +44,7 @@ import au.csiro.ontology.model.Conjunction;
 import au.csiro.ontology.model.Datatype;
 import au.csiro.ontology.model.DecimalLiteral;
 import au.csiro.ontology.model.Existential;
+import au.csiro.ontology.model.FunctionalFeature;
 import au.csiro.ontology.model.IntegerLiteral;
 import au.csiro.ontology.model.Literal;
 import au.csiro.ontology.model.NamedConcept;
@@ -1065,6 +1066,11 @@ public class RF2Importer extends BaseImporter {
                                 conjs), getConcept(c1, ci)));
                     }
                 }
+            }
+
+            log.info("Add functional feature axioms");
+            for (NamedFeature feature: fi.values()) {
+                statedAxioms.add(new FunctionalFeature(feature));
             }
 
             log.info("Finished building ontology");

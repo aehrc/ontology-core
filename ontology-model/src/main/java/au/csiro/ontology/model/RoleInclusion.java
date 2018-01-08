@@ -11,33 +11,33 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * This class represents a role inclusion axiom (also known as a SubObjectPropertyOf axiom in OWL).
- * 
+ *
  * @author Alejandro Metke
- * 
+ *
  */
 @XmlRootElement
 public class RoleInclusion extends Axiom {
-    
+
     /**
      * The left hand side of the expression.
      */
     protected Role[] lhs;
-    
+
     /**
      * The right hand side of the expression.
      */
     protected Role rhs;
-    
+
     /**
-     * 
+     *
      */
     public RoleInclusion() {
-        
+
     }
-    
+
     /**
      * Creates a new {@link RoleInclusion}.
-     * 
+     *
      * @param lhs
      * @param rhs
      */
@@ -45,10 +45,10 @@ public class RoleInclusion extends Axiom {
         this.lhs = lhs;
         this.rhs = rhs;
     }
-    
+
     /**
      * Creates a new {@link RoleInclusion}.
-     * 
+     *
      * @param lhs
      * @param rhs
      */
@@ -98,10 +98,11 @@ public class RoleInclusion extends Axiom {
         return sb.toString();
     }
 
+    @Override
     public int compareTo(Axiom o) {
-        if(!(o instanceof RoleInclusion)) {
+        if (o instanceof ConceptInclusion) {
             return 1;
-        } else {
+        } else if (o instanceof RoleInclusion) {
             RoleInclusion otherRi = (RoleInclusion) o;
             int lhsRes = 0;
             Role[] oLhs = otherRi.getLhs();
@@ -131,7 +132,9 @@ public class RoleInclusion extends Axiom {
                 return lhsRes;
             else
                 return rhsRes;
+        } else {
+            return -1;
         }
     }
-    
+
 }
