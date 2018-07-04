@@ -35,7 +35,7 @@ interface IRefsetFactory<T extends RefsetRow> {
         public RefsetRow create(String id, String effectiveTime, String active, String moduleId, String refsetId,
                 String referencedComponentId, String... fields) {
             assert fields.length == CD_COLS.length;
-            return new RefsetRow(referencedComponentId, effectiveTime, active, moduleId, refsetId, 
+            return new RefsetRow(referencedComponentId, effectiveTime, active, moduleId, refsetId,
                     referencedComponentId, fields) {
                 @Override
                 public String[] getColumns() {
@@ -45,6 +45,23 @@ interface IRefsetFactory<T extends RefsetRow> {
         }
     };
 
-    T create(String id, String effectiveTime, String active, String moduleId, String refsetId, 
+    static IRefsetFactory<RefsetRow> OWL = new IRefsetFactory<RefsetRow>() {
+        final private String[] OWL_COLS = { "owlExpression" };
+
+        @Override
+        public RefsetRow create(String id, String effectiveTime, String active, String moduleId, String refsetId,
+                String referencedComponentId, String... fields) {
+            assert fields.length == OWL_COLS.length;
+            return new RefsetRow(referencedComponentId, effectiveTime, active, moduleId, refsetId,
+                    referencedComponentId, fields) {
+                @Override
+                public String[] getColumns() {
+                    return OWL_COLS;
+                }
+            };
+        }
+    };
+
+    T create(String id, String effectiveTime, String active, String moduleId, String refsetId,
             String referencedComponentId, String... fields);
 }

@@ -31,6 +31,11 @@
       <artifactId>owlapi-api</artifactId>
       <version>[4.3.1,4.4)</version>
     </dependency>
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-apibinding</artifactId>
+      <version>[4.3.1,4.4)</version>
+    </dependency>
   </dependencies>
   
 </project>
