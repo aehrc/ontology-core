@@ -251,7 +251,7 @@ public class RF2Importer extends BaseImporter {
         } catch (Throwable t) {
             log.error(t.getMessage());
             throw new ImportException("Unable to load reference set file. Please check your input configuration file " +
-                    "(input type = " + input.getInputType() + ", file=" + refsetFile + ")");
+                    "(input type = " + input.getInputType() + ", file=" + refsetFile + ")", t);
         } finally {
             for (String moduleId : unknownModules) {
                 log.info("Refset: Ignored data from module '" + moduleId + "' found in " + refsetFile);
