@@ -218,8 +218,7 @@ public class RF2Importer extends BaseImporter {
                 String[] fields = line.split("\t");
 
                 if (fields.length < 6) {
-                    throw new RuntimeException("Refset: Mis-formatted line, expected >= 6 tab-separated fields, " +
-                    		"got: " + line);
+                    throw new RuntimeException("Refset: Mis-formatted line, expected >= 6 tab-separated fields, got: " + line);
                 }
 
                 final String id = fields[0];
@@ -288,6 +287,8 @@ public class RF2Importer extends BaseImporter {
 
         Map<String, RefsetRow> cdMap = new HashMap<>();
 
+        Map<String, RefsetRow> adMap = new HashMap<>();
+
         Map<String, RefsetRow> owlMap = new HashMap<>();
 
         RF2Input input = (RF2Input) entry.getInput();
@@ -341,47 +342,62 @@ public class RF2Importer extends BaseImporter {
         final Set<String> concreteDomainRefsetFiles = input.getConcreteDomainRefsetFiles();
         log.info("Reading concrete domains reference set info: " + concreteDomainRefsetFiles.size());
         for (String filename : concreteDomainRefsetFiles) {
-        	try {
-        		loadReferenceSet(input, filename, modMap, cdMap, IRefsetFactory.CD);
-        	} catch (ArrayIndexOutOfBoundsException e) {
-        		final String msg = "Error loading concrete domains reference set: " + filename +
-        				". Possibly has wrong number of columns.";
-        		log.error(msg, e);
-        		throw new ImportException(msg, e);
-        	}
+            try {
+                loadReferenceSet(input, filename, modMap, cdMap, IRefsetFactory.CD);
+            } catch (ArrayIndexOutOfBoundsException e) {
+                final String msg = "Error loading concrete domains reference set: " + filename +
+                        ". Possibly has wrong number of columns.";
+                log.error(msg, e);
+                throw new ImportException(msg, e);
+            }
+        }
+
+        // Load attribute domains refsets
+        final Set<String> attributeDomainRefsetFiles = input.getAttributeDomainRefsetFiles();
+        log.info("Reading attribute domains reference set info: " + attributeDomainRefsetFiles.size());
+        for (String filename : attributeDomainRefsetFiles) {
+            try {
+                loadReferenceSet(input, filename, modMap, adMap, IRefsetFactory.AD);
+            } catch (ArrayIndexOutOfBoundsException e) {
+                final String msg = "Error loading attribute domains reference set: " + filename +
+                        ". Possibly has wrong number of columns.";
+                log.error(msg, e);
+                throw new ImportException(msg, e);
+            }
         }
 
         // Load OWL reference sets
         final Set<String> owlOntologyRefsetFiles = input.getOwlOntologyRefsetFiles();
         log.info("Reading OWL Ontology reference set info: " + owlOntologyRefsetFiles.size());
         for (String filename : owlOntologyRefsetFiles) {
-        	try {
-        		loadReferenceSet(input, filename, modMap, owlMap, IRefsetFactory.OWL);
-        	} catch (ArrayIndexOutOfBoundsException e) {
-        		final String msg = "Error loading OWL Ontology reference set: " + filename +
-        				". Possibly has wrong number of columns.";
-        		log.error(msg, e);
-        		throw new ImportException(msg, e);
-        	}
+            try {
+                loadReferenceSet(input, filename, modMap, owlMap, IRefsetFactory.OWL);
+            } catch (ArrayIndexOutOfBoundsException e) {
+                final String msg = "Error loading OWL Ontology reference set: " + filename +
+                        ". Possibly has wrong number of columns.";
+                log.error(msg, e);
+                throw new ImportException(msg, e);
+            }
         }
         final Set<String> owlAxiomRefsetFiles = input.getOwlAxiomRefsetFiles();
         log.info("Reading OWL Axiom reference set info: " + owlAxiomRefsetFiles.size());
         for (String filename : owlAxiomRefsetFiles) {
-        	try {
-        		loadReferenceSet(input, filename, modMap, owlMap, IRefsetFactory.OWL);
-        	} catch (ArrayIndexOutOfBoundsException e) {
-        		final String msg = "Error loading OWL Axiom reference set: " + filename +
-        				". Possibly has wrong number of columns.";
-        		log.error(msg, e);
-        		throw new ImportException(msg, e);
-        	}
+            try {
+                loadReferenceSet(input, filename, modMap, owlMap, IRefsetFactory.OWL);
+            } catch (ArrayIndexOutOfBoundsException e) {
+                final String msg = "Error loading OWL Axiom reference set: " + filename +
+                        ". Possibly has wrong number of columns.";
+                log.error(msg, e);
+                throw new ImportException(msg, e);
+            }
         }
 
-        VersionRows vr = new VersionRows(conceptMap.values(), relationshipMap.values(), cdMap.values(), owlMap.values());
+        VersionRows vr = new VersionRows(conceptMap.values(), relationshipMap.values(), cdMap.values(), adMap.values(), owlMap.values());
 
         conceptMap = null;
         relationshipMap = null;
         cdMap = null;
+        adMap = null;
         owlMap = null;
 
         return vr;
@@ -590,13 +606,13 @@ public class RF2Importer extends BaseImporter {
                 populateRoles(cs, role, rightIdentityIds, children, rolesMap);
             }
             if (null != rightIdentityIds) {
-            	String[] ris = rightIdentityIds.split("[,]");
-            	String ri = (ris[0].equals(role)) ? ris[1] : null;
-            	if (ri != null) {
-            		populateRoleDef(role, ri, parentSCTID, rolesMap);
-            	} else {
-            		populateRoleDef(role, "", parentSCTID, rolesMap);
-            	}
+                String[] ris = rightIdentityIds.split("[,]");
+                String ri = (ris[0].equals(role)) ? ris[1] : null;
+                if (ri != null) {
+                    populateRoleDef(role, ri, parentSCTID, rolesMap);
+                } else {
+                    populateRoleDef(role, "", parentSCTID, rolesMap);
+                }
             }
         }
     }
@@ -826,7 +842,7 @@ public class RF2Importer extends BaseImporter {
      *
      */
     protected class OntologyBuilder {
-		protected final VersionRows vr;
+        protected final VersionRows vr;
         protected final String rootModuleId;
         protected final String rootModuleVersion;
 
@@ -910,13 +926,18 @@ public class RF2Importer extends BaseImporter {
                         + "Import process might produce unexpected results.");
             }
 
-            if (neverGroupedIdsString == null) {
+            if (neverGroupedIdsString == null && vr.getAttributeDomainRows().isEmpty()) {
                 log.warn("Metadata value for neverGroupedIds was not found. "
                         + "Import process might produce unexpected results.");
-            } else {
-                String[] parts = neverGroupedIdsString.split("[,]");
-                for (String part : parts)
-                    neverGroupedIds.add(part);
+            }
+            initDefaultNeverGroupedIds();
+            for (RefsetRow row: vr.getAttributeDomainRows()) {
+                if (isActive(row.getActive()) && "0".equals(row.getExtras()[1])) {
+                    neverGroupedIds.add(row.getReferencedComponentId());
+                }
+            }
+            if (log.isInfoEnabled()) {
+                log.info("Never-grouped attributes: " + neverGroupedIds);
             }
 
             if (fsnId == null) {
@@ -962,9 +983,19 @@ public class RF2Importer extends BaseImporter {
             }
         }
 
-        protected Ontology build(IProgressMonitor monitor) throws URISyntaxException {
-        	processAxiomRows(monitor);
+        protected void initDefaultNeverGroupedIds() {
+            neverGroupedIds.clear();
+            if (null != neverGroupedIdsString) {
+                String[] parts = neverGroupedIdsString.split("[,]");
+                for (String part : parts) {
+                    if (!part.isEmpty()) {
+                        neverGroupedIds.add(part);
+                    }
+                }
+            }
+        }
 
+        protected Ontology build(IProgressMonitor monitor) throws URISyntaxException {
             // Process concept rows
             log.info("Processing " + vr.getConceptRows().size() + " concept rows");
             for (ConceptRow cr : vr.getConceptRows()) {
@@ -1104,13 +1135,12 @@ public class RF2Importer extends BaseImporter {
                         }
                     }
 
-                    final ConceptInclusion axiom = new ConceptInclusion(
-                            getConcept(c1, ci), new Conjunction(conjs));
+                    final ConceptInclusion axiom = new ConceptInclusion(getConcept(c1, ci), new Conjunction(conjs));
                     statedAxioms.add(axiom);
 
                     if (primitive.get(c1).equals("0")) {
-                        statedAxioms.add(new ConceptInclusion(new Conjunction(
-                                conjs), getConcept(c1, ci)));
+                        final ConceptInclusion axiom2 = new ConceptInclusion(new Conjunction(conjs), getConcept(c1, ci));
+                        statedAxioms.add(axiom2);
                     }
                 }
             }
@@ -1120,29 +1150,36 @@ public class RF2Importer extends BaseImporter {
                 statedAxioms.add(new FunctionalFeature(feature));
             }
 
+            processAxiomRows(monitor);
+
             log.info("Finished building ontology");
 
             return new Ontology(rootModuleId, rootModuleVersion, statedAxioms, null);
         }
 
-		protected void processAxiomRows(IProgressMonitor monitor) {
-			// Process axiom rows
-        	List<String> namespace = new ArrayList<>();
-        	List<String> axiomList = new ArrayList<>();
+        protected void processAxiomRows(IProgressMonitor monitor) {
+            // Process axiom rows
+            List<String> namespace = new ArrayList<>();
+            List<String> axiomList = new ArrayList<>();
             log.info("Processing " + vr.getOwlRows().size() + " OWL rows");
             for (RefsetRow row: vr.getOwlRows()) {
                 if (isActive(row.getActive())) {
-                	if ("733073007".equals(row.getRefsetId())) {
-                		axiomList.add(row.getExtras()[0]);
-                	} else if ("762103008".equals(row.getRefsetId())) {
-                		if ("734146004".equals(row.getReferencedComponentId())) {
-                			namespace.add(row.getExtras()[0]);
-                		} else if (!"734147008".equals(row.getReferencedComponentId())) {
-                			log.warn("Unexpected referencedComponentId in: " + row);
-                		}
-                	} else {
-            			log.warn("Unexpected refsetId in: " + row);
-                	}
+                    final String owlFragment = row.getExtras()[0];
+                    if ("733073007".equals(row.getRefsetId())) {
+                        axiomList.add(owlFragment);
+                    } else if ("762103008".equals(row.getRefsetId())) {
+                        if ("734146004".equals(row.getReferencedComponentId())) {
+                            if (!owlFragment.startsWith("Prefix(:=")) {
+                                namespace.add(owlFragment);
+                            } else {
+                                namespace.add("Prefix(:=<>)");
+                            }
+                        } else if (!"734147008".equals(row.getReferencedComponentId())) {
+                            log.warn("Unexpected referencedComponentId in: " + row);
+                        }
+                    } else {
+                        log.warn("Unexpected refsetId in: " + row);
+                    }
                 }
             }
 
@@ -1157,16 +1194,17 @@ public class RF2Importer extends BaseImporter {
 
             final OWLOntologyDocumentSource source = new ReaderDocumentSource(new StringReader(input), IRI.generateDocumentIRI(), FUNCTIONAL_SYNTAX_DOCUMENT_FORMAT, null);
             final OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-			try {
-				final OWLOntology owlOntology = manager.loadOntologyFromOntologyDocument(source);
-	            final Iterator<Ontology> itr = new OWLImporter(owlOntology).getOntologyVersions(monitor);
-	            while (itr.hasNext()) {
-	            	statedAxioms.addAll(itr.next().getStatedAxioms());
-	            }
-			} catch (OWLOntologyCreationException e) {
-				throw new RuntimeException("Failed to process OWL axioms", e);
-			}
-		}
+            try {
+                final OWLOntology owlOntology = manager.loadOntologyFromOntologyDocument(source);
+                final Iterator<Ontology> itr = new OWLImporter(owlOntology).getOntologyVersions(monitor);
+                while (itr.hasNext()) {
+                    final Collection<Axiom> importedStatedAxioms = itr.next().getStatedAxioms();
+                    statedAxioms.addAll(importedStatedAxioms);
+                }
+            } catch (OWLOntologyCreationException e) {
+                throw new RuntimeException("Failed to process OWL axioms", e);
+            }
+        }
 
         protected boolean isActive(final String active) {
             return "1".equals(active);

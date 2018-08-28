@@ -33,6 +33,11 @@ public class VersionRows {
 	 */
 	protected final Collection<RefsetRow> concreteDomainRows;
 
+        /**
+         * The attribute domains reference set rows in this version.
+         */
+        protected final Collection<RefsetRow> attributeDomainRows;
+
 	/**
 	 * The OWL reference set rows in this version.
 	 */
@@ -42,14 +47,16 @@ public class VersionRows {
 	 * Builds a new VersionRows.
 	 */
 	public VersionRows() {
-		this(new ArrayList<ConceptRow>(), new ArrayList<RelationshipRow>(), new ArrayList<RefsetRow>(), new ArrayList<RefsetRow>());
+		this(new ArrayList<ConceptRow>(), new ArrayList<RelationshipRow>(), new ArrayList<RefsetRow>(), new ArrayList<RefsetRow>(), new ArrayList<RefsetRow>());
 	}
 
 	public VersionRows(Collection<ConceptRow> conceptRows, Collection<RelationshipRow> relationshipRows,
-			Collection<RefsetRow> concreteDomainRows, Collection<RefsetRow> owlRows) {
+			Collection<RefsetRow> concreteDomainRows, Collection<RefsetRow> attributeDomainRows,
+			Collection<RefsetRow> owlRows) {
 		this.conceptRows = conceptRows;
 		this.relationshipRows = relationshipRows;
 		this.concreteDomainRows = concreteDomainRows;
+                this.attributeDomainRows = attributeDomainRows;
 		this.owlRows = owlRows;
 	}
 
@@ -75,6 +82,14 @@ public class VersionRows {
 		return concreteDomainRows;
 	}
 
+        /**
+         *
+         * @return the attribute domain refsetRows (includes current inactive rows)
+         */
+        public Collection<RefsetRow> getAttributeDomainRows() {
+                return attributeDomainRows;
+        }
+
 	/**
 	 *
 	 * @return the owl refsetRows (includes current inactive rows)
@@ -92,6 +107,7 @@ public class VersionRows {
 		conceptRows.addAll(other.conceptRows);
 		relationshipRows.addAll(other.relationshipRows);
 		concreteDomainRows.addAll(other.getConcreteDomainRows());
+                attributeDomainRows.addAll(other.getAttributeDomainRows());
 		owlRows.addAll(other.getConcreteDomainRows());
 	}
 

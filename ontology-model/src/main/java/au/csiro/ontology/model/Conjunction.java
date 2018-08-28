@@ -48,7 +48,7 @@ public class Conjunction extends Concept {
         // independent, i.e. conjunctions are reflexive (should also be
         // transitive, but Agile says STTCPW)
 
-        final SortedSet<Concept> sorted = new TreeSet<Concept>(concepts);
+        final SortedSet<Concept> sorted = new TreeSet<>(concepts);
         this.concepts = sorted.toArray(new Concept[sorted.size()]);
         hashCode = sorted.hashCode();
     }
@@ -61,7 +61,7 @@ public class Conjunction extends Concept {
      * @param concepts the concepts to set
      */
     public void setConcepts(Concept[] concepts) {
-        final SortedSet<Concept> sorted = new TreeSet<Concept>();
+        final SortedSet<Concept> sorted = new TreeSet<>();
         for (Concept concept : concepts) {
             sorted.add(concept);
         }

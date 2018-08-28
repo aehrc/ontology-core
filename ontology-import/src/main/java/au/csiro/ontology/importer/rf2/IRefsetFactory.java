@@ -45,6 +45,30 @@ interface IRefsetFactory<T extends RefsetRow> {
         }
     };
 
+    static IRefsetFactory<RefsetRow> AD = new IRefsetFactory<RefsetRow>() {
+        final private String[] AD_COLS = {
+                "domainId",
+                "grouped",
+                "attributeCardinality",
+                "attributeInGroupCardinality",
+                "ruleStrengthId",
+                "contentTypeId",
+        };
+
+        @Override
+        public RefsetRow create(String id, String effectiveTime, String active, String moduleId, String refsetId,
+                String referencedComponentId, String... fields) {
+            assert fields.length == AD_COLS.length;
+            return new RefsetRow(referencedComponentId, effectiveTime, active, moduleId, refsetId,
+                    referencedComponentId, fields) {
+                @Override
+                public String[] getColumns() {
+                    return AD_COLS;
+                }
+            };
+        }
+    };
+
     static IRefsetFactory<RefsetRow> OWL = new IRefsetFactory<RefsetRow>() {
         final private String[] OWL_COLS = { "owlExpression" };
 

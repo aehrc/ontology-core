@@ -38,6 +38,7 @@ public class RF2Input extends Input {
     protected Set<String> annotationRefsetFiles = new HashSet<>();
     protected Set<String> associationRefsetFiles = new HashSet<>();
     protected Set<String> concreteDomainRefsetFiles = new HashSet<>();
+    protected Set<String> attributeDomainRefsetFiles = new HashSet<>();
 
     // The type of release - full, snapshot or incremental
     protected ReleaseType releaseType;
@@ -338,6 +339,20 @@ public class RF2Input extends Input {
      */
     public void setConcreteDomainRefsetFiles(Set<String> concreteDomainRefsetFiles) {
         this.concreteDomainRefsetFiles = concreteDomainRefsetFiles;
+    }
+
+    /**
+     * @return the attributeDomainRefsetFiles
+     */
+    public Set<String> getAttributeDomainRefsetFiles() {
+        return attributeDomainRefsetFiles;
+    }
+
+    /**
+     * @param attributeDomainRefsetFiles the attributeDomainRefsetFiles to set
+     */
+    public void setAttributeDomainRefsetFiles(Set<String> attributeDomainRefsetFiles) {
+        this.attributeDomainRefsetFiles = attributeDomainRefsetFiles;
     }
 
     /**
