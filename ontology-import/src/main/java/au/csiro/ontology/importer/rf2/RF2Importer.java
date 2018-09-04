@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URISyntaxException;
@@ -24,13 +25,24 @@ import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.formats.FunctionalSyntaxDocumentFormat;
+import org.semanticweb.owlapi.io.OWLOntologyDocumentSource;
+import org.semanticweb.owlapi.io.ReaderDocumentSource;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLDocumentFormat;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import au.csiro.ontology.Ontology;
 import au.csiro.ontology.importer.BaseImporter;
 import au.csiro.ontology.importer.ImportException;
+import au.csiro.ontology.importer.owl.OWLImporter;
 import au.csiro.ontology.input.Input;
 import au.csiro.ontology.input.Input.InputType;
 import au.csiro.ontology.input.Inputs;
@@ -66,6 +78,8 @@ import au.csiro.ontology.util.IProgressMonitor;
  */
 public class RF2Importer extends BaseImporter {
 
+    protected static final OWLDocumentFormat FUNCTIONAL_SYNTAX_DOCUMENT_FORMAT = new FunctionalSyntaxDocumentFormat();
+
     /**
      * Logger.
      */
@@ -74,12 +88,12 @@ public class RF2Importer extends BaseImporter {
     /**
      * List of problems found while importing.
      */
-    protected final List<String> problems = new ArrayList<String>();
+    protected final List<String> problems = new ArrayList<>();
 
     /**
      * Queue with the inputs to process.
      */
-    protected final Queue<RF2Input> inputs = new LinkedList<RF2Input>();
+    protected final Queue<RF2Input> inputs = new LinkedList<>();
 
     /**
      * Imports an ontology using the supplied configuration object.
@@ -120,7 +134,7 @@ public class RF2Importer extends BaseImporter {
      * @throws ImportException
      */
     protected IModuleDependencyRefset loadModuleDependencies(RF2Input input) throws ImportException {
-        Set<InputStream> iss = new HashSet<InputStream>();
+        Set<InputStream> iss = new HashSet<>();
         InputType inputType = input.getInputType();
         for(String md : input.getModuleDependenciesRefsetFiles()) {
             final String message = "Unable to load module " +
@@ -148,12 +162,12 @@ public class RF2Importer extends BaseImporter {
      * @return
      */
     protected Map<String, Set<Version>> getModuleVersionsToLoad(RF2Input in) {
-        Map<String, Set<Version>> res = new HashMap<String, Set<Version>>();
+        Map<String, Set<Version>> res = new HashMap<>();
         for(ModuleInfo mi : in.getModules()) {
             String moduleId = mi.getId();
             Set<Version> versionsToLoad = res.get(moduleId);
             if(versionsToLoad == null) {
-                versionsToLoad = new HashSet<Version>();
+                versionsToLoad = new HashSet<>();
                 res.put(moduleId, versionsToLoad);
             }
             for(Version v : mi.getVersions()) {
@@ -179,7 +193,7 @@ public class RF2Importer extends BaseImporter {
         List<String[]> list;
         // my ( $comp, $feature, $op, $value, $unit ) = @_;
         if (!cdMap.containsKey(referencedComponentId)) {
-            list = new ArrayList<String[]>();
+            list = new ArrayList<>();
             cdMap.put(referencedComponentId, list);
         } else {
             list = cdMap.get(referencedComponentId);
@@ -191,7 +205,7 @@ public class RF2Importer extends BaseImporter {
             Map<String, R> refsetMap, IRefsetFactory<R> factory)
             throws ImportException {
 
-        Set<String> unknownModules = new HashSet<String>();
+        Set<String> unknownModules = new HashSet<>();
         BufferedReader br = null;
         try {
             br = new BufferedReader(new InputStreamReader(input.getInputStream(refsetFile), Charset.forName("UTF8")));
@@ -204,8 +218,7 @@ public class RF2Importer extends BaseImporter {
                 String[] fields = line.split("\t");
 
                 if (fields.length < 6) {
-                    throw new RuntimeException("Refset: Mis-formatted line, expected >= 6 tab-separated fields, " +
-                    		"got: " + line);
+                    throw new RuntimeException("Refset: Mis-formatted line, expected >= 6 tab-separated fields, got: " + line);
                 }
 
                 final String id = fields[0];
@@ -237,7 +250,7 @@ public class RF2Importer extends BaseImporter {
         } catch (Throwable t) {
             log.error(t.getMessage());
             throw new ImportException("Unable to load reference set file. Please check your input configuration file " +
-                    "(input type = " + input.getInputType() + ", file=" + refsetFile + ")");
+                    "(input type = " + input.getInputType() + ", file=" + refsetFile + ")", t);
         } finally {
             for (String moduleId : unknownModules) {
                 log.info("Refset: Ignored data from module '" + moduleId + "' found in " + refsetFile);
@@ -255,7 +268,7 @@ public class RF2Importer extends BaseImporter {
     protected VersionRows getBundle(ImportEntry entry) throws ImportException {
 
         // Add module information to map for easy lookup
-        Map<String, String> modMap = new HashMap<String, String>();
+        Map<String, String> modMap = new HashMap<>();
         for (Module module : entry.getModules()) {
             String modId = module.getModuleId();
             String modVer = module.getModuleVersion();
@@ -266,13 +279,17 @@ public class RF2Importer extends BaseImporter {
         }
 
         // Map needed to find the correct version of each concept to load for this import entry
-        Map<String, ConceptRow> conceptMap = new HashMap<String, ConceptRow>();
+        Map<String, ConceptRow> conceptMap = new HashMap<>();
 
         // Map needed to find the correct version of each relationship to load
         // for this import entry
-        Map<String, RelationshipRow> relationshipMap = new HashMap<String, RelationshipRow>();
+        Map<String, RelationshipRow> relationshipMap = new HashMap<>();
 
-        Map<String, RefsetRow> cdMap = new HashMap<String, RefsetRow>();
+        Map<String, RefsetRow> cdMap = new HashMap<>();
+
+        Map<String, RefsetRow> adMap = new HashMap<>();
+
+        Map<String, RefsetRow> owlMap = new HashMap<>();
 
         RF2Input input = (RF2Input) entry.getInput();
 
@@ -319,27 +336,69 @@ public class RF2Importer extends BaseImporter {
                 log.error(message, e);
                 throw new ImportException(message, e);
             }
+        }
 
-            // Load concrete domains refsets
-            final Set<String> concreteDomainRefsetFiles = input.getConcreteDomainRefsetFiles();
-            log.info("Reading concrete domains reference set info: " + concreteDomainRefsetFiles.size());
-            for (String filename : concreteDomainRefsetFiles) {
-                try {
-                    loadReferenceSet(input, filename, modMap, cdMap, IRefsetFactory.CD);
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    final String msg = "Error loading concrete domains reference set: " + filename +
-                            ". Possibly has wrong number of columns.";
-                    log.error(msg, e);
-                    throw new ImportException(msg, e);
-                }
+        // Load concrete domains refsets
+        final Set<String> concreteDomainRefsetFiles = input.getConcreteDomainRefsetFiles();
+        log.info("Reading concrete domains reference set info: " + concreteDomainRefsetFiles.size());
+        for (String filename : concreteDomainRefsetFiles) {
+            try {
+                loadReferenceSet(input, filename, modMap, cdMap, IRefsetFactory.CD);
+            } catch (ArrayIndexOutOfBoundsException e) {
+                final String msg = "Error loading concrete domains reference set: " + filename +
+                        ". Possibly has wrong number of columns.";
+                log.error(msg, e);
+                throw new ImportException(msg, e);
             }
         }
 
-        VersionRows vr = new VersionRows(conceptMap.values(), relationshipMap.values(), cdMap.values());
+        // Load attribute domains refsets
+        final Set<String> attributeDomainRefsetFiles = input.getAttributeDomainRefsetFiles();
+        log.info("Reading attribute domains reference set info: " + attributeDomainRefsetFiles.size());
+        for (String filename : attributeDomainRefsetFiles) {
+            try {
+                loadReferenceSet(input, filename, modMap, adMap, IRefsetFactory.AD);
+            } catch (ArrayIndexOutOfBoundsException e) {
+                final String msg = "Error loading attribute domains reference set: " + filename +
+                        ". Possibly has wrong number of columns.";
+                log.error(msg, e);
+                throw new ImportException(msg, e);
+            }
+        }
+
+        // Load OWL reference sets
+        final Set<String> owlOntologyRefsetFiles = input.getOwlOntologyRefsetFiles();
+        log.info("Reading OWL Ontology reference set info: " + owlOntologyRefsetFiles.size());
+        for (String filename : owlOntologyRefsetFiles) {
+            try {
+                loadReferenceSet(input, filename, modMap, owlMap, IRefsetFactory.OWL);
+            } catch (ArrayIndexOutOfBoundsException e) {
+                final String msg = "Error loading OWL Ontology reference set: " + filename +
+                        ". Possibly has wrong number of columns.";
+                log.error(msg, e);
+                throw new ImportException(msg, e);
+            }
+        }
+        final Set<String> owlAxiomRefsetFiles = input.getOwlAxiomRefsetFiles();
+        log.info("Reading OWL Axiom reference set info: " + owlAxiomRefsetFiles.size());
+        for (String filename : owlAxiomRefsetFiles) {
+            try {
+                loadReferenceSet(input, filename, modMap, owlMap, IRefsetFactory.OWL);
+            } catch (ArrayIndexOutOfBoundsException e) {
+                final String msg = "Error loading OWL Axiom reference set: " + filename +
+                        ". Possibly has wrong number of columns.";
+                log.error(msg, e);
+                throw new ImportException(msg, e);
+            }
+        }
+
+        VersionRows vr = new VersionRows(conceptMap.values(), relationshipMap.values(), cdMap.values(), adMap.values(), owlMap.values());
 
         conceptMap = null;
         relationshipMap = null;
         cdMap = null;
+        adMap = null;
+        owlMap = null;
 
         return vr;
     }
@@ -513,7 +572,7 @@ public class RF2Importer extends BaseImporter {
     protected void populateParent(String src, String tgt, Map<String, Set<String>> parents) {
         Set<String> prs = parents.get(src);
         if (prs == null) {
-            prs = new TreeSet<String>();
+            prs = new TreeSet<>();
             parents.put(src, prs);
         }
         prs.add(tgt);
@@ -522,7 +581,7 @@ public class RF2Importer extends BaseImporter {
     protected void populateChildren(String src, String tgt, Map<String, Set<String>> children) {
         Set<String> prs = children.get(src);
         if (prs == null) {
-            prs = new TreeSet<String>();
+            prs = new TreeSet<>();
             children.put(src, prs);
         }
         prs.add(tgt);
@@ -532,7 +591,7 @@ public class RF2Importer extends BaseImporter {
             Map<String, List<String[]>> rels) {
         List<String[]> val = rels.get(src);
         if (val == null) {
-            val = new ArrayList<String[]>();
+            val = new ArrayList<>();
             rels.put(src, val);
         }
         val.add(new String[] { comp, role, tgt, group });
@@ -546,12 +605,14 @@ public class RF2Importer extends BaseImporter {
             if (cs != null) {
                 populateRoles(cs, role, rightIdentityIds, children, rolesMap);
             }
-            String[] ris = rightIdentityIds.split("[,]");
-            String ri = (ris[0].equals(role)) ? ris[1] : null;
-            if (ri != null) {
-                populateRoleDef(role, ri, parentSCTID, rolesMap);
-            } else {
-                populateRoleDef(role, "", parentSCTID, rolesMap);
+            if (null != rightIdentityIds) {
+                String[] ris = rightIdentityIds.split("[,]");
+                String ri = (ris[0].equals(role)) ? ris[1] : null;
+                if (ri != null) {
+                    populateRoleDef(role, ri, parentSCTID, rolesMap);
+                } else {
+                    populateRoleDef(role, "", parentSCTID, rolesMap);
+                }
             }
         }
     }
@@ -560,7 +621,7 @@ public class RF2Importer extends BaseImporter {
             Map<String, String>> roles) {
         Map<String, String> vals = roles.get(code);
         if (vals == null) {
-            vals = new HashMap<String, String>();
+            vals = new HashMap<>();
             roles.put(code, vals);
         }
         vals.put("rightID", rightId);
@@ -569,7 +630,7 @@ public class RF2Importer extends BaseImporter {
 
     protected Set<Set<RoleValuePair>> groupRoles(List<String[]> groups) {
         Map<String, Set<RoleValuePair>> roleGroups =
-                new HashMap<String, Set<RoleValuePair>>();
+                new HashMap<>();
 
         for (String[] group : groups) {
             String comp = group[0];
@@ -578,25 +639,25 @@ public class RF2Importer extends BaseImporter {
             String roleGroup = group[3];
             Set<RoleValuePair> lrvp = roleGroups.get(roleGroup);
             if (lrvp == null) {
-                lrvp = new HashSet<RoleValuePair>();
+                lrvp = new HashSet<>();
                 roleGroups.put(roleGroup, lrvp);
             }
             lrvp.add(new RoleValuePair(attr, val, comp));
         }
 
-        Set<Set<RoleValuePair>> res = new HashSet<Set<RoleValuePair>>();
+        Set<Set<RoleValuePair>> res = new HashSet<>();
         for (String roleGroup : roleGroups.keySet()) {
             Set<RoleValuePair> val = roleGroups.get(roleGroup);
 
             // 0 indicates not grouped
             if ("0".equals(roleGroup)) {
                 for (RoleValuePair rvp : val) {
-                    Set<RoleValuePair> sin = new HashSet<RoleValuePair>();
+                    Set<RoleValuePair> sin = new HashSet<>();
                     sin.add(rvp);
                     res.add(sin);
                 }
             } else {
-                Set<RoleValuePair> item = new HashSet<RoleValuePair>();
+                Set<RoleValuePair> item = new HashSet<>();
                 for (RoleValuePair trvp : val) {
                     item.add(trvp);
                 }
@@ -676,7 +737,7 @@ public class RF2Importer extends BaseImporter {
 
     class OntologyInterator implements Iterator<Ontology> {
 
-        private final Queue<ImportEntry> entries = new LinkedList<ImportEntry>();
+        private final Queue<ImportEntry> entries = new LinkedList<>();
         @SuppressWarnings("unused")
         private final IProgressMonitor monitor;
 
@@ -715,9 +776,9 @@ public class RF2Importer extends BaseImporter {
                         throw new ImportException("Version " + ver + " of module " + rootModuleId +
                                 " was not found in MDRS.");
                     }
-                    Set<Module> modules = new HashSet<Module>();
+                    Set<Module> modules = new HashSet<>();
 
-                    Queue<ModuleDependency> depends = new LinkedList<ModuleDependency>();
+                    Queue<ModuleDependency> depends = new LinkedList<>();
                     depends.add(md);
 
                     while (!depends.isEmpty()) {
@@ -757,7 +818,7 @@ public class RF2Importer extends BaseImporter {
 
                 log.info("Building ontology " + ontologyId + " (" + ontologyVersion + ")");
                 OntologyBuilder builder = getOntologyBuilder(bundle, ontologyId, ontologyVersion, entry.getMetadata());
-                return builder.build();
+                return builder.build(monitor);
             } catch (ImportException e) {
                 log.error(e.getMessage());
                 throw new RuntimeException(e);
@@ -785,12 +846,12 @@ public class RF2Importer extends BaseImporter {
         protected final String rootModuleId;
         protected final String rootModuleVersion;
 
-        protected final Map<String, String> primitive = new HashMap<String, String>();
-        protected final Map<String, Set<String>> parents = new HashMap<String, Set<String>>();
-        protected final Map<String, Set<String>> children = new HashMap<String, Set<String>>();
-        protected final Map<String, List<String[]>> rels = new HashMap<String, List<String[]>>();
-        protected final Map<String, Map<String, String>> roles = new HashMap<String, Map<String, String>>();
-        protected final List<String> lateralizableConcepts = new LinkedList<String>();
+        protected final Map<String, String> primitive = new HashMap<>();
+        protected final Map<String, Set<String>> parents = new HashMap<>();
+        protected final Map<String, Set<String>> children = new HashMap<>();
+        protected final Map<String, List<String[]>> rels = new HashMap<>();
+        protected final Map<String, Map<String, String>> roles = new HashMap<>();
+        protected final List<String> lateralizableConcepts = new LinkedList<>();
 
         protected final String conceptDefinedId;
         protected final String someId;
@@ -807,15 +868,15 @@ public class RF2Importer extends BaseImporter {
         protected final String measurementTypeFloat;
         protected final String equalsOperatorId;
         protected final String unitRoleId;
-        protected final Set<String> neverGroupedIds = new HashSet<String>();
+        protected final Set<String> neverGroupedIds = new HashSet<>();
 
-        protected final Map<String, Concept> ci = new HashMap<String, Concept>();
-        protected final Map<String, NamedRole> ri = new HashMap<String, NamedRole>();
-        protected final Map<String, NamedFeature> fi = new HashMap<String, NamedFeature>();
-        protected final Collection<Axiom> statedAxioms = new ArrayList<Axiom>();
-        protected final Map<String, String> featureType = new HashMap<String, String>();
+        protected final Map<String, Concept> ci = new HashMap<>();
+        protected final Map<String, NamedRole> ri = new HashMap<>();
+        protected final Map<String, NamedFeature> fi = new HashMap<>();
+        protected final Collection<Axiom> statedAxioms = new ArrayList<>();
+        protected final Map<String, String> featureType = new HashMap<>();
 
-        protected final Map<String, List<String[]>> cdsMap = new HashMap<String, List<String[]>>();
+        protected final Map<String, List<String[]>> cdsMap = new HashMap<>();
 
         public OntologyBuilder(VersionRows vr, String rootModuleId, String rootModuleVersion,
                 Map<String, String> metadata) {
@@ -865,13 +926,18 @@ public class RF2Importer extends BaseImporter {
                         + "Import process might produce unexpected results.");
             }
 
-            if (neverGroupedIdsString == null) {
+            if (neverGroupedIdsString == null && vr.getAttributeDomainRows().isEmpty()) {
                 log.warn("Metadata value for neverGroupedIds was not found. "
                         + "Import process might produce unexpected results.");
-            } else {
-                String[] parts = neverGroupedIdsString.split("[,]");
-                for (String part : parts)
-                    neverGroupedIds.add(part);
+            }
+            initDefaultNeverGroupedIds();
+            for (RefsetRow row: vr.getAttributeDomainRows()) {
+                if (isActive(row.getActive()) && "0".equals(row.getExtras()[1])) {
+                    neverGroupedIds.add(row.getReferencedComponentId());
+                }
+            }
+            if (log.isInfoEnabled()) {
+                log.info("Never-grouped attributes: " + neverGroupedIds);
             }
 
             if (fsnId == null) {
@@ -917,7 +983,19 @@ public class RF2Importer extends BaseImporter {
             }
         }
 
-        protected Ontology build() throws URISyntaxException {
+        protected void initDefaultNeverGroupedIds() {
+            neverGroupedIds.clear();
+            if (null != neverGroupedIdsString) {
+                String[] parts = neverGroupedIdsString.split("[,]");
+                for (String part : parts) {
+                    if (!part.isEmpty()) {
+                        neverGroupedIds.add(part);
+                    }
+                }
+            }
+        }
+
+        protected Ontology build(IProgressMonitor monitor) throws URISyntaxException {
             // Process concept rows
             log.info("Processing " + vr.getConceptRows().size() + " concept rows");
             for (ConceptRow cr : vr.getConceptRows()) {
@@ -957,7 +1035,7 @@ public class RF2Importer extends BaseImporter {
             }
 
             log.info("Processing " + vr.getConcreteDomainRows().size() + " concrete domain rows");
-            Set<String> untypedFeatures = new HashSet<String>();
+            Set<String> untypedFeatures = new HashSet<>();
 
             for (RefsetRow rr : vr.getConcreteDomainRows()) {
                 if (isActive(rr.getActive())) {
@@ -1034,7 +1112,7 @@ public class RF2Importer extends BaseImporter {
                     Concept rhs = getConcept(prs.iterator().next(), ci);
                     statedAxioms.add(new ConceptInclusion(lhs, rhs));
                 } else {
-                    List<Concept> conjs = new ArrayList<Concept>();
+                    List<Concept> conjs = new ArrayList<>();
 
                     // Add parents
                     if (prs != null) {
@@ -1057,13 +1135,12 @@ public class RF2Importer extends BaseImporter {
                         }
                     }
 
-                    final ConceptInclusion axiom = new ConceptInclusion(
-                            getConcept(c1, ci), new Conjunction(conjs));
+                    final ConceptInclusion axiom = new ConceptInclusion(getConcept(c1, ci), new Conjunction(conjs));
                     statedAxioms.add(axiom);
 
                     if (primitive.get(c1).equals("0")) {
-                        statedAxioms.add(new ConceptInclusion(new Conjunction(
-                                conjs), getConcept(c1, ci)));
+                        final ConceptInclusion axiom2 = new ConceptInclusion(new Conjunction(conjs), getConcept(c1, ci));
+                        statedAxioms.add(axiom2);
                     }
                 }
             }
@@ -1073,9 +1150,60 @@ public class RF2Importer extends BaseImporter {
                 statedAxioms.add(new FunctionalFeature(feature));
             }
 
+            processAxiomRows(monitor);
+
             log.info("Finished building ontology");
 
             return new Ontology(rootModuleId, rootModuleVersion, statedAxioms, null);
+        }
+
+        protected void processAxiomRows(IProgressMonitor monitor) {
+            // Process axiom rows
+            List<String> namespace = new ArrayList<>();
+            List<String> axiomList = new ArrayList<>();
+            log.info("Processing " + vr.getOwlRows().size() + " OWL rows");
+            for (RefsetRow row: vr.getOwlRows()) {
+                if (isActive(row.getActive())) {
+                    final String owlFragment = row.getExtras()[0];
+                    if ("733073007".equals(row.getRefsetId())) {
+                        axiomList.add(owlFragment);
+                    } else if ("762103008".equals(row.getRefsetId())) {
+                        if ("734146004".equals(row.getReferencedComponentId())) {
+                            if (!owlFragment.startsWith("Prefix(:=")) {
+                                namespace.add(owlFragment);
+                            } else {
+                                namespace.add("Prefix(:=<>)");
+                            }
+                        } else if (!"734147008".equals(row.getReferencedComponentId())) {
+                            log.warn("Unexpected referencedComponentId in: " + row);
+                        }
+                    } else {
+                        log.warn("Unexpected refsetId in: " + row);
+                    }
+                }
+            }
+
+            final String namespaceStr = namespace.stream().collect(Collectors.joining("\n"));
+            final String axiomStr = axiomList.stream().collect(Collectors.joining("\n  "));
+
+            final String input =
+            		namespaceStr +
+            		"\nOntology(\n  " + axiomStr + "\n)";
+            System.err.println(input);
+            System.err.flush();
+
+            final OWLOntologyDocumentSource source = new ReaderDocumentSource(new StringReader(input), IRI.generateDocumentIRI(), FUNCTIONAL_SYNTAX_DOCUMENT_FORMAT, null);
+            final OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+            try {
+                final OWLOntology owlOntology = manager.loadOntologyFromOntologyDocument(source);
+                final Iterator<Ontology> itr = new OWLImporter(owlOntology).getOntologyVersions(monitor);
+                while (itr.hasNext()) {
+                    final Collection<Axiom> importedStatedAxioms = itr.next().getStatedAxioms();
+                    statedAxioms.addAll(importedStatedAxioms);
+                }
+            } catch (OWLOntologyCreationException e) {
+                throw new RuntimeException("Failed to process OWL axioms", e);
+            }
         }
 
         protected boolean isActive(final String active) {
@@ -1111,7 +1239,7 @@ public class RF2Importer extends BaseImporter {
 
         protected Concept resolveFiller(Concept value, String compId) {
             if (cdsMap.containsKey(compId)) {
-                final List<Concept> concepts = new ArrayList<Concept>();
+                final List<Concept> concepts = new ArrayList<>();
                 concepts.add(value);
                 for (String[] datatype : cdsMap.get(compId)) {
                     mapDatatype(concepts, datatype);
@@ -1164,7 +1292,7 @@ public class RF2Importer extends BaseImporter {
                 Map<String, List<String[]>> inactiveRels) {
             List<String[]> val = inactiveRels.get(src);
             if (val == null) {
-                val = new ArrayList<String[]>();
+                val = new ArrayList<>();
                 inactiveRels.put(src, val);
             }
             val.add(new String[] { comp, role, tgt, group });
@@ -1174,7 +1302,7 @@ public class RF2Importer extends BaseImporter {
                 Map<String, Set<String>> inactiveParents) {
             Set<String> prs = inactiveParents.get(src);
             if (prs == null) {
-                prs = new TreeSet<String>();
+                prs = new TreeSet<>();
                 inactiveParents.put(src, prs);
             }
             prs.add(tgt);
@@ -1184,7 +1312,7 @@ public class RF2Importer extends BaseImporter {
                 Map<String, Set<String>> inactiveChildren) {
             Set<String> prs = inactiveChildren.get(src);
             if (prs == null) {
-                prs = new TreeSet<String>();
+                prs = new TreeSet<>();
                 inactiveChildren.put(src, prs);
             }
             prs.add(tgt);
@@ -1219,7 +1347,7 @@ public class RF2Importer extends BaseImporter {
                 Map<String, Map<String, String>> inactiveRoles) {
             Map<String, String> vals = inactiveRoles.get(code);
             if (vals == null) {
-                vals = new HashMap<String, String>();
+                vals = new HashMap<>();
                 inactiveRoles.put(code, vals);
             }
             vals.put("rightID", rightId);

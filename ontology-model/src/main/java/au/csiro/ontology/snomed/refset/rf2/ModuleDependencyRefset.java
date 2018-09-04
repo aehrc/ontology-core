@@ -7,6 +7,7 @@ package au.csiro.ontology.snomed.refset.rf2;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -212,15 +213,31 @@ public class ModuleDependencyRefset extends Refset implements IModuleDependencyR
     }
 
     private ModuleDependency createDependency(M version, Map<M, Set<M>> index) {
+    	return createDependency(new HashSet<>(), version, index);
+    }
+
+    private ModuleDependency createDependency(Collection<ModuleDependency> all, M version, Map<M, Set<M>> index) {
         final ModuleDependency md = new ModuleDependency(version.module, version.time);
+        
+        if (all.contains(md)) {
+        	log.warn("Ignoring cyclic dependency for " + md);
+        	return null;
+        }
+        
+        all.add(md);
 
         Set<M> deps = index.get(version);
         if (deps != null) {
             for (M dep : deps) {
-                md.getDependencies().add(createDependency(dep, index));
+                final ModuleDependency childMd = createDependency(all, dep, index);
+                if (null != childMd) {
+                	md.getDependencies().add(childMd);
+                }
             }
         }
 
+        all.remove(md);
+        
         return md;
     }
 

@@ -87,11 +87,15 @@ public class RoleInclusion extends Axiom {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(lhs[0]);
-        for (int i = 1; i < lhs.length; i++) {
-            sb.append(" o ");
-            sb.append(lhs[i]);
+        final StringBuilder sb = new StringBuilder();
+        if (lhs.length > 0) {
+            sb.append(lhs[0]);
+            for (int i = 1; i < lhs.length; i++) {
+                sb.append(" o ");
+                sb.append(lhs[i]);
+            }
+        } else {
+            sb.append("\u03B5");
         }
         sb.append(" \u2291 ");
         sb.append(rhs);

@@ -9,46 +9,49 @@ import au.csiro.ontology.input.Inputs.ReleaseType;
 
 /**
  * An RF set of input files.
- * 
+ *
  * @author Alejandro Metke
  *
  */
 public class RF2Input extends Input {
     // Terminology files
-    protected Set<String> conceptsFiles = new HashSet<String>();
-    protected Set<String> descriptionsFiles = new HashSet<String>();
-    protected Set<String> identifiersFiles = new HashSet<String>();
-    protected Set<String> relationshipsFiles = new HashSet<String>();
-    protected Set<String> statedRelationshipsFiles = new HashSet<String>();
-    protected Set<String> textDefinitionsFiles = new HashSet<String>();
-    
+    protected Set<String> conceptsFiles = new HashSet<>();
+    protected Set<String> descriptionsFiles = new HashSet<>();
+    protected Set<String> identifiersFiles = new HashSet<>();
+    protected Set<String> relationshipsFiles = new HashSet<>();
+    protected Set<String> statedRelationshipsFiles = new HashSet<>();
+    protected Set<String> textDefinitionsFiles = new HashSet<>();
+    protected Set<String> owlOntologyRefsetFiles = new HashSet<>();
+    protected Set<String> owlAxiomRefsetFiles = new HashSet<>();
+
     // Reference set files
-    protected Set<String> refsetDescriptorRefsetFiles = new HashSet<String>();
-    protected Set<String> descriptionFormatRefsetFiles = new HashSet<String>();
-    protected Set<String> moduleDependenciesRefsetFiles = new HashSet<String>();
-    protected Set<String> languageRefsetFiles = new HashSet<String>();
-    protected Set<String> simpleRefsetFiles = new HashSet<String>();
-    protected Set<String> orderedRefsetFiles = new HashSet<String>();
-    protected Set<String> attributeValueRefsetFiles = new HashSet<String>();
-    protected Set<String> simpleMapRefsetFiles = new HashSet<String>();
-    protected Set<String> complexMapRefsetFiles = new HashSet<String>();
-    protected Set<String> querySpecificationRefsetFiles = new HashSet<String>();
-    protected Set<String> annotationRefsetFiles = new HashSet<String>();
-    protected Set<String> associationRefsetFiles = new HashSet<String>();
-    protected Set<String> concreteDomainRefsetFiles = new HashSet<String>();
-    
+    protected Set<String> refsetDescriptorRefsetFiles = new HashSet<>();
+    protected Set<String> descriptionFormatRefsetFiles = new HashSet<>();
+    protected Set<String> moduleDependenciesRefsetFiles = new HashSet<>();
+    protected Set<String> languageRefsetFiles = new HashSet<>();
+    protected Set<String> simpleRefsetFiles = new HashSet<>();
+    protected Set<String> orderedRefsetFiles = new HashSet<>();
+    protected Set<String> attributeValueRefsetFiles = new HashSet<>();
+    protected Set<String> simpleMapRefsetFiles = new HashSet<>();
+    protected Set<String> complexMapRefsetFiles = new HashSet<>();
+    protected Set<String> querySpecificationRefsetFiles = new HashSet<>();
+    protected Set<String> annotationRefsetFiles = new HashSet<>();
+    protected Set<String> associationRefsetFiles = new HashSet<>();
+    protected Set<String> concreteDomainRefsetFiles = new HashSet<>();
+    protected Set<String> attributeDomainRefsetFiles = new HashSet<>();
+
     // The type of release - full, snapshot or incremental
     protected ReleaseType releaseType;
-    
+
     // List of module information - indicates which modules should be
     // processed and includes the meta-data needed to do so
-    protected List<ModuleInfo> modules = new ArrayList<ModuleInfo>();
-    
+    protected List<ModuleInfo> modules = new ArrayList<>();
+
     /**
      * Constructor.
      */
     public RF2Input() {
-        
+
     }
 
     /**
@@ -136,7 +139,23 @@ public class RF2Input extends Input {
         this.textDefinitionsFiles = textDefinitionsFiles;
     }
 
-    /**
+    public Set<String> getOwlOntologyRefsetFiles() {
+		return owlOntologyRefsetFiles;
+	}
+
+	public void setOwlOntologyRefsetFiles(Set<String> owlOntologyRefsetFiles) {
+		this.owlOntologyRefsetFiles = owlOntologyRefsetFiles;
+	}
+
+	public Set<String> getOwlAxiomRefsetFiles() {
+		return owlAxiomRefsetFiles;
+	}
+
+	public void setOwlAxiomRefsetFiles(Set<String> owlAxiomRefsetFiles) {
+		this.owlAxiomRefsetFiles = owlAxiomRefsetFiles;
+	}
+
+	/**
      * @return the refsetDescriptorRefsetFiles
      */
     public Set<String> getRefsetDescriptorRefsetFiles() {
@@ -323,6 +342,20 @@ public class RF2Input extends Input {
     }
 
     /**
+     * @return the attributeDomainRefsetFiles
+     */
+    public Set<String> getAttributeDomainRefsetFiles() {
+        return attributeDomainRefsetFiles;
+    }
+
+    /**
+     * @param attributeDomainRefsetFiles the attributeDomainRefsetFiles to set
+     */
+    public void setAttributeDomainRefsetFiles(Set<String> attributeDomainRefsetFiles) {
+        this.attributeDomainRefsetFiles = attributeDomainRefsetFiles;
+    }
+
+    /**
      * @return the releaseType
      */
     public ReleaseType getReleaseType() {
@@ -349,5 +382,5 @@ public class RF2Input extends Input {
     public void setModules(List<ModuleInfo> modules) {
         this.modules = modules;
     }
-    
+
 }

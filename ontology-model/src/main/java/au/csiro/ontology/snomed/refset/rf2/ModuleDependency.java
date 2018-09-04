@@ -71,4 +71,13 @@ public class ModuleDependency {
         return id.equals(other.id) && version.equals(other.version);
     }
 
+    @Override
+    public String toString() {
+    	return "ModuleDependency[id="
+    			+ id
+    			+ ",version="
+    			+ version
+    			+ "]";
+    }
+    
 }

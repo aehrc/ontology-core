@@ -104,8 +104,8 @@ public class OWLImporter extends BaseImporter {
     public static final String THING_IRI = "http://www.w3.org/2002/07/owl#Thing";
     public static final String NOTHING_IRI = "http://www.w3.org/2002/07/owl#Nothing";
 
-    private final Set<OWLDataPropertyRangeAxiom> dprAxioms = new HashSet<OWLDataPropertyRangeAxiom>();
-    private final List<String> problems = new ArrayList<String>();
+    private final Set<OWLDataPropertyRangeAxiom> dprAxioms = new HashSet<>();
+    private final List<String> problems = new ArrayList<>();
 
     private OWLOntology ontology;
     private List<OWLAxiom> axioms;
@@ -230,7 +230,7 @@ public class OWLImporter extends BaseImporter {
 
     private List<Axiom> transformOWLEquivalentClassesAxiom(
             OWLEquivalentClassesAxiom a) {
-        List<Axiom> axioms = new ArrayList<Axiom>();
+        List<Axiom> axioms = new ArrayList<>();
         List<OWLClassExpression> exps = a.getClassExpressionsAsList();
 
         int size = exps.size();
@@ -257,7 +257,7 @@ public class OWLImporter extends BaseImporter {
     private Axiom transformOWLDisjointClassesAxiom(OWLDisjointClassesAxiom a) {
         try {
             List<OWLClassExpression> exps = a.getClassExpressionsAsList();
-            List<Concept> concepts = new ArrayList<Concept>();
+            List<Concept> concepts = new ArrayList<>();
             for (OWLClassExpression exp : exps) {
                 concepts.add(getConcept(exp));
             }
@@ -277,7 +277,7 @@ public class OWLImporter extends BaseImporter {
 
     private List<Axiom> transformOWLEquivalentObjectPropertiesAxiom(
             OWLEquivalentObjectPropertiesAxiom a) {
-        List<Axiom> axioms = new ArrayList<Axiom>();
+        List<Axiom> axioms = new ArrayList<>();
         for (OWLSubObjectPropertyOfAxiom ax : a.asSubObjectPropertyOfAxioms()) {
             OWLObjectPropertyExpression sub = ax.getSubProperty();
             OWLObjectPropertyExpression sup = ax.getSuperProperty();
@@ -292,7 +292,7 @@ public class OWLImporter extends BaseImporter {
 
     private Set<Axiom> transform(List<OWLAxiom> axioms, IProgressMonitor monitor) throws ImportException {
         monitor.taskStarted("Loading axioms");
-        final Set<Axiom> res = new HashSet<Axiom>();
+        final Set<Axiom> res = new HashSet<>();
         int totalAxioms = axioms.size();
         int workDone = 0;
 
@@ -455,7 +455,7 @@ public class OWLImporter extends BaseImporter {
      * @return
      */
     private Concept getConcept(OWLClassExpression desc) {
-        final Stack<Concept> stack = new Stack<Concept>();
+        final Stack<Concept> stack = new Stack<>();
         desc.accept(new OWLClassExpressionVisitor() {
 
             private void unimplemented(OWLClassExpression e) {
@@ -547,7 +547,7 @@ public class OWLImporter extends BaseImporter {
                     OWLDatatypeRestriction dtr = (OWLDatatypeRestriction)range;
                     Set<OWLFacetRestriction> frs = dtr.getFacetRestrictions();
 
-                    List<Datatype> conjuncts = new ArrayList<Datatype>();
+                    List<Datatype> conjuncts = new ArrayList<>();
                     for(OWLFacetRestriction fr : frs) {
                         OWLLiteral l = fr.getFacetValue();
 
@@ -664,7 +664,7 @@ public class OWLImporter extends BaseImporter {
 
             @Override
             public void visit(OWLObjectIntersectionOf e) {
-                List<Concept> items = new ArrayList<Concept>();
+                List<Concept> items = new ArrayList<>();
 
                 for (OWLClassExpression desc : e.getOperands()) {
                     desc.accept(this);
