@@ -1189,8 +1189,6 @@ public class RF2Importer extends BaseImporter {
             final String input =
             		namespaceStr +
             		"\nOntology(\n  " + axiomStr + "\n)";
-            System.err.println(input);
-            System.err.flush();
 
             final OWLOntologyDocumentSource source = new ReaderDocumentSource(new StringReader(input), IRI.generateDocumentIRI(), FUNCTIONAL_SYNTAX_DOCUMENT_FORMAT, null);
             final OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
