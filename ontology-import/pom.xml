@@ -11,7 +11,7 @@
   <parent>
     <groupId>au.csiro</groupId>
     <artifactId>ontology-parent</artifactId>
-    <version>3.1.1</version>
+    <version>3.1.2</version>
     <relativePath>..</relativePath>
   </parent>
 
@@ -21,20 +21,22 @@
       <artifactId>ontology-model</artifactId>
       <version>${project.version}</version>
     </dependency>
+<!--
     <dependency>
-      <groupId>com.sun.xml.bind</groupId>
+      <groupId></groupId>
       <artifactId>jaxb-core</artifactId>
       <version>2.2.7-b58</version>
     </dependency>      
-	<dependency>
+-->
+    <dependency>
       <groupId>net.sourceforge.owlapi</groupId>
       <artifactId>owlapi-api</artifactId>
-      <version>[4.3.1,4.4)</version>
+      <version>[4.3.1,4.6)</version>
     </dependency>
     <dependency>
       <groupId>net.sourceforge.owlapi</groupId>
       <artifactId>owlapi-apibinding</artifactId>
-      <version>[4.3.1,4.4)</version>
+      <version>[4.3.1,4.6)</version>
     </dependency>
   </dependencies>
   
