@@ -17,11 +17,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import au.csiro.ontology.input.StructuredLog;
 
 /**
  * This class represents a module dependency reference set.
@@ -112,6 +113,7 @@ public class ModuleDependencyRefset extends Refset implements IModuleDependencyR
      * </ul>
      * <li>Compute the completion (transitive closure) of the dependency relationship
      * </ul>
+     * @param report
      *
      * @param members
      */
@@ -126,14 +128,11 @@ public class ModuleDependencyRefset extends Refset implements IModuleDependencyR
             final M version = new M(member.getModuleId(), member.getSourceEffectiveTime());
             final M requiredModule = new M(member.getReferencedComponentId(), member.getTargetEffectiveTime());
             if (!member.isActive()) {
-                final String message = "Inactive dependency: " + version + " to\t" + requiredModule;
-                log.info(message);
+                StructuredLog.InactiveDependency.info(log, version, requiredModule);
                 continue;
             }
             if (member.isMalformed()) {
-                final String message = "Ignoring malformed MDRS entry: " + version + " to\t" + requiredModule;
-                problems.add(message);
-                log.warn(message);
+                problems.add(StructuredLog.MalformedMDRSEntry.warn(member, log, version, requiredModule));
                 continue;
             }
 
@@ -184,7 +183,7 @@ public class ModuleDependencyRefset extends Refset implements IModuleDependencyR
      * @param index
      */
     private static void tc(Map<M, Set<M>> index) {
-        final SortedSet<String> warnings = new TreeSet<String>();
+        final Map<String, Object[]> warnings = new HashMap<>();
 
         for (Entry<M, Set<M>> entry: index.entrySet()) {
             final M src = entry.getKey();
@@ -201,14 +200,14 @@ public class ModuleDependencyRefset extends Refset implements IModuleDependencyR
                     if (!dependents.contains(addition)) {
                         dependents.add(addition);
                         queue.add(addition);
-                        warnings.add("Added implied transitive dependency from " + src + " to " + addition + " via " + key);
+                        warnings.put(src + "|" + addition + "|" + key, new Object[] {src, addition, key});
                     }
                 }
             }
         }
 
-        for (final String warning: warnings) {
-            log.warn(warning);
+        for (final Object[] args: warnings.values()) {
+            StructuredLog.ImpliedTransitiveDependency.warn(log, args);
         }
     }
 
@@ -218,12 +217,12 @@ public class ModuleDependencyRefset extends Refset implements IModuleDependencyR
 
     private ModuleDependency createDependency(Collection<ModuleDependency> all, M version, Map<M, Set<M>> index) {
         final ModuleDependency md = new ModuleDependency(version.module, version.time);
-        
+
         if (all.contains(md)) {
-        	log.warn("Ignoring cyclic dependency for " + md);
-        	return null;
+            StructuredLog.CyclicDependency.warn(md, log);
+            return null;
         }
-        
+
         all.add(md);
 
         Set<M> deps = index.get(version);
@@ -231,13 +230,13 @@ public class ModuleDependencyRefset extends Refset implements IModuleDependencyR
             for (M dep : deps) {
                 final ModuleDependency childMd = createDependency(all, dep, index);
                 if (null != childMd) {
-                	md.getDependencies().add(childMd);
+                    md.getDependencies().add(childMd);
                 }
             }
         }
 
         all.remove(md);
-        
+
         return md;
     }
 
@@ -255,8 +254,7 @@ public class ModuleDependencyRefset extends Refset implements IModuleDependencyR
             try {
                 return sdf.parse(time);
             } catch (ParseException e2) {
-                final String message = "Could not parse effectiveTime: " + time;
-                log.error(message, e2);
+                final String message = StructuredLog.InvalidEffectiveTime.error(log, time, e1.getMessage(), e2.getMessage());
                 throw new RuntimeException(message, e2);
             }
         }
