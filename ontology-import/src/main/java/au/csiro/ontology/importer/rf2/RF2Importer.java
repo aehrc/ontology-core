@@ -300,28 +300,6 @@ public class RF2Importer extends BaseImporter {
             }
         }
 
-        // Load relationships
-        Set<String> relationshipsFiles = input.getStatedRelationshipsFiles();
-        if(relationshipsFiles == null || relationshipsFiles.isEmpty()) {
-            relationshipsFiles = input.getRelationshipsFiles();
-            log.info("Reading inferred relationships info: " + relationshipsFiles.size());
-        } else {
-            log.info("Reading stated relationships info: " + relationshipsFiles.size());
-        }
-
-        if(relationshipsFiles == null || relationshipsFiles.isEmpty()) {
-            throw new ImportException("No relationships files was specified.");
-        }
-
-        for(String relationshipsFile : relationshipsFiles) {
-            try {
-                loadRelationshipRows(modMap, relationshipMap, input.getInputStream(relationshipsFile));
-            } catch (NullPointerException | IOException e) {
-                final String message = ModelMessage.FileLoadFailure.error(log, "relationships", inputType, relationshipsFile, e);
-                throw new ImportException(message, e);
-            }
-        }
-
         // Load concrete domains refsets
         final Set<String> concreteDomainRefsetFiles = input.getConcreteDomainRefsetFiles();
         log.info("Reading concrete domains reference set info: " + concreteDomainRefsetFiles.size());
@@ -347,6 +325,19 @@ public class RF2Importer extends BaseImporter {
         }
 
         // Load OWL reference sets
+        final Set<String> owlAxiomRefsetFiles = input.getOwlAxiomRefsetFiles();
+        log.info("Reading OWL Axiom reference set info: " + owlAxiomRefsetFiles.size());
+        for (String filename : owlAxiomRefsetFiles) {
+            try {
+                loadReferenceSet(input, filename, modMap, owlMap, IRefsetFactory.OWL);
+            } catch (ArrayIndexOutOfBoundsException e) {
+                final String msg = ModelMessage.RefsetLoadFailure.error(log, "OWL Axiom", filename, e);
+                log.error(msg, e);
+                throw new ImportException(msg, e);
+            }
+        }
+        boolean hasAxioms = !owlMap.isEmpty();
+
         final Set<String> owlOntologyRefsetFiles = input.getOwlOntologyRefsetFiles();
         log.info("Reading OWL Ontology reference set info: " + owlOntologyRefsetFiles.size());
         for (String filename : owlOntologyRefsetFiles) {
@@ -357,15 +348,30 @@ public class RF2Importer extends BaseImporter {
                 throw new ImportException(msg, e);
             }
         }
-        final Set<String> owlAxiomRefsetFiles = input.getOwlAxiomRefsetFiles();
-        log.info("Reading OWL Axiom reference set info: " + owlAxiomRefsetFiles.size());
-        for (String filename : owlAxiomRefsetFiles) {
+
+        // Load relationships
+        Set<String> relationshipsFiles = input.getStatedRelationshipsFiles();
+        if (relationshipsFiles == null || relationshipsFiles.isEmpty()) {
+            if (!hasAxioms) {
+                // FIXME - MUST not do this if we have loaded OWL Axioms !
+                relationshipsFiles = input.getRelationshipsFiles();
+                ModelMessage.UsingInferredRelationships.warn(log);
+            }
+            log.info("Reading inferred relationships info: " + relationshipsFiles.size());
+        } else {
+            log.info("Reading stated relationships info: " + relationshipsFiles.size());
+        }
+
+        if(relationshipsFiles == null || relationshipsFiles.isEmpty()) {
+            throw new ImportException("No relationships files was specified.");
+        }
+
+        for(String relationshipsFile : relationshipsFiles) {
             try {
-                loadReferenceSet(input, filename, modMap, owlMap, IRefsetFactory.OWL);
-            } catch (ArrayIndexOutOfBoundsException e) {
-                final String msg = ModelMessage.RefsetLoadFailure.error(log, "OWL Axiom", filename, e);
-                log.error(msg, e);
-                throw new ImportException(msg, e);
+                loadRelationshipRows(modMap, relationshipMap, input.getInputStream(relationshipsFile));
+            } catch (NullPointerException | IOException e) {
+                final String message = ModelMessage.FileLoadFailure.error(log, "relationships", inputType, relationshipsFile, e);
+                throw new ImportException(message, e);
             }
         }
 
