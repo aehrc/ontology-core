@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import au.csiro.ontology.input.MapView;
-import au.csiro.ontology.input.ModelMessage;
+import au.csiro.ontology.input.StructuredLog;
 
 /**
  * Contains information about modules and their dependencies.
@@ -78,7 +78,7 @@ public class ModuleDependency implements MapView {
 
     @Override
     public String toString() {
-        return ModelMessage.renderMap(toMap());
+        return StructuredLog.renderMap(toMap());
     }
 
     @Override

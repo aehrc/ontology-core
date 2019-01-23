@@ -22,7 +22,7 @@ import java.util.TreeSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import au.csiro.ontology.input.ModelMessage;
+import au.csiro.ontology.input.StructuredLog;
 
 /**
  * This class represents a module dependency reference set.
@@ -128,11 +128,11 @@ public class ModuleDependencyRefset extends Refset implements IModuleDependencyR
             final M version = new M(member.getModuleId(), member.getSourceEffectiveTime());
             final M requiredModule = new M(member.getReferencedComponentId(), member.getTargetEffectiveTime());
             if (!member.isActive()) {
-                ModelMessage.InactiveDependency.info(log, version, requiredModule);
+                StructuredLog.InactiveDependency.info(log, version, requiredModule);
                 continue;
             }
             if (member.isMalformed()) {
-                problems.add(ModelMessage.MalformedMDRSEntry.warn(member, log, version, requiredModule));
+                problems.add(StructuredLog.MalformedMDRSEntry.warn(member, log, version, requiredModule));
                 continue;
             }
 
@@ -207,7 +207,7 @@ public class ModuleDependencyRefset extends Refset implements IModuleDependencyR
         }
 
         for (final Object[] args: warnings.values()) {
-            ModelMessage.ImpliedTransitiveDependency.warn(log, args);
+            StructuredLog.ImpliedTransitiveDependency.warn(log, args);
         }
     }
 
@@ -219,7 +219,7 @@ public class ModuleDependencyRefset extends Refset implements IModuleDependencyR
         final ModuleDependency md = new ModuleDependency(version.module, version.time);
 
         if (all.contains(md)) {
-            ModelMessage.CyclicDependency.warn(md, log);
+            StructuredLog.CyclicDependency.warn(md, log);
             return null;
         }
 
@@ -254,7 +254,7 @@ public class ModuleDependencyRefset extends Refset implements IModuleDependencyR
             try {
                 return sdf.parse(time);
             } catch (ParseException e2) {
-                final String message = ModelMessage.InvalidEffectiveTime.error(log, time, e1.getMessage(), e2.getMessage());
+                final String message = StructuredLog.InvalidEffectiveTime.error(log, time, e1.getMessage(), e2.getMessage());
                 throw new RuntimeException(message, e2);
             }
         }

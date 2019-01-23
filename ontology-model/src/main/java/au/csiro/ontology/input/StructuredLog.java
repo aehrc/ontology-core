@@ -3,10 +3,11 @@ package au.csiro.ontology.input;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 
-public enum ModelMessage {
+public enum StructuredLog {
     GenericException(null, "message", "exception"),
 
     OntologyGeneration("Building ontology", "id", "version"),
@@ -55,10 +56,12 @@ public enum ModelMessage {
 
     final private static String PREFIX = "json: ";
 
+    final private ThreadLocal<UUID> uuid = ThreadLocal.withInitial(() -> UUID.randomUUID());
+
     final private String format;
     final private String[] keys;
 
-    private ModelMessage(String format, String... keys) {
+    private StructuredLog(String format, String... keys) {
         this.format = format;
         this.keys = keys;
     }
@@ -109,11 +112,16 @@ public enum ModelMessage {
         return buildMap(log, obj.toMap(), args);
     }
 
+    public void reset() {
+        uuid.set(UUID.randomUUID());
+    }
+
     private Map<String, Object> buildMap(Logger log, Map<String, Object> map, Object... args) {
         final String message = format == null ? null : String.format(format, args);
         if (null == map) {
             map = new HashMap<>();
         }
+        map.put("uuid", uuid.get());
         if (null != keys) {
             for (int i = 0; i < keys.length; i++) {
                 map.put(keys[i], args[i]);

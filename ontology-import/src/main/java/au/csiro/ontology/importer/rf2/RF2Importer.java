@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +47,7 @@ import au.csiro.ontology.importer.owl.OWLImporter;
 import au.csiro.ontology.input.Input;
 import au.csiro.ontology.input.Input.InputType;
 import au.csiro.ontology.input.Inputs;
-import au.csiro.ontology.input.ModelMessage;
+import au.csiro.ontology.input.StructuredLog;
 import au.csiro.ontology.input.ModuleInfo;
 import au.csiro.ontology.input.RF2Input;
 import au.csiro.ontology.input.Version;
@@ -141,7 +142,7 @@ public class RF2Importer extends BaseImporter {
             try {
                 iss.add(input.getInputStream(md));
             } catch (NullPointerException | IOException e) {
-                final String message = ModelMessage.ModuleLoadFailure.error(log, inputType, md, e);
+                final String message = StructuredLog.ModuleLoadFailure.error(log, inputType, md, e);
                 throw new ImportException(message, e);
             }
         }
@@ -244,11 +245,11 @@ public class RF2Importer extends BaseImporter {
             }
         } catch (Throwable t) {
             log.error(t.getMessage());
-            final String message = ModelMessage.FileLoadFailure.error(log, "referenceSet", input.getInputType(), refsetFile, t);
+            final String message = StructuredLog.FileLoadFailure.error(log, "referenceSet", input.getInputType(), refsetFile, t);
             throw new ImportException(message, t);
         } finally {
             for (String moduleId : unknownModules) {
-                ModelMessage.IgnoredModules.info(log, moduleId, refsetFile);
+                StructuredLog.IgnoredModules.info(log, moduleId, refsetFile);
             }
         }
     }
@@ -295,7 +296,7 @@ public class RF2Importer extends BaseImporter {
             try {
                 loadConceptRows(modMap, conceptMap, input.getInputStream(conceptsFile));
             } catch (NullPointerException | IOException e) {
-                final String message = ModelMessage.FileLoadFailure.error(log, "concepts", inputType, conceptsFile, e);
+                final String message = StructuredLog.FileLoadFailure.error(log, "concepts", inputType, conceptsFile, e);
                 throw new ImportException(message, e);
             }
         }
@@ -307,7 +308,7 @@ public class RF2Importer extends BaseImporter {
             try {
                 loadReferenceSet(input, filename, modMap, cdMap, IRefsetFactory.CD);
             } catch (ArrayIndexOutOfBoundsException e) {
-                final String msg = ModelMessage.RefsetLoadFailure.error(log, "concrete domains", filename, e);
+                final String msg = StructuredLog.RefsetLoadFailure.error(log, "concrete domains", filename, e);
                 throw new ImportException(msg, e);
             }
         }
@@ -319,7 +320,7 @@ public class RF2Importer extends BaseImporter {
             try {
                 loadReferenceSet(input, filename, modMap, adMap, IRefsetFactory.AD);
             } catch (ArrayIndexOutOfBoundsException e) {
-                final String msg = ModelMessage.RefsetLoadFailure.error(log, "attribute domains", filename, e);
+                final String msg = StructuredLog.RefsetLoadFailure.error(log, "attribute domains", filename, e);
                 throw new ImportException(msg, e);
             }
         }
@@ -331,7 +332,7 @@ public class RF2Importer extends BaseImporter {
             try {
                 loadReferenceSet(input, filename, modMap, owlMap, IRefsetFactory.OWL);
             } catch (ArrayIndexOutOfBoundsException e) {
-                final String msg = ModelMessage.RefsetLoadFailure.error(log, "OWL Axiom", filename, e);
+                final String msg = StructuredLog.RefsetLoadFailure.error(log, "OWL Axiom", filename, e);
                 log.error(msg, e);
                 throw new ImportException(msg, e);
             }
@@ -344,7 +345,7 @@ public class RF2Importer extends BaseImporter {
             try {
                 loadReferenceSet(input, filename, modMap, owlMap, IRefsetFactory.OWL);
             } catch (ArrayIndexOutOfBoundsException e) {
-                final String msg = ModelMessage.RefsetLoadFailure.error(log, "OWL Ontology", filename, e);
+                final String msg = StructuredLog.RefsetLoadFailure.error(log, "OWL Ontology", filename, e);
                 throw new ImportException(msg, e);
             }
         }
@@ -355,14 +356,14 @@ public class RF2Importer extends BaseImporter {
             if (!hasAxioms) {
                 // FIXME - MUST not do this if we have loaded OWL Axioms !
                 relationshipsFiles = input.getRelationshipsFiles();
-                ModelMessage.UsingInferredRelationships.warn(log);
+                StructuredLog.UsingInferredRelationships.warn(log);
             }
             log.info("Reading inferred relationships info: " + relationshipsFiles.size());
         } else {
             log.info("Reading stated relationships info: " + relationshipsFiles.size());
         }
 
-        if(relationshipsFiles == null || relationshipsFiles.isEmpty()) {
+        if(!hasAxioms && (relationshipsFiles == null || relationshipsFiles.isEmpty())) {
             throw new ImportException("No relationships files was specified.");
         }
 
@@ -370,7 +371,7 @@ public class RF2Importer extends BaseImporter {
             try {
                 loadRelationshipRows(modMap, relationshipMap, input.getInputStream(relationshipsFile));
             } catch (NullPointerException | IOException e) {
-                final String message = ModelMessage.FileLoadFailure.error(log, "relationships", inputType, relationshipsFile, e);
+                final String message = StructuredLog.FileLoadFailure.error(log, "relationships", inputType, relationshipsFile, e);
                 throw new ImportException(message, e);
             }
         }
@@ -799,11 +800,11 @@ public class RF2Importer extends BaseImporter {
                 String ontologyId = entry.getRootModuleId();
                 String ontologyVersion = entry.getRootModuleVersion();
 
-                ModelMessage.OntologyGeneration.info(log, ontologyId, ontologyVersion);
+                StructuredLog.OntologyGeneration.info(log, ontologyId, ontologyVersion);
                 OntologyBuilder builder = getOntologyBuilder(bundle, ontologyId, ontologyVersion, entry.getMetadata());
                 return builder.build(monitor);
             } catch (ImportException | URISyntaxException e) {
-                ModelMessage.GenericException.error(log, e.getMessage(), e);
+                StructuredLog.GenericException.error(log, e.getMessage(), e);
                 throw new RuntimeException(e);
             }
         }
@@ -881,28 +882,28 @@ public class RF2Importer extends BaseImporter {
             unitRoleId = metadata.get("unitRoleId");
 
             if (conceptDefinedId == null) {
-                ModelMessage.MissingMetadata.warn(log, "conceptDefinedId");
+                StructuredLog.MissingMetadata.warn(log, "conceptDefinedId");
             }
 
             if (someId == null) {
-                ModelMessage.MissingMetadata.warn(log, "someId");
+                StructuredLog.MissingMetadata.warn(log, "someId");
             }
 
             if (isAId == null) {
-                ModelMessage.MissingMetadata.warn(log, "isAId");
+                StructuredLog.MissingMetadata.warn(log, "isAId");
             }
 
             if (lateralityId == null) {
-                ModelMessage.MissingMetadata.warn(log, "conceptDefinedId");
+                StructuredLog.MissingMetadata.warn(log, "conceptDefinedId");
                 lateralityId = "";
             }
 
             if (conceptModelAttId == null) {
-                ModelMessage.MissingMetadata.warn(log, "conceptModelAttId");
+                StructuredLog.MissingMetadata.warn(log, "conceptModelAttId");
             }
 
             if (neverGroupedIdsString == null && vr.getAttributeDomainRows().isEmpty()) {
-                ModelMessage.MissingMetadata.warn(log, "neverGroupedIds");
+                StructuredLog.MissingMetadata.warn(log, "neverGroupedIds");
             }
             initDefaultNeverGroupedIds();
             for (RefsetRow row: vr.getAttributeDomainRows()) {
@@ -915,36 +916,36 @@ public class RF2Importer extends BaseImporter {
             }
 
             if (fsnId == null) {
-                ModelMessage.MissingMetadata.warn(log, "fsnId");
+                StructuredLog.MissingMetadata.warn(log, "fsnId");
             }
 
             if (synonymId == null) {
-                ModelMessage.MissingMetadata.warn(log, "synonymId");
+                StructuredLog.MissingMetadata.warn(log, "synonymId");
             }
 
             if (definitionId == null) {
-                ModelMessage.MissingMetadata.warn(log, "definitionId");
+                StructuredLog.MissingMetadata.warn(log, "definitionId");
             }
 
             if (rightIdentityIds == null) {
-                ModelMessage.MissingMetadata.warn(log, "rightIdentityIds");
+                StructuredLog.MissingMetadata.warn(log, "rightIdentityIds");
             }
 
             if (roleGroupId == null) {
-                ModelMessage.MissingMetadata.warn(log, "roleGroupId");
+                StructuredLog.MissingMetadata.warn(log, "roleGroupId");
             }
 
             if (measurementTypeFloat == null) {
-                ModelMessage.MissingMetadata.warn(log, "floatTypeId");
+                StructuredLog.MissingMetadata.warn(log, "floatTypeId");
             }
             if (measurementTypeInt == null) {
-                ModelMessage.MissingMetadata.warn(log, "intTypeId");
+                StructuredLog.MissingMetadata.warn(log, "intTypeId");
             }
             if (equalsOperatorId == null) {
-                ModelMessage.MissingMetadata.warn(log, "equalsOperatorId");
+                StructuredLog.MissingMetadata.warn(log, "equalsOperatorId");
             }
             if (unitRoleId == null) {
-                ModelMessage.MissingMetadata.warn(log, "unitRoleId");
+                StructuredLog.MissingMetadata.warn(log, "unitRoleId");
             }
         }
 
@@ -1000,7 +1001,8 @@ public class RF2Importer extends BaseImporter {
             }
 
             log.info("Processing " + vr.getConcreteDomainRows().size() + " concrete domain rows");
-            Set<String> untypedFeatures = new HashSet<>();
+            final Set<String> untypedFeatures = new LinkedHashSet<>();
+            final Set<String> missingRefsets = new LinkedHashSet<>();
 
             for (RefsetRow rr : vr.getConcreteDomainRows()) {
                 if (isActive(rr.getActive())) {
@@ -1013,7 +1015,7 @@ public class RF2Importer extends BaseImporter {
                             extras[0]);
                     Set<String> allParents = parents.get(rr.getRefsetId());
                     if (allParents == null) {
-                        ModelMessage.MissingRefsetId.error(log, rr.getRefsetId());
+                        missingRefsets.add(rr.getRefsetId());
                         continue;
                     }
                     if (allParents.contains(measurementTypeFloat)) {
@@ -1026,8 +1028,11 @@ public class RF2Importer extends BaseImporter {
                 }
             }
 
+            for (String refsetId : missingRefsets) {
+                StructuredLog.MissingRefsetId.error(log, refsetId);
+            }
             for (String refsetId : untypedFeatures) {
-                ModelMessage.UntypedConcreteDomainRefsetId.error(log, refsetId);
+                StructuredLog.UntypedConcreteDomainRefsetId.error(log, refsetId);
             }
 
             log.info("Creating role axioms");
@@ -1066,7 +1071,7 @@ public class RF2Importer extends BaseImporter {
                 int numElems = numParents + numRels + numCds;
 
                 if (numParents == 0 && numElems > 0) {
-                    ModelMessage.DefinedWithoutParents.warn(log, c1);
+                    StructuredLog.DefinedWithoutParents.warn(log, c1);
                 }
 
                 if (numElems == 0) {
@@ -1139,10 +1144,10 @@ public class RF2Importer extends BaseImporter {
                                 namespace.add("Prefix(:=<>)");
                             }
                         } else if (!"734147008".equals(row.getReferencedComponentId())) {
-                            ModelMessage.OWLUnknownReferencedComponent.error(row, log, row.getReferencedComponentId());
+                            StructuredLog.OWLUnknownReferencedComponent.error(row, log, row.getReferencedComponentId());
                         }
                     } else {
-                        ModelMessage.OWLUnknownRefset.error(row, log, row.getRefsetId());
+                        StructuredLog.OWLUnknownRefset.error(row, log, row.getRefsetId());
                     }
                 }
             }
@@ -1220,7 +1225,7 @@ public class RF2Importer extends BaseImporter {
             NamedFeature feature = getFeature(datatype[0], fi);
             String type = featureType.get(datatype[0]);
             if(type == null) {
-                ModelMessage.UndeclaredFeature.error(log, datatype[0]);
+                StructuredLog.UndeclaredFeature.error(log, datatype[0]);
                 return;
             }
 
@@ -1233,7 +1238,7 @@ public class RF2Importer extends BaseImporter {
             } else if (type.equals("float")) {
                 value = new DecimalLiteral(new BigDecimal(datatype[2]));
             } else {
-                ModelMessage.UnknownConcreteDomainType.error(log, type);
+                StructuredLog.UnknownConcreteDomainType.error(log, type);
                 return;
             }
 
@@ -1244,7 +1249,7 @@ public class RF2Importer extends BaseImporter {
 
                 conjs.add(new Existential(getRole(roleGroupId, ri), new Conjunction(concepts)));
             } else {
-                ModelMessage.UnknownConcreteDomainOperator.error(log, operatorId);
+                StructuredLog.UnknownConcreteDomainOperator.error(log, operatorId);
             }
         }
 

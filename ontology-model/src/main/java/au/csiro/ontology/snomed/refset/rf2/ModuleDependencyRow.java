@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import au.csiro.ontology.input.MapView;
-import au.csiro.ontology.input.ModelMessage;
+import au.csiro.ontology.input.StructuredLog;
 
 /**
  * Simple implementation of a module dependency refset member.
@@ -59,19 +59,19 @@ public class ModuleDependencyRow implements MapView {
         if (active) {
             if (!refsetId.equals("900000000000534007")) {
                 malformed = true;
-                ModelMessage.RefsetIdMismatch.error(toMap(), log);
+                StructuredLog.RefsetIdMismatch.error(toMap(), log);
             }
             if (!effectiveTime.equals(sourceEffectiveTime)) {
                 malformed = true;
-                ModelMessage.TimesMismatch.error(toMap(), log);
+                StructuredLog.TimesMismatch.error(toMap(), log);
             }
             if (ModuleDependencyRefset.parseTime(effectiveTime).compareTo(ModuleDependencyRefset.parseTime(sourceEffectiveTime)) < 0) {
                 malformed = true;
-                ModelMessage.EffectgiveTimeOrderMismatch.error(toMap(), log);
+                StructuredLog.EffectgiveTimeOrderMismatch.error(toMap(), log);
             }
             if (ModuleDependencyRefset.parseTime(sourceEffectiveTime).compareTo(ModuleDependencyRefset.parseTime(targetEffectiveTime)) < 0) {
                 malformed = true;
-                ModelMessage.SourceTimeMismatch.error(toMap(), log);
+                StructuredLog.SourceTimeMismatch.error(toMap(), log);
             }
         }
     }
@@ -231,7 +231,7 @@ public class ModuleDependencyRow implements MapView {
 
     @Override
     public String toString() {
-        return ModelMessage.renderMap(toMap());
+        return StructuredLog.renderMap(toMap());
     }
 
 }
