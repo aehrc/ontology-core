@@ -4,8 +4,14 @@
  */
 package au.csiro.ontology.snomed.refset.rf2;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import au.csiro.ontology.input.MapView;
+import au.csiro.ontology.input.ModelMessage;
 
 /**
  * Simple implementation of a module dependency refset member.
@@ -13,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * @author Alejandro Metke
  *
  */
-public class ModuleDependencyRow {
+public class ModuleDependencyRow implements MapView {
 
     final static private Logger log = LoggerFactory.getLogger(ModuleDependencyRow.class);
 
@@ -53,21 +59,38 @@ public class ModuleDependencyRow {
         if (active) {
             if (!refsetId.equals("900000000000534007")) {
                 malformed = true;
-                log.error("refsetId does not match that for the MDRS (900000000000534007): " + this);
+                ModelMessage.RefsetIdMismatch.error(toMap(), log);
             }
             if (!effectiveTime.equals(sourceEffectiveTime)) {
                 malformed = true;
-                log.error("effectiveTime and sourceEffectiveTime must be equal: " + this);
+                ModelMessage.TimesMismatch.error(toMap(), log);
             }
             if (ModuleDependencyRefset.parseTime(effectiveTime).compareTo(ModuleDependencyRefset.parseTime(sourceEffectiveTime)) < 0) {
                 malformed = true;
-                log.error("effectiveTime cannot be earlier than sourceEffectiveTime: " + this);
+                ModelMessage.EffectgiveTimeOrderMismatch.error(toMap(), log);
             }
             if (ModuleDependencyRefset.parseTime(sourceEffectiveTime).compareTo(ModuleDependencyRefset.parseTime(targetEffectiveTime)) < 0) {
                 malformed = true;
-                log.error("sourceEffectiveTime cannot be earlier than targetEffectiveTime: " + this);
+                ModelMessage.SourceTimeMismatch.error(toMap(), log);
             }
         }
+    }
+
+    @Override
+    public Map<String, Object> toMap() {
+        final Map<String, Object> map = new HashMap<>();
+
+        map.put("type", "ModuleDependencyRow");
+        map.put("id", id);
+        map.put("effectiveTime", effectiveTime);
+        map.put("active", active);
+        map.put("moduleId", moduleId);
+        map.put("refsetId", refsetId);
+        map.put("referencedComponentId", referencedComponentId);
+        map.put("sourceEffectiveTime", sourceEffectiveTime);
+        map.put("targetEffectiveTime", targetEffectiveTime);
+
+        return map;
     }
 
     boolean isMalformed() {
@@ -208,10 +231,7 @@ public class ModuleDependencyRow {
 
     @Override
     public String toString() {
-        return "ModuleDependencyRow [id=" + id + ", effectiveTime=" + effectiveTime + ", active=" + active
-                + ", moduleId=" + moduleId + ", refsetId=" + refsetId + ", referencedComponentId="
-                + referencedComponentId + ", sourceEffectiveTime=" + sourceEffectiveTime + ", targetEffectiveTime="
-                + targetEffectiveTime + "]";
+        return ModelMessage.renderMap(toMap());
     }
 
 }

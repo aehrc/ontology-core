@@ -46,6 +46,7 @@ import au.csiro.ontology.importer.owl.OWLImporter;
 import au.csiro.ontology.input.Input;
 import au.csiro.ontology.input.Input.InputType;
 import au.csiro.ontology.input.Inputs;
+import au.csiro.ontology.input.ModelMessage;
 import au.csiro.ontology.input.ModuleInfo;
 import au.csiro.ontology.input.RF2Input;
 import au.csiro.ontology.input.Version;
@@ -137,16 +138,10 @@ public class RF2Importer extends BaseImporter {
         Set<InputStream> iss = new HashSet<>();
         InputType inputType = input.getInputType();
         for(String md : input.getModuleDependenciesRefsetFiles()) {
-            final String message = "Unable to load module " +
-                    "dependencias. Please check your input configuration " +
-                    "file. (input type = "+inputType+", file="+md+")";
             try {
                 iss.add(input.getInputStream(md));
-            } catch (NullPointerException e) {
-                log.error(message, e);
-                throw new ImportException(message, e);
-            } catch (IOException e) {
-                log.error(message, e);
+            } catch (NullPointerException | IOException e) {
+                final String message = ModelMessage.ModuleLoadFailure.error(log, inputType, md, e);
                 throw new ImportException(message, e);
             }
         }
@@ -249,11 +244,11 @@ public class RF2Importer extends BaseImporter {
             }
         } catch (Throwable t) {
             log.error(t.getMessage());
-            throw new ImportException("Unable to load reference set file. Please check your input configuration file " +
-                    "(input type = " + input.getInputType() + ", file=" + refsetFile + ")", t);
+            final String message = ModelMessage.FileLoadFailure.error(log, "referenceSet", input.getInputType(), refsetFile, t);
+            throw new ImportException(message, t);
         } finally {
             for (String moduleId : unknownModules) {
-                log.info("Refset: Ignored data from module '" + moduleId + "' found in " + refsetFile);
+                ModelMessage.IgnoredModules.info(log, moduleId, refsetFile);
             }
         }
     }
@@ -297,16 +292,10 @@ public class RF2Importer extends BaseImporter {
         Set<String> conceptsFiles = input.getConceptsFiles();
         log.info("Reading concepts info: " + conceptsFiles.size());
         for(String conceptsFile : conceptsFiles) {
-            final String message = "Unable to load concepts file. " +
-                    "Please check your input configuration file. " +
-                    "(input type = "+inputType+", file="+conceptsFile+")";
             try {
                 loadConceptRows(modMap, conceptMap, input.getInputStream(conceptsFile));
-            } catch (NullPointerException e) {
-                log.error(message, e);
-                throw new ImportException(message, e);
-            } catch (IOException e) {
-                log.error(message, e);
+            } catch (NullPointerException | IOException e) {
+                final String message = ModelMessage.FileLoadFailure.error(log, "concepts", inputType, conceptsFile, e);
                 throw new ImportException(message, e);
             }
         }
@@ -325,15 +314,10 @@ public class RF2Importer extends BaseImporter {
         }
 
         for(String relationshipsFile : relationshipsFiles) {
-            final String message = "Unable to load relationships file. Please check your input configuration " +
-                    "file. (input type = " + inputType+", file=" + relationshipsFile+")";
             try {
                 loadRelationshipRows(modMap, relationshipMap, input.getInputStream(relationshipsFile));
-            } catch (NullPointerException e) {
-                log.error(message, e);
-                throw new ImportException(message, e);
-            } catch (IOException e) {
-                log.error(message, e);
+            } catch (NullPointerException | IOException e) {
+                final String message = ModelMessage.FileLoadFailure.error(log, "relationships", inputType, relationshipsFile, e);
                 throw new ImportException(message, e);
             }
         }
@@ -345,9 +329,7 @@ public class RF2Importer extends BaseImporter {
             try {
                 loadReferenceSet(input, filename, modMap, cdMap, IRefsetFactory.CD);
             } catch (ArrayIndexOutOfBoundsException e) {
-                final String msg = "Error loading concrete domains reference set: " + filename +
-                        ". Possibly has wrong number of columns.";
-                log.error(msg, e);
+                final String msg = ModelMessage.RefsetLoadFailure.error(log, "concrete domains", filename, e);
                 throw new ImportException(msg, e);
             }
         }
@@ -359,9 +341,7 @@ public class RF2Importer extends BaseImporter {
             try {
                 loadReferenceSet(input, filename, modMap, adMap, IRefsetFactory.AD);
             } catch (ArrayIndexOutOfBoundsException e) {
-                final String msg = "Error loading attribute domains reference set: " + filename +
-                        ". Possibly has wrong number of columns.";
-                log.error(msg, e);
+                final String msg = ModelMessage.RefsetLoadFailure.error(log, "attribute domains", filename, e);
                 throw new ImportException(msg, e);
             }
         }
@@ -373,9 +353,7 @@ public class RF2Importer extends BaseImporter {
             try {
                 loadReferenceSet(input, filename, modMap, owlMap, IRefsetFactory.OWL);
             } catch (ArrayIndexOutOfBoundsException e) {
-                final String msg = "Error loading OWL Ontology reference set: " + filename +
-                        ". Possibly has wrong number of columns.";
-                log.error(msg, e);
+                final String msg = ModelMessage.RefsetLoadFailure.error(log, "OWL Ontology", filename, e);
                 throw new ImportException(msg, e);
             }
         }
@@ -385,8 +363,7 @@ public class RF2Importer extends BaseImporter {
             try {
                 loadReferenceSet(input, filename, modMap, owlMap, IRefsetFactory.OWL);
             } catch (ArrayIndexOutOfBoundsException e) {
-                final String msg = "Error loading OWL Axiom reference set: " + filename +
-                        ". Possibly has wrong number of columns.";
+                final String msg = ModelMessage.RefsetLoadFailure.error(log, "OWL Axiom", filename, e);
                 log.error(msg, e);
                 throw new ImportException(msg, e);
             }
@@ -790,7 +767,7 @@ public class RF2Importer extends BaseImporter {
                     entries.add(new ImportEntry(rootModuleId, ver, metadata, modules, in));
                 }
             }
-            log.info("Found "+entries.size()+" entries to import");
+            log.info("Found "+entries.size()+" entries to import");     // TODO - consider formal logging
         }
 
         public OntologyInterator(IProgressMonitor monitor) throws ImportException {
@@ -816,14 +793,11 @@ public class RF2Importer extends BaseImporter {
                 String ontologyId = entry.getRootModuleId();
                 String ontologyVersion = entry.getRootModuleVersion();
 
-                log.info("Building ontology " + ontologyId + " (" + ontologyVersion + ")");
+                ModelMessage.OntologyGeneration.info(log, ontologyId, ontologyVersion);
                 OntologyBuilder builder = getOntologyBuilder(bundle, ontologyId, ontologyVersion, entry.getMetadata());
                 return builder.build(monitor);
-            } catch (ImportException e) {
-                log.error(e.getMessage());
-                throw new RuntimeException(e);
-            } catch (URISyntaxException e) {
-                log.error(e.getMessage());
+            } catch (ImportException | URISyntaxException e) {
+                ModelMessage.GenericException.error(log, e.getMessage(), e);
                 throw new RuntimeException(e);
             }
         }
@@ -901,34 +875,28 @@ public class RF2Importer extends BaseImporter {
             unitRoleId = metadata.get("unitRoleId");
 
             if (conceptDefinedId == null) {
-                log.warn("Metadata value for conceptDefinedId was not found. "
-                        + "Import process might produce unexpected results.");
+                ModelMessage.MissingMetadata.warn(log, "conceptDefinedId");
             }
 
             if (someId == null) {
-                log.warn("Metadata value for someId was not found. "
-                        + "Import process might produce unexpected results.");
+                ModelMessage.MissingMetadata.warn(log, "someId");
             }
 
             if (isAId == null) {
-                log.warn("Metadata value for isAId was not found. "
-                        + "Import process might produce unexpected results.");
+                ModelMessage.MissingMetadata.warn(log, "isAId");
             }
 
             if (lateralityId == null) {
+                ModelMessage.MissingMetadata.warn(log, "conceptDefinedId");
                 lateralityId = "";
-                log.warn("Metadata value for lateralityId was not found. "
-                        + "Import process might produce unexpected results.");
             }
 
             if (conceptModelAttId == null) {
-                log.warn("Metadata value for conceptModelAttId was not found. "
-                        + "Import process might produce unexpected results.");
+                ModelMessage.MissingMetadata.warn(log, "conceptModelAttId");
             }
 
             if (neverGroupedIdsString == null && vr.getAttributeDomainRows().isEmpty()) {
-                log.warn("Metadata value for neverGroupedIds was not found. "
-                        + "Import process might produce unexpected results.");
+                ModelMessage.MissingMetadata.warn(log, "neverGroupedIds");
             }
             initDefaultNeverGroupedIds();
             for (RefsetRow row: vr.getAttributeDomainRows()) {
@@ -941,45 +909,36 @@ public class RF2Importer extends BaseImporter {
             }
 
             if (fsnId == null) {
-                log.warn("Metadata value for fsnId was not found. "
-                        + "Import process might produce unexpected results.");
+                ModelMessage.MissingMetadata.warn(log, "fsnId");
             }
 
             if (synonymId == null) {
-                log.warn("Metadata value for synonymId was not found. "
-                        + "Import process might produce unexpected results.");
+                ModelMessage.MissingMetadata.warn(log, "synonymId");
             }
 
             if (definitionId == null) {
-                log.warn("Metadata value for definitionId was not found. "
-                        + "Import process might produce unexpected results.");
+                ModelMessage.MissingMetadata.warn(log, "definitionId");
             }
 
             if (rightIdentityIds == null) {
-                log.warn("Metadata value for rightIdentityIds was not found. "
-                        + "Import process might produce unexpected results.");
+                ModelMessage.MissingMetadata.warn(log, "rightIdentityIds");
             }
 
             if (roleGroupId == null) {
-                log.warn("Metadata value for roleGroupId was not found. "
-                        + "Import process might produce unexpected results.");
+                ModelMessage.MissingMetadata.warn(log, "roleGroupId");
             }
 
             if (measurementTypeFloat == null) {
-                log.warn("Metadata value for floatTypeId was not found. "
-                        + "Import process might produce unexpected results.");
+                ModelMessage.MissingMetadata.warn(log, "floatTypeId");
             }
             if (measurementTypeInt == null) {
-                log.warn("Metadata value for intTypeId was not found. "
-                        + "Import process might produce unexpected results.");
+                ModelMessage.MissingMetadata.warn(log, "intTypeId");
             }
             if (equalsOperatorId == null) {
-                log.warn("Metadata value for equalsOperatorId was not found. "
-                        + "Import process might produce unexpected results.");
+                ModelMessage.MissingMetadata.warn(log, "equalsOperatorId");
             }
             if (unitRoleId == null) {
-                log.warn("Metadata value for unitRoleId was not found. "
-                        + "Import process might produce unexpected results.");
+                ModelMessage.MissingMetadata.warn(log, "unitRoleId");
             }
         }
 
@@ -1047,9 +1006,8 @@ public class RF2Importer extends BaseImporter {
                     populateCDs(cdsMap, rr.getReferencedComponentId(), rr.getRefsetId(), extras[1], extras[2],
                             extras[0]);
                     Set<String> allParents = parents.get(rr.getRefsetId());
-                    if(allParents == null) {
-                        log.error("Could not find refset id " + rr.getRefsetId() + " in meta-data hierarchy. There "
-                                + "might be a problem with the concrete domains definitions.");
+                    if (allParents == null) {
+                        ModelMessage.MissingRefsetId.error(log, rr.getRefsetId());
                         continue;
                     }
                     if (allParents.contains(measurementTypeFloat)) {
@@ -1063,7 +1021,7 @@ public class RF2Importer extends BaseImporter {
             }
 
             for (String refsetId : untypedFeatures) {
-                log.error("ERROR: Could not determine the type (int/float) of " + refsetId);
+                ModelMessage.UntypedConcreteDomainRefsetId.error(log, refsetId);
             }
 
             log.info("Creating role axioms");
@@ -1102,7 +1060,7 @@ public class RF2Importer extends BaseImporter {
                 int numElems = numParents + numRels + numCds;
 
                 if (numParents == 0 && numElems > 0) {
-                    log.warn("Root concept " + c1 + " has non-ISA relationships but no ISA relationships.");
+                    ModelMessage.DefinedWithoutParents.warn(log, c1);
                 }
 
                 if (numElems == 0) {
@@ -1175,10 +1133,10 @@ public class RF2Importer extends BaseImporter {
                                 namespace.add("Prefix(:=<>)");
                             }
                         } else if (!"734147008".equals(row.getReferencedComponentId())) {
-                            log.warn("Unexpected referencedComponentId in: " + row);
+                            ModelMessage.OWLUnknownReferencedComponent.error(row, log, row.getReferencedComponentId());
                         }
                     } else {
-                        log.warn("Unexpected refsetId in: " + row);
+                        ModelMessage.OWLUnknownRefset.error(row, log, row.getRefsetId());
                     }
                 }
             }
@@ -1256,8 +1214,7 @@ public class RF2Importer extends BaseImporter {
             NamedFeature feature = getFeature(datatype[0], fi);
             String type = featureType.get(datatype[0]);
             if(type == null) {
-                log.error("Ignoring feature " + datatype[0] + " (it has no type). There might be a problem with the "
-                        + "concrete domains definitions.");
+                ModelMessage.UndeclaredFeature.error(log, datatype[0]);
                 return;
             }
 
@@ -1270,7 +1227,7 @@ public class RF2Importer extends BaseImporter {
             } else if (type.equals("float")) {
                 value = new DecimalLiteral(new BigDecimal(datatype[2]));
             } else {
-                log.error("Unknown type: " + type);
+                ModelMessage.UnknownConcreteDomainType.error(log, type);
                 return;
             }
 
@@ -1281,7 +1238,7 @@ public class RF2Importer extends BaseImporter {
 
                 conjs.add(new Existential(getRole(roleGroupId, ri), new Conjunction(concepts)));
             } else {
-                log.error("Unknown operator: " + operatorId);
+                ModelMessage.UnknownConcreteDomainOperator.error(log, operatorId);
             }
         }
 

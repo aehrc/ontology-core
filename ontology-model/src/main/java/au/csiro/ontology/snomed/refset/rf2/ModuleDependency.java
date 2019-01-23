@@ -5,8 +5,13 @@
 package au.csiro.ontology.snomed.refset.rf2;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+
+import au.csiro.ontology.input.MapView;
+import au.csiro.ontology.input.ModelMessage;
 
 /**
  * Contains information about modules and their dependencies.
@@ -14,7 +19,7 @@ import java.util.Set;
  * @author Alejandro Metke
  *
  */
-public class ModuleDependency {
+public class ModuleDependency implements MapView {
 
     final protected String id;
     final protected String version;
@@ -73,11 +78,17 @@ public class ModuleDependency {
 
     @Override
     public String toString() {
-    	return "ModuleDependency[id="
-    			+ id
-    			+ ",version="
-    			+ version
-    			+ "]";
+        return ModelMessage.renderMap(toMap());
     }
-    
+
+    @Override
+    public Map<String, Object> toMap() {
+        final Map<String, Object> map = new HashMap<>();
+        map.put("type", "ModuleDependency");
+        map.put("id", id);
+        map.put("version", version);
+        map.put("dependencies", dependencies);
+        return map;
+    }
+
 }

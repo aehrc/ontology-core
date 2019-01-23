@@ -36,6 +36,7 @@ public class RefsetImporter {
      * Imports a module dependency reference set from a {@link Set} of
      * {@link InputStream}s. This method closes the {@link InputStream}s after
      * loading the reference sets.
+     * @param report
      *
      * @param refsetFiles The input streams.
      * @return

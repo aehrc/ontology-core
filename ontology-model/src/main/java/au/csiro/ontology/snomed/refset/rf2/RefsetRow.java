@@ -4,15 +4,19 @@
  */
 package au.csiro.ontology.snomed.refset.rf2;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import au.csiro.ontology.input.MapView;
 
 /**
  * @author Alejandro Metke
  *
  */
-public class RefsetRow implements Comparable<RefsetRow> {
-    
+public class RefsetRow implements MapView, Comparable<RefsetRow> {
+
     private static final String[] NONE = {};
-    
+
     protected final String id;
     protected final String effectiveTime;
     protected final String active;
@@ -23,7 +27,7 @@ public class RefsetRow implements Comparable<RefsetRow> {
 
     /**
      * Constructor.
-     * 
+     *
      * @param id
      * @param effectiveTime
      * @param active
@@ -31,7 +35,7 @@ public class RefsetRow implements Comparable<RefsetRow> {
      * @param refsetId
      * @param referencedComponentId
      */
-    public RefsetRow(String id, String effectiveTime, String active, String moduleId, String refsetId, 
+    public RefsetRow(String id, String effectiveTime, String active, String moduleId, String refsetId,
             String referencedComponentId, String... extras) {
         super();
         this.id = id;
@@ -41,7 +45,7 @@ public class RefsetRow implements Comparable<RefsetRow> {
         this.refsetId = refsetId;
         this.referencedComponentId = referencedComponentId;
         this.extras = extras == null ? NONE : extras;
-        
+
         assert extras.length == getColumns().length;
     }
 
@@ -65,14 +69,14 @@ public class RefsetRow implements Comparable<RefsetRow> {
                 + ((extras == null) ? 0 : extras.hashCode());
         return result;
     }
-    
+
     /**
      * @return the names of the extra columns
      */
     public String[] getColumns() {
         return NONE;
     }
-    
+
     /**
      * @return the id
      */
@@ -194,6 +198,19 @@ public class RefsetRow implements Comparable<RefsetRow> {
             }
             return res;
         }
+    }
+
+    @Override
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", id);
+        map.put("effectiveTime", effectiveTime);
+        map.put("active", active);
+        map.put("moduleId", moduleId);
+        map.put("refsetId", refsetId);
+        map.put("referencedComponentId", referencedComponentId);
+        map.put("extras", extras);
+        return map ;
     }
 
 }
