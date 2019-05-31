@@ -8,6 +8,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EmptyStackException;
@@ -167,34 +169,34 @@ public class OWLImporter extends BaseImporter {
         this.useSimpleFloats = useSimpleFloats;
     }
 
-    private Axiom transformOWLSubPropertyChainOfAxiom(OWLSubPropertyChainOfAxiom a) {
+    private Collection<Axiom> transformOWLSubPropertyChainOfAxiom(OWLSubPropertyChainOfAxiom a) {
         List<OWLObjectPropertyExpression> sub = a.getPropertyChain();
         OWLObjectPropertyExpression sup = a.getSuperProperty();
 
         int size = sub.size();
-        Role[] lhss = new Role[size];
+        NamedRole[] lhss = new NamedRole[size];
         for (int i = 0; i < size; i++) {
             lhss[i] = new NamedRole(sub.get(i).asOWLObjectProperty().toStringID());
         }
 
-        Role rhs = new NamedRole(sup.asOWLObjectProperty().toStringID());
+        NamedRole rhs = new NamedRole(sup.asOWLObjectProperty().toStringID());
 
         if (lhss.length == 1 || lhss.length == 2) {
-            return new RoleInclusion(lhss, rhs);
+            return Arrays.asList(new RoleInclusion(lhss, rhs), new ConceptInclusion(new NamedConcept(lhss[0].getId()), new NamedConcept(rhs.getId())));
         } else {
             problems.add("Unable to import axiom "+a.toString()+". RoleChains longer than 2 not supported.");
             return null;
         }
     }
 
-    private Axiom transformOWLSubObjectPropertyOfAxiom(OWLSubObjectPropertyOfAxiom a) {
+    private Collection<Axiom> transformOWLSubObjectPropertyOfAxiom(OWLSubObjectPropertyOfAxiom a) {
         OWLObjectPropertyExpression sub = a.getSubProperty();
         OWLObjectPropertyExpression sup = a.getSuperProperty();
 
-        Role lhs = new NamedRole(sub.asOWLObjectProperty().toStringID());
-        Role rhs = new NamedRole(sup.asOWLObjectProperty().toStringID());
+        NamedRole lhs = new NamedRole(sub.asOWLObjectProperty().toStringID());
+        NamedRole rhs = new NamedRole(sup.asOWLObjectProperty().toStringID());
 
-        return new RoleInclusion(new Role[]{lhs}, rhs);
+        return Arrays.asList(new RoleInclusion(new Role[]{lhs}, rhs), new ConceptInclusion(new NamedConcept(lhs.getId()), new NamedConcept(rhs.getId())));
     }
 
     private Axiom transformOWLReflexiveObjectPropertyAxiom(OWLReflexiveObjectPropertyAxiom a) {
@@ -310,12 +312,12 @@ public class OWLImporter extends BaseImporter {
                 }
             } else if (axiom instanceof OWLSubPropertyChainOfAxiom) {
                 OWLSubPropertyChainOfAxiom a = (OWLSubPropertyChainOfAxiom) axiom;
-                Axiom ax = transformOWLSubPropertyChainOfAxiom(a);
-                if(ax != null) res.add(ax);
+                Collection<Axiom> ax = transformOWLSubPropertyChainOfAxiom(a);
+                if(ax != null) res.addAll(ax);
                 monitor.step(workDone, totalAxioms);
             } else if (axiom instanceof OWLSubObjectPropertyOfAxiom) {
                 OWLSubObjectPropertyOfAxiom a = (OWLSubObjectPropertyOfAxiom) axiom;
-                res.add(transformOWLSubObjectPropertyOfAxiom(a));
+                res.addAll(transformOWLSubObjectPropertyOfAxiom(a));
                 monitor.step(++workDone, totalAxioms);
             } else if (axiom instanceof OWLReflexiveObjectPropertyAxiom) {
                 OWLReflexiveObjectPropertyAxiom a = (OWLReflexiveObjectPropertyAxiom) axiom;
@@ -352,6 +354,7 @@ public class OWLImporter extends BaseImporter {
                 monitor.step(++workDone, totalAxioms);
             } else {
                 problems.add("The axiom " + axiom.toString() + " is not currently supported by Snorocket.");
+                System.err.println("The axiom " + axiom.toString() + " is not currently supported by Snorocket.");
             }
         }
 
@@ -719,14 +722,14 @@ public class OWLImporter extends BaseImporter {
 
     @Override
     public Iterator<Ontology> getOntologyVersions(IProgressMonitor monitor) {
-        return new OntologyInterator(monitor);
+        return new OntologyIterator(monitor);
     }
 
-    class OntologyInterator implements Iterator<Ontology> {
+    class OntologyIterator implements Iterator<Ontology> {
         private boolean accessed = false;
         private IProgressMonitor monitor;
 
-        public OntologyInterator(IProgressMonitor monitor) {
+        public OntologyIterator(IProgressMonitor monitor) {
             this.monitor = monitor;
         }
 

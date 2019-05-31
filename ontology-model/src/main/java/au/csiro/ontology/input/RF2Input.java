@@ -8,7 +8,7 @@ import java.util.Set;
 import au.csiro.ontology.input.Inputs.ReleaseType;
 
 /**
- * An RF set of input files.
+ * An set of RF2 input files.
  *
  * @author Alejandro Metke
  *
@@ -18,11 +18,13 @@ public class RF2Input extends Input {
     protected Set<String> conceptsFiles = new HashSet<>();
     protected Set<String> descriptionsFiles = new HashSet<>();
     protected Set<String> identifiersFiles = new HashSet<>();
-    protected Set<String> relationshipsFiles = new HashSet<>();
+    protected Set<String> relationshipsFiles = new HashSet<>();         // deprecated
     protected Set<String> statedRelationshipsFiles = new HashSet<>();
+    protected Set<String> nnfRelationshipsFiles = new HashSet<>();
     protected Set<String> textDefinitionsFiles = new HashSet<>();
-    protected Set<String> owlOntologyRefsetFiles = new HashSet<>();
-    protected Set<String> owlAxiomRefsetFiles = new HashSet<>();
+    protected Set<String> owlOntologyRefsetFiles = new HashSet<>();     // deprecated
+    protected Set<String> owlAxiomRefsetFiles = new HashSet<>();        // deprecated
+    protected Set<String> owlExpressionRefsetFiles = new HashSet<>();
 
     // Reference set files
     protected Set<String> refsetDescriptorRefsetFiles = new HashSet<>();
@@ -52,6 +54,33 @@ public class RF2Input extends Input {
      */
     public RF2Input() {
 
+    }
+
+    @Override
+    public void validate() {
+        super.validate();
+
+//        if (!relationshipsFiles.isEmpty()) {
+//            throw new RuntimeException("relationshipsFiles is deprecated.");
+//        }
+        if (!owlOntologyRefsetFiles.isEmpty()) {
+            owlExpressionRefsetFiles.addAll(owlOntologyRefsetFiles);
+            owlOntologyRefsetFiles.clear();
+        }
+        if (!owlAxiomRefsetFiles.isEmpty()) {
+            owlExpressionRefsetFiles.addAll(owlAxiomRefsetFiles);
+            owlAxiomRefsetFiles.clear();
+        }
+        if (statedRelationshipsFiles.isEmpty() && owlExpressionRefsetFiles.isEmpty() && owlAxiomRefsetFiles.isEmpty() && owlOntologyRefsetFiles.isEmpty()) {
+            throw new RuntimeException("No stated form of any kind declared.");
+        }
+
+        if (null == releaseType) {
+            throw new RuntimeException("No releaseType.");
+        }
+        if (modules.size() < 1) {
+            throw new RuntimeException("No modules.");
+        }
     }
 
     /**
@@ -99,15 +128,15 @@ public class RF2Input extends Input {
     /**
      * @return the relationshipsFiles
      */
-    public Set<String> getRelationshipsFiles() {
-        return relationshipsFiles;
+    public Set<String> getNnfRelationshipsFiles() {
+        return nnfRelationshipsFiles;
     }
 
     /**
      * @param relationshipsFiles the relationshipsFiles to set
      */
-    public void setRelationshipsFiles(Set<String> relationshipsFiles) {
-        this.relationshipsFiles = relationshipsFiles;
+    public void setNnfRelationshipsFiles(Set<String> relationshipsFiles) {
+        this.nnfRelationshipsFiles = relationshipsFiles;
     }
 
     /**
@@ -139,23 +168,15 @@ public class RF2Input extends Input {
         this.textDefinitionsFiles = textDefinitionsFiles;
     }
 
-    public Set<String> getOwlOntologyRefsetFiles() {
-		return owlOntologyRefsetFiles;
-	}
+    public Set<String> getOwlExpressionRefsetFiles() {
+        return owlExpressionRefsetFiles;
+    }
 
-	public void setOwlOntologyRefsetFiles(Set<String> owlOntologyRefsetFiles) {
-		this.owlOntologyRefsetFiles = owlOntologyRefsetFiles;
-	}
+    public void setOwlExpressionRefsetFiles(Set<String> owlExpressionRefsetFiles) {
+        this.owlExpressionRefsetFiles = owlExpressionRefsetFiles;
+    }
 
-	public Set<String> getOwlAxiomRefsetFiles() {
-		return owlAxiomRefsetFiles;
-	}
-
-	public void setOwlAxiomRefsetFiles(Set<String> owlAxiomRefsetFiles) {
-		this.owlAxiomRefsetFiles = owlAxiomRefsetFiles;
-	}
-
-	/**
+    /**
      * @return the refsetDescriptorRefsetFiles
      */
     public Set<String> getRefsetDescriptorRefsetFiles() {
@@ -381,6 +402,34 @@ public class RF2Input extends Input {
      */
     public void setModules(List<ModuleInfo> modules) {
         this.modules = modules;
+    }
+
+    public Set<String> getRelationshipsFiles() {
+        return relationshipsFiles;
+    }
+
+    public void setRelationshipsFiles(Set<String> relationshipsFiles) {
+        this.relationshipsFiles = relationshipsFiles;
+    }
+
+    public Set<String> getOwlOntologyRefsetFiles() {
+        return owlOntologyRefsetFiles;
+    }
+
+    public void setOwlOntologyRefsetFiles(Set<String> owlOntologyRefsetFiles) {
+        this.owlOntologyRefsetFiles = owlOntologyRefsetFiles;
+    }
+
+    public Set<String> getOwlAxiomRefsetFiles() {
+        return owlAxiomRefsetFiles;
+    }
+
+    public void setOwlAxiomRefsetFiles(Set<String> owlAxiomRefsetFiles) {
+        this.owlAxiomRefsetFiles = owlAxiomRefsetFiles;
+    }
+
+    public void setTextDefinitionsFiles(Set<String> textDefinitionsFiles) {
+        this.textDefinitionsFiles = textDefinitionsFiles;
     }
 
 }
