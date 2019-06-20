@@ -10,3 +10,5 @@ Version 3.1.0 now supports use of SNOMED's MRCM AttributeDomain reference set to
 
 Version 3.2.0 refuses to use infered relationships if OWL Axioms are available
 
+Version 4.0.0 support new RF2 format with OWL-based stated form and NNF inferred form
+
