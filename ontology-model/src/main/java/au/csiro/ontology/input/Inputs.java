@@ -49,6 +49,9 @@ public class Inputs {
         JAXBContext context = JAXBContext.newInstance(Inputs.class, RF2Input.class, OWLInput.class);
         Unmarshaller u = context.createUnmarshaller();
         Inputs inputs = (Inputs) u.unmarshal(in);
+
+        inputs.validate();
+
         return inputs;
     }
 
@@ -59,6 +62,10 @@ public class Inputs {
      */
     public Inputs() {
 
+    }
+
+    public void validate() {
+        inputs.stream().forEach(i -> i.validate());
     }
 
     /**

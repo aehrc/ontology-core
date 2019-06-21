@@ -40,7 +40,7 @@ public class InputsUtil {
         in1.setInputType(InputType.CLASSPATH);
         in1.getConceptsFiles().add("/snomed_int_full_rf2/Terminology/sct2_Concept_Full_INT_20120131.txt");
         in1.getDescriptionsFiles().add("/snomed_int_full_rf2/Terminology/sct2_Description_Full-en_INT_20120131.txt");
-        in1.getRelationshipsFiles().add("/snomed_int_full_rf2/Terminology/sct2_Relationship_Full_INT_20120131.txt");
+        in1.getNnfRelationshipsFiles().add("/snomed_int_full_rf2/Terminology/sct2_Relationship_Full_INT_20120131.txt");
         in1.getStatedRelationshipsFiles().add("/snomed_int_full_rf2/Terminology/sct2_StatedRelationship_Full_INT_20120131.txt");
         in1.getTextDefinitionsFiles().add("/snomed_int_full_rf2/Terminology/sct2_TextDefinition_Full_INT_20120131.txt");
         in1.getIdentifiersFiles().add("/snomed_int_full_rf2/Terminology/sct2_Identifier_Full_INT_20120131.txt");
@@ -92,7 +92,7 @@ public class InputsUtil {
         in2.setInputType(InputType.CLASSPATH);
         in2.getConceptsFiles().add("/SnomedCT_GB1000000_20121001/RF2Release/Full/Terminology/xsct2_Concept_Full_GB1000000_20121001.txt");
         in2.getDescriptionsFiles().add("/SnomedCT_GB1000000_20121001/RF2Release/Full/Terminology/xsct2_Description_Full-en-GB_GB1000000_20121001.txt");
-        in2.getRelationshipsFiles().add("/SnomedCT_GB1000000_20121001/RF2Release/Full/Terminology/xsct2_Relationship_Full_GB1000000_20121001.txt");
+        in2.getNnfRelationshipsFiles().add("/SnomedCT_GB1000000_20121001/RF2Release/Full/Terminology/xsct2_Relationship_Full_GB1000000_20121001.txt");
         in2.getStatedRelationshipsFiles().add("/SnomedCT_GB1000000_20121001/RF2Release/Full/Terminology/xsct2_StatedRelationship_Full_GB1000000_20121001.txt");
         in2.getTextDefinitionsFiles().add("/SnomedCT_GB1000000_20121001/RF2Release/Full/Terminology/xsct2_TextDefinition_Full_GB1000000_20121001.txt");
         in2.getIdentifiersFiles().add("/SnomedCT_GB1000000_20121001/RF2Release/Full/Terminology/xsct2_Identifier_Full_GB1000000_20121001.txt");

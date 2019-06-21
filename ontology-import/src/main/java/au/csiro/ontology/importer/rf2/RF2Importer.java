@@ -47,9 +47,9 @@ import au.csiro.ontology.importer.owl.OWLImporter;
 import au.csiro.ontology.input.Input;
 import au.csiro.ontology.input.Input.InputType;
 import au.csiro.ontology.input.Inputs;
-import au.csiro.ontology.input.StructuredLog;
 import au.csiro.ontology.input.ModuleInfo;
 import au.csiro.ontology.input.RF2Input;
+import au.csiro.ontology.input.StructuredLog;
 import au.csiro.ontology.input.Version;
 import au.csiro.ontology.model.Axiom;
 import au.csiro.ontology.model.Concept;
@@ -279,7 +279,8 @@ public class RF2Importer extends BaseImporter {
 
         // Map needed to find the correct version of each relationship to load
         // for this import entry
-        Map<String, RelationshipRow> relationshipMap = new HashMap<>();
+        Map<String, RelationshipRow> statedRelationshipMap = new HashMap<>();
+        Map<String, RelationshipRow> inferredRelationshipMap = new HashMap<>();
 
         Map<String, RefsetRow> cdMap = new HashMap<>();
 
@@ -326,60 +327,60 @@ public class RF2Importer extends BaseImporter {
         }
 
         // Load OWL reference sets
-        final Set<String> owlAxiomRefsetFiles = input.getOwlAxiomRefsetFiles();
-        log.info("Reading OWL Axiom reference set info: " + owlAxiomRefsetFiles.size());
-        for (String filename : owlAxiomRefsetFiles) {
+        final Set<String> owlExpressionRefsetFiles = input.getOwlExpressionRefsetFiles();
+        log.info("Reading OWL Expression reference set info: " + owlExpressionRefsetFiles.size());
+        for (String filename : owlExpressionRefsetFiles) {
             try {
                 loadReferenceSet(input, filename, modMap, owlMap, IRefsetFactory.OWL);
             } catch (ArrayIndexOutOfBoundsException e) {
-                final String msg = StructuredLog.RefsetLoadFailure.error(log, "OWL Axiom", filename, e);
+                final String msg = StructuredLog.RefsetLoadFailure.error(log, "OWL Expression", filename, e);
                 log.error(msg, e);
                 throw new ImportException(msg, e);
             }
         }
         boolean hasAxioms = !owlMap.isEmpty();
 
-        final Set<String> owlOntologyRefsetFiles = input.getOwlOntologyRefsetFiles();
-        log.info("Reading OWL Ontology reference set info: " + owlOntologyRefsetFiles.size());
-        for (String filename : owlOntologyRefsetFiles) {
-            try {
-                loadReferenceSet(input, filename, modMap, owlMap, IRefsetFactory.OWL);
-            } catch (ArrayIndexOutOfBoundsException e) {
-                final String msg = StructuredLog.RefsetLoadFailure.error(log, "OWL Ontology", filename, e);
-                throw new ImportException(msg, e);
+        // Load stated relationships, if any
+        Set<String> statedRelationshipsFiles = input.getStatedRelationshipsFiles();
+
+        if(!hasAxioms && (statedRelationshipsFiles == null || statedRelationshipsFiles.isEmpty())) {
+            throw new ImportException("No relationships files were specified.");
+        }
+
+        if (statedRelationshipsFiles != null && !statedRelationshipsFiles.isEmpty()) {
+            log.info("Reading stated relationships info: " + statedRelationshipsFiles.size());
+
+            for(String relationshipsFile : statedRelationshipsFiles) {
+                try {
+                    loadRelationshipRows(modMap, statedRelationshipMap, input.getInputStream(relationshipsFile));
+                } catch (NullPointerException | IOException e) {
+                    final String message = StructuredLog.FileLoadFailure.error(log, "relationships", inputType, relationshipsFile, e);
+                    throw new ImportException(message, e);
+                }
             }
         }
 
-        // Load relationships
-        Set<String> relationshipsFiles = input.getStatedRelationshipsFiles();
-        if (relationshipsFiles == null || relationshipsFiles.isEmpty()) {
-            if (!hasAxioms) {
-                // FIXME - MUST not do this if we have loaded OWL Axioms !
-                relationshipsFiles = input.getRelationshipsFiles();
-                StructuredLog.UsingInferredRelationships.warn(log);
-            }
-            log.info("Reading inferred relationships info: " + relationshipsFiles.size());
-        } else {
-            log.info("Reading stated relationships info: " + relationshipsFiles.size());
-        }
+        // Load inferred relationships, if any
+        Set<String> inferredRelationshipsFiles = input.getNnfRelationshipsFiles();
 
-        if(!hasAxioms && (relationshipsFiles == null || relationshipsFiles.isEmpty())) {
-            throw new ImportException("No relationships files was specified.");
-        }
+        if (inferredRelationshipsFiles != null && !inferredRelationshipsFiles.isEmpty()) {
+            log.info("Reading inferred relationships info: " + inferredRelationshipsFiles.size());
 
-        for(String relationshipsFile : relationshipsFiles) {
-            try {
-                loadRelationshipRows(modMap, relationshipMap, input.getInputStream(relationshipsFile));
-            } catch (NullPointerException | IOException e) {
-                final String message = StructuredLog.FileLoadFailure.error(log, "relationships", inputType, relationshipsFile, e);
-                throw new ImportException(message, e);
+            for(String relationshipsFile : inferredRelationshipsFiles) {
+                try {
+                    loadRelationshipRows(modMap, inferredRelationshipMap, input.getInputStream(relationshipsFile));
+                } catch (NullPointerException | IOException e) {
+                    final String message = StructuredLog.FileLoadFailure.error(log, "relationships", inputType, relationshipsFile, e);
+                    throw new ImportException(message, e);
+                }
             }
         }
 
-        VersionRows vr = new VersionRows(conceptMap.values(), relationshipMap.values(), cdMap.values(), adMap.values(), owlMap.values());
+        VersionRows vr = new VersionRows(conceptMap.values(), inferredRelationshipMap.values(), statedRelationshipMap.values(), cdMap.values(), adMap.values(), owlMap.values());
 
         conceptMap = null;
-        relationshipMap = null;
+        inferredRelationshipMap = null;
+        statedRelationshipMap = null;
         cdMap = null;
         adMap = null;
         owlMap = null;
@@ -524,33 +525,6 @@ public class RF2Importer extends BaseImporter {
                 try { br.close(); } catch(Exception e) {};
             }
         }
-    }
-
-    protected Concept getConcept(String id, Map<String, Concept> ci) {
-        Concept c = ci.get(id);
-        if (c == null) {
-            c = new NamedConcept(id);
-            ci.put(id, c);
-        }
-        return c;
-    }
-
-    protected NamedRole getRole(String id, Map<String, NamedRole> ri) {
-        NamedRole r = ri.get(id);
-        if (r == null) {
-            r = new NamedRole(id);
-            ri.put(id, r);
-        }
-        return r;
-    }
-
-    protected NamedFeature getFeature(String id, Map<String, NamedFeature> fi) {
-        NamedFeature f = fi.get(id);
-        if (f == null) {
-            f = new NamedFeature(id);
-            fi.put(id, f);
-        }
-        return f;
     }
 
     protected void populateParent(String src, String tgt, Map<String, Set<String>> parents) {
@@ -816,6 +790,44 @@ public class RF2Importer extends BaseImporter {
 
     }
 
+    static class Factory {
+        protected final Map<String, Concept> ci = new HashMap<>();
+        protected final Map<String, NamedRole> ri = new HashMap<>();
+        protected final Map<String, NamedFeature> fi = new HashMap<>();
+
+        protected Concept getConcept(String id) {
+            Concept c = ci.get(id);
+            if (c == null) {
+                c = new NamedConcept(id);
+                ci.put(id, c);
+            }
+            return c;
+        }
+
+        protected NamedRole getRole(String id) {
+            NamedRole r = ri.get(id);
+            if (r == null) {
+                r = new NamedRole(id);
+                ri.put(id, r);
+            }
+            return r;
+        }
+
+        protected NamedFeature getFeature(String id) {
+            NamedFeature f = fi.get(id);
+            if (f == null) {
+                f = new NamedFeature(id);
+                fi.put(id, f);
+            }
+            return f;
+        }
+
+        public Collection<NamedFeature> getFeatures() {
+            return fi.values();
+        }
+
+    }
+
     /**
      * Class that knows how to build an {@link Ontology} from a set of RF2 files.
      *
@@ -826,13 +838,6 @@ public class RF2Importer extends BaseImporter {
         protected final VersionRows vr;
         protected final String rootModuleId;
         protected final String rootModuleVersion;
-
-        protected final Map<String, String> primitive = new HashMap<>();
-        protected final Map<String, Set<String>> parents = new HashMap<>();
-        protected final Map<String, Set<String>> children = new HashMap<>();
-        protected final Map<String, List<String[]>> rels = new HashMap<>();
-        protected final Map<String, Map<String, String>> roles = new HashMap<>();
-        protected final List<String> lateralizableConcepts = new LinkedList<>();
 
         protected final String conceptDefinedId;
         protected final String someId;
@@ -849,12 +854,11 @@ public class RF2Importer extends BaseImporter {
         protected final String measurementTypeFloat;
         protected final String equalsOperatorId;
         protected final String unitRoleId;
+        protected final boolean isNNF;
         protected final Set<String> neverGroupedIds = new HashSet<>();
 
-        protected final Map<String, Concept> ci = new HashMap<>();
-        protected final Map<String, NamedRole> ri = new HashMap<>();
-        protected final Map<String, NamedFeature> fi = new HashMap<>();
-        protected final Collection<Axiom> statedAxioms = new ArrayList<>();
+        protected final Factory factory = new Factory();
+
         protected final Map<String, String> featureType = new HashMap<>();
 
         protected final Map<String, List<String[]>> cdsMap = new HashMap<>();
@@ -880,6 +884,7 @@ public class RF2Importer extends BaseImporter {
             measurementTypeFloat = metadata.get("floatTypeId");
             equalsOperatorId = metadata.get("equalsOperatorId");
             unitRoleId = metadata.get("unitRoleId");
+            isNNF = Boolean.parseBoolean(metadata.getOrDefault("nnfOutput", "false"));
 
             if (conceptDefinedId == null) {
                 StructuredLog.MissingMetadata.warn(log, "conceptDefinedId");
@@ -903,16 +908,21 @@ public class RF2Importer extends BaseImporter {
             }
 
             if (neverGroupedIdsString == null && vr.getAttributeDomainRows().isEmpty()) {
-                StructuredLog.MissingMetadata.warn(log, "neverGroupedIds");
+                final String msg = StructuredLog.MissingMetadata.error(log, "neverGroupedIds");
+                throw new RuntimeException(msg);
             }
             initDefaultNeverGroupedIds();
             for (RefsetRow row: vr.getAttributeDomainRows()) {
-                if (isActive(row.getActive()) && "0".equals(row.getExtras()[1])) {
+                if (isActive(row.getActive()) && isNeverGrouped(row)) {
                     neverGroupedIds.add(row.getReferencedComponentId());
                 }
             }
             if (log.isInfoEnabled()) {
-                log.info("Never-grouped attributes: " + neverGroupedIds);
+                log.info("Always-grouped attributes:\t" + vr.getAttributeDomainRows().stream()
+                        .filter(row -> isActive(row.getActive()) && !isNeverGrouped(row))
+                        .map(row -> row.getReferencedComponentId()));
+
+                log.info("Never-grouped attributes:\t" + neverGroupedIds);
             }
 
             if (fsnId == null) {
@@ -949,6 +959,15 @@ public class RF2Importer extends BaseImporter {
             }
         }
 
+        private boolean isNeverGrouped(RefsetRow row) {
+            return "0".equals(row.getExtras()[1]);
+        }
+
+        /**
+         * Initialise the never-grouped ObjectProperties to those explicitly specified in external configuration.
+         *
+         * Normally this is not needed as the MRCM provides this information.
+         */
         protected void initDefaultNeverGroupedIds() {
             neverGroupedIds.clear();
             if (null != neverGroupedIdsString) {
@@ -961,7 +980,28 @@ public class RF2Importer extends BaseImporter {
             }
         }
 
+        /**
+         * Builds the Ontology stated form from the RF2 input files.
+         *
+         * <li> populates {@link #primitive} map from Concepts file
+         * <li> processes <b>defining</b> stated relationships
+         * <li> mixes in data property information from Concrete Domains refsets
+         * <li> creates RoleIncludes from the conceptModelAttrId (and rightIdentitiy metadata)
+         *
+         * @param monitor
+         * @return
+         * @throws URISyntaxException
+         */
         protected Ontology build(IProgressMonitor monitor) throws URISyntaxException {
+            final Map<String, String> primitive = new HashMap<>();
+            final Map<String, Set<String>> parents = new HashMap<>();
+            final Map<String, Set<String>> children = new HashMap<>();
+            final Map<String, List<String[]>> rels = new HashMap<>();
+            final Map<String, Map<String, String>> roles = new HashMap<>();
+            final List<String> lateralizableConcepts = new LinkedList<>();
+
+            final Collection<Axiom> statedAxioms = new ArrayList<>();
+
             // Process concept rows
             log.info("Processing " + vr.getConceptRows().size() + " concept rows");
             for (ConceptRow cr : vr.getConceptRows()) {
@@ -976,14 +1016,14 @@ public class RF2Importer extends BaseImporter {
             }
 
             // Process relationship rows
-            log.info("Processing " + vr.getRelationshipRows().size() + " relationship rows");
-            for (RelationshipRow rr : vr.getRelationshipRows()) {
-                if (!someId.equals(rr.getModifierId())) {
-                    throw new RuntimeException("Only existentials are supported.");
-                }
-
+            log.info("Processing " + vr.getStatedRelationshipRows().size() + " stated relationship rows");
+            for (RelationshipRow rr : vr.getStatedRelationshipRows()) {
                 // only process active concepts and defining relationships
-                if (isActive(rr.getActive())) {
+                if (isActive(rr.getActive()) && isDefining(rr.getCharacteristicTypeId())) {
+                    if (!someId.equals(rr.getModifierId())) {
+                        throw new RuntimeException("Only existentials are supported.");
+                    }
+
                     String type = rr.getTypeId();
                     String src = rr.getSourceId();
                     String dest = rr.getDestinationId();
@@ -1043,15 +1083,15 @@ public class RF2Importer extends BaseImporter {
                 String parentRole = roles.get(r1).get("parentrole");
 
                 if (!"".equals(parentRole)) {
-                    Role lhs = getRole(r1, ri);
-                    Role rhs = getRole(parentRole, ri);
+                    Role lhs = factory.getRole(r1);
+                    Role rhs = factory.getRole(parentRole);
                     statedAxioms.add(new RoleInclusion(new Role[] { lhs }, rhs));
                 }
 
                 String rightId = roles.get(r1).get("rightID");
                 if (!"".equals(rightId)) {
-                    Role lhs1 = getRole(r1, ri);
-                    Role lhs2 = getRole(rightId, ri);
+                    Role lhs1 = factory.getRole(r1);
+                    Role lhs2 = factory.getRole(rightId);
                     statedAxioms.add(new RoleInclusion(new Role[] { lhs1, lhs2 }, lhs1));
                 }
             }
@@ -1075,10 +1115,10 @@ public class RF2Importer extends BaseImporter {
                 }
 
                 if (numElems == 0) {
-                    // do nothing
+                    // do nothing; expect axioms in vr.getOwlRows()
                 } else if (numElems == 1 && numParents == 1) {
-                    Concept lhs = getConcept(c1, ci);
-                    Concept rhs = getConcept(prs.iterator().next(), ci);
+                    Concept lhs = factory.getConcept(c1);
+                    Concept rhs = factory.getConcept(prs.iterator().next());
                     statedAxioms.add(new ConceptInclusion(lhs, rhs));
                 } else {
                     List<Concept> conjs = new ArrayList<>();
@@ -1086,7 +1126,7 @@ public class RF2Importer extends BaseImporter {
                     // Add parents
                     if (prs != null) {
                         for (String pr : prs) {
-                            conjs.add(getConcept(pr, ci));
+                            conjs.add(factory.getConcept(pr));
                         }
                     }
 
@@ -1104,29 +1144,29 @@ public class RF2Importer extends BaseImporter {
                         }
                     }
 
-                    final ConceptInclusion axiom = new ConceptInclusion(getConcept(c1, ci), new Conjunction(conjs));
+                    final ConceptInclusion axiom = new ConceptInclusion(factory.getConcept(c1), new Conjunction(conjs));
                     statedAxioms.add(axiom);
 
-                    if (primitive.get(c1).equals("0")) {
-                        final ConceptInclusion axiom2 = new ConceptInclusion(new Conjunction(conjs), getConcept(c1, ci));
+                    if ("0".equals(primitive.get(c1))) {        // if not primitive
+                        final ConceptInclusion axiom2 = new ConceptInclusion(new Conjunction(conjs), factory.getConcept(c1));
                         statedAxioms.add(axiom2);
                     }
                 }
             }
 
             log.info("Add functional feature axioms");
-            for (NamedFeature feature: fi.values()) {
+            for (NamedFeature feature: factory.getFeatures()) {
                 statedAxioms.add(new FunctionalFeature(feature));
             }
 
-            processAxiomRows(monitor);
+            processAxiomRows(statedAxioms, monitor);
 
             log.info("Finished building ontology");
 
             return new Ontology(rootModuleId, rootModuleVersion, statedAxioms, null);
         }
 
-        protected void processAxiomRows(IProgressMonitor monitor) {
+        protected void processAxiomRows(Collection<Axiom> statedAxioms, IProgressMonitor monitor) {
             // Process axiom rows
             List<String> namespace = new ArrayList<>();
             List<String> axiomList = new ArrayList<>();
@@ -1150,6 +1190,15 @@ public class RF2Importer extends BaseImporter {
                         StructuredLog.OWLUnknownRefset.error(row, log, row.getRefsetId());
                     }
                 }
+            }
+
+            // Built-in axioms as per https://confluence.ihtsdotools.org/display/WIPOWL/2.4.+Content+for+the+OWL+Axiom+Refset
+            if (isNNF) {
+                final NamedConcept conceptModelAttribute = new NamedConcept("410662002");
+                final NamedConcept conceptModelObjectAttribute = new NamedConcept("762705008");
+                final NamedConcept conceptModelDataAttribute = new NamedConcept("762706009");
+                statedAxioms.add(new ConceptInclusion(conceptModelObjectAttribute, conceptModelAttribute));
+                statedAxioms.add(new ConceptInclusion(conceptModelDataAttribute, conceptModelAttribute));
             }
 
             final String namespaceStr = namespace.stream().collect(Collectors.joining("\n"));
@@ -1177,29 +1226,36 @@ public class RF2Importer extends BaseImporter {
             return "1".equals(active);
         }
 
+        protected boolean isDefining(final String characteristicType) {
+            return "900000000000010007".equals(characteristicType)      // stated
+                    || "900000000000006009".equals(characteristicType)  // defining (abstract?, unexpected)
+                    || "900000000000011006".equals(characteristicType)  // inferred (unexpected, shouldn't hurt)
+                    ;
+        }
+
         protected void mapRoles(List<Concept> conjs, Set<RoleValuePair> rvs) {
             if (rvs.size() > 1) {
                 Concept[] innerConjs = new Concept[rvs.size()];
                 int j = 0;
                 for (RoleValuePair rv : rvs) {
-                    NamedRole role = getRole(rv.role, ri);
-                    Concept filler = resolveFiller(getConcept(rv.value, ci), rv.id);
+                    NamedRole role = factory.getRole(rv.role);
+                    Concept filler = resolveFiller(factory.getConcept(rv.value), rv.id);
                     Existential exis = new Existential(role, filler);
                     innerConjs[j++] = exis;
                 }
                 // Wrap with a role group
-                conjs.add(new Existential(getRole(roleGroupId, ri), new Conjunction(innerConjs)));
+                conjs.add(new Existential(factory.getRole(roleGroupId), new Conjunction(innerConjs)));
             } else {
                 RoleValuePair first = rvs.iterator().next();
-                NamedRole role = getRole(first.role, ri);
-                Concept filler = resolveFiller(getConcept(first.value, ci), first.id);
+                NamedRole role = factory.getRole(first.role);
+                Concept filler = resolveFiller(factory.getConcept(first.value), first.id);
                 Existential exis = new Existential(role, filler);
                 if (neverGroupedIds.contains(first.role)) {
                     // Does not need a role group
                     conjs.add(exis);
                 } else {
                     // Needs a role group
-                    conjs.add(new Existential(getRole(roleGroupId, ri), exis));
+                    conjs.add(new Existential(factory.getRole(roleGroupId), exis));
                 }
             }
         }
@@ -1222,7 +1278,7 @@ public class RF2Importer extends BaseImporter {
         }
 
         protected void mapDatatype(List<Concept> conjs, String[] datatype) {
-            NamedFeature feature = getFeature(datatype[0], fi);
+            NamedFeature feature = factory.getFeature(datatype[0]);
             String type = featureType.get(datatype[0]);
             if(type == null) {
                 StructuredLog.UndeclaredFeature.error(log, datatype[0]);
@@ -1244,10 +1300,10 @@ public class RF2Importer extends BaseImporter {
 
             if (equalsOperatorId.equals(operatorId)) {
                 Concept[] concepts = {
-                        new Existential(getRole(unitRoleId, ri), getConcept(unitId, ci)),
+                        new Existential(factory.getRole(unitRoleId), factory.getConcept(unitId)),
                         new Datatype(feature, Operator.EQUALS, value), };
 
-                conjs.add(new Existential(getRole(roleGroupId, ri), new Conjunction(concepts)));
+                conjs.add(new Existential(factory.getRole(roleGroupId), new Conjunction(concepts)));
             } else {
                 StructuredLog.UnknownConcreteDomainOperator.error(log, operatorId);
             }

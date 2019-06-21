@@ -105,4 +105,21 @@ public abstract class Input {
         }
     }
 
+    public void validate() {
+        switch (getInputType()) {
+        case CLASSPATH:
+            if (null != getBase()) {
+                throw new RuntimeException("Base must not be specified with " + getInputType());
+            }
+            break;
+        case EXTERNAL:
+            if (null == getBase()) {
+                throw new RuntimeException("Base must be specified with " + getInputType());
+            }
+            break;
+        default:
+            throw new RuntimeException("Invalid inputType: " + getInputType());
+        }
+    }
+
 }
