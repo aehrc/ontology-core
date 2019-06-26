@@ -186,6 +186,7 @@ public class RF2Importer extends BaseImporter {
      */
     protected void populateCDs(Map<String, List<String[]>> cdMap, String referencedComponentId, String featureId,
             String operator, String value, String unit) {
+        checkRel(referencedComponentId);
         List<String[]> list;
         // my ( $comp, $feature, $op, $value, $unit ) = @_;
         if (!cdMap.containsKey(referencedComponentId)) {
@@ -195,6 +196,12 @@ public class RF2Importer extends BaseImporter {
             list = cdMap.get(referencedComponentId);
         }
         list.add(new String[] { featureId, operator, value, unit });
+    }
+
+    private void checkRel(String referencedComponentId) {
+        if ('2' != referencedComponentId.charAt(referencedComponentId.length()-2)) {
+            throw new RuntimeException("Expected a Relationship SCTID: " + referencedComponentId);
+        }
     }
 
     protected <R extends RefsetRow> void loadReferenceSet(RF2Input input, String refsetFile, Map<String, String> modMap,
@@ -899,7 +906,7 @@ public class RF2Importer extends BaseImporter {
             }
 
             if (lateralityId == null) {
-                StructuredLog.MissingMetadata.warn(log, "conceptDefinedId");
+                StructuredLog.MissingMetadata.warn(log, "lateralityId");
                 lateralityId = "";
             }
 
@@ -1107,6 +1114,9 @@ public class RF2Importer extends BaseImporter {
 
                 List<String[]> cdsVal = cdsMap.get(c1);
                 int numCds = (cdsVal != null) ? 1 : 0;
+                if (numCds > 0) {
+                    throw new RuntimeException("Unexpected relationship id: " + c1);
+                }
 
                 int numElems = numParents + numRels + numCds;
 
@@ -1130,12 +1140,12 @@ public class RF2Importer extends BaseImporter {
                         }
                     }
 
-                    // Process concrete domains
-                    if (cdsVal != null) {
-                        for (String[] datatype : cdsVal) {
-                            mapDatatype(conjs, datatype);
-                        }
-                    }
+//                    // Process concrete domains
+//                    if (cdsVal != null) {
+//                        for (String[] datatype : cdsVal) {
+//                            mapDatatype(conjs, datatype);
+//                        }
+//                    }
 
                     // Process relationships
                     if (relsVal != null) {
