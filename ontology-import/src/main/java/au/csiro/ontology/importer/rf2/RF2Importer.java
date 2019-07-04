@@ -186,6 +186,7 @@ public class RF2Importer extends BaseImporter {
      */
     protected void populateCDs(Map<String, List<String[]>> cdMap, String referencedComponentId, String featureId,
             String operator, String value, String unit) {
+        checkRel(referencedComponentId);
         List<String[]> list;
         // my ( $comp, $feature, $op, $value, $unit ) = @_;
         if (!cdMap.containsKey(referencedComponentId)) {
@@ -195,6 +196,12 @@ public class RF2Importer extends BaseImporter {
             list = cdMap.get(referencedComponentId);
         }
         list.add(new String[] { featureId, operator, value, unit });
+    }
+
+    private void checkRel(String referencedComponentId) {
+        if ('2' != referencedComponentId.charAt(referencedComponentId.length()-2)) {
+            throw new RuntimeException("Expected a Relationship SCTID: " + referencedComponentId);
+        }
     }
 
     protected <R extends RefsetRow> void loadReferenceSet(RF2Input input, String refsetFile, Map<String, String> modMap,
@@ -586,15 +593,21 @@ public class RF2Importer extends BaseImporter {
         vals.put("parentrole", parentRole);
     }
 
-    protected Set<Set<RoleValuePair>> groupRoles(List<String[]> groups) {
-        Map<String, Set<RoleValuePair>> roleGroups =
-                new HashMap<>();
+    /**
+     *
+     * @param relationships
+     * @return
+     */
+    protected Set<Set<RoleValuePair>> groupRoles(List<String[]> relationships) {
+        final Map<String, Set<RoleValuePair>> roleGroups = new HashMap<>();
 
-        for (String[] group : groups) {
-            String comp = group[0];
-            String attr = group[1];
-            String val = group[2];
-            String roleGroup = group[3];
+        // group relationships by roleGroupId
+        // all "0"-grouped go together
+        for (String[] rel : relationships) {
+            String comp = rel[0];
+            String attr = rel[1];
+            String val = rel[2];
+            String roleGroup = rel[3];
             Set<RoleValuePair> lrvp = roleGroups.get(roleGroup);
             if (lrvp == null) {
                 lrvp = new HashSet<>();
@@ -603,23 +616,20 @@ public class RF2Importer extends BaseImporter {
             lrvp.add(new RoleValuePair(attr, val, comp));
         }
 
-        Set<Set<RoleValuePair>> res = new HashSet<>();
+        // Split out the "0"-grouped relationships
+        final Set<Set<RoleValuePair>> res = new HashSet<>();
         for (String roleGroup : roleGroups.keySet()) {
             Set<RoleValuePair> val = roleGroups.get(roleGroup);
 
             // 0 indicates not grouped
             if ("0".equals(roleGroup)) {
                 for (RoleValuePair rvp : val) {
-                    Set<RoleValuePair> sin = new HashSet<>();
+                    final Set<RoleValuePair> sin = new HashSet<>();
                     sin.add(rvp);
                     res.add(sin);
                 }
             } else {
-                Set<RoleValuePair> item = new HashSet<>();
-                for (RoleValuePair trvp : val) {
-                    item.add(trvp);
-                }
-                res.add(item);
+                res.add(val);
             }
         }
         return res;
@@ -899,7 +909,7 @@ public class RF2Importer extends BaseImporter {
             }
 
             if (lateralityId == null) {
-                StructuredLog.MissingMetadata.warn(log, "conceptDefinedId");
+                StructuredLog.MissingMetadata.warn(log, "lateralityId");
                 lateralityId = "";
             }
 
@@ -1051,9 +1061,9 @@ public class RF2Importer extends BaseImporter {
                     // &populateCDs( $values[5], $values[4], $values[7],
                     // $values[8], $values[6] );
                     final String[] extras = rr.getExtras();
-                    populateCDs(cdsMap, rr.getReferencedComponentId(), rr.getRefsetId(), extras[1], extras[2],
-                            extras[0]);
-                    Set<String> allParents = parents.get(rr.getRefsetId());
+                    populateCDs(cdsMap, rr.getReferencedComponentId(), rr.getRefsetId(), extras[1], extras[2], extras[0]);
+
+                    final Set<String> allParents = parents.get(rr.getRefsetId());
                     if (allParents == null) {
                         missingRefsets.add(rr.getRefsetId());
                         continue;
@@ -1098,57 +1108,61 @@ public class RF2Importer extends BaseImporter {
 
             // Add concept axioms
             log.info("Creating axioms for " + primitive.size() + " active concepts");
-            for (String c1 : primitive.keySet()) {
-                Set<String> prs = parents.get(c1);
-                int numParents = (prs != null) ? prs.size() : 0;
+            for (String focus : primitive.keySet()) {
+                final Set<String> focusParents = parents.get(focus);
+                final int numParents = (focusParents != null) ? focusParents.size() : 0;
 
-                List<String[]> relsVal = rels.get(c1);
-                int numRels = (relsVal != null) ? 1 : 0;
+                final List<String[]> focusRelationships = rels.get(focus);
+                final int numRels = (focusRelationships != null) ? 1 : 0;
 
-                List<String[]> cdsVal = cdsMap.get(c1);
-                int numCds = (cdsVal != null) ? 1 : 0;
+//                List<String[]> cdsVal = cdsMap.get(c1);
+//                int numCds = (cdsVal != null) ? 1 : 0;
+//                if (numCds > 0) {
+//                    // cdsMap is from Relationship SCTIDs not Concept SCTIDs; c1 is a Concept SCTID
+//                    throw new RuntimeException("Unexpected relationship id: " + c1);
+//                }
 
-                int numElems = numParents + numRels + numCds;
+                int numElems = numParents + numRels; // + numCds;
 
                 if (numParents == 0 && numElems > 0) {
-                    StructuredLog.DefinedWithoutParents.warn(log, c1);
+                    StructuredLog.DefinedWithoutParents.warn(log, focus);
                 }
 
                 if (numElems == 0) {
                     // do nothing; expect axioms in vr.getOwlRows()
                 } else if (numElems == 1 && numParents == 1) {
-                    Concept lhs = factory.getConcept(c1);
-                    Concept rhs = factory.getConcept(prs.iterator().next());
+                    Concept lhs = factory.getConcept(focus);
+                    Concept rhs = factory.getConcept(focusParents.iterator().next());
                     statedAxioms.add(new ConceptInclusion(lhs, rhs));
                 } else {
-                    List<Concept> conjs = new ArrayList<>();
+                    final List<Concept> conjuncts = new ArrayList<>();
 
                     // Add parents
-                    if (prs != null) {
-                        for (String pr : prs) {
-                            conjs.add(factory.getConcept(pr));
+                    if (focusParents != null) {
+                        for (String pr : focusParents) {
+                            conjuncts.add(factory.getConcept(pr));
                         }
                     }
 
-                    // Process concrete domains
-                    if (cdsVal != null) {
-                        for (String[] datatype : cdsVal) {
-                            mapDatatype(conjs, datatype);
-                        }
-                    }
+//                    // Process concrete domains
+//                    if (cdsVal != null) {
+//                        for (String[] datatype : cdsVal) {
+//                            mapDatatype(conjs, datatype);
+//                        }
+//                    }
 
                     // Process relationships
-                    if (relsVal != null) {
-                        for (Set<RoleValuePair> rvs : groupRoles(relsVal)) {
-                            mapRoles(conjs, rvs);
+                    if (focusRelationships != null) {
+                        for (Set<RoleValuePair> rvs : groupRoles(focusRelationships)) {
+                            mapRoles(conjuncts, rvs);
                         }
                     }
 
-                    final ConceptInclusion axiom = new ConceptInclusion(factory.getConcept(c1), new Conjunction(conjs));
+                    final ConceptInclusion axiom = new ConceptInclusion(factory.getConcept(focus), new Conjunction(conjuncts));
                     statedAxioms.add(axiom);
 
-                    if ("0".equals(primitive.get(c1))) {        // if not primitive
-                        final ConceptInclusion axiom2 = new ConceptInclusion(new Conjunction(conjs), factory.getConcept(c1));
+                    if ("0".equals(primitive.get(focus))) {        // if not primitive
+                        final ConceptInclusion axiom2 = new ConceptInclusion(new Conjunction(conjuncts), factory.getConcept(focus));
                         statedAxioms.add(axiom2);
                     }
                 }
@@ -1233,47 +1247,59 @@ public class RF2Importer extends BaseImporter {
                     ;
         }
 
-        protected void mapRoles(List<Concept> conjs, Set<RoleValuePair> rvs) {
+        /**
+         * Process all the grouped relationships and add associated axioms to the list of conjuncts
+         *
+         * @param conjuncts
+         * @param rvs
+         */
+        protected void mapRoles(List<Concept> conjuncts, Set<RoleValuePair> rvs) {
             if (rvs.size() > 1) {
-                Concept[] innerConjs = new Concept[rvs.size()];
-                int j = 0;
+                final TreeSet<Concept> innerConjs = new TreeSet<Concept>();
                 for (RoleValuePair rv : rvs) {
-                    NamedRole role = factory.getRole(rv.role);
-                    Concept filler = resolveFiller(factory.getConcept(rv.value), rv.id);
-                    Existential exis = new Existential(role, filler);
-                    innerConjs[j++] = exis;
+                    resolveFiller(innerConjs, rv.id);
+                    if (neverGroupedIds.contains(rv.role)) {
+                        throw new RuntimeException(StructuredLog.GroupingError.error(log, rv.role));
+                    } else {
+                        final NamedRole role = factory.getRole(rv.role);
+                        final Existential exis = new Existential(role, factory.getConcept(rv.value));
+                        innerConjs.add(exis);
+                    }
                 }
                 // Wrap with a role group
-                conjs.add(new Existential(factory.getRole(roleGroupId), new Conjunction(innerConjs)));
+                conjuncts.add(new Existential(factory.getRole(roleGroupId), new Conjunction(innerConjs)));
             } else {
-                RoleValuePair first = rvs.iterator().next();
-                NamedRole role = factory.getRole(first.role);
-                Concept filler = resolveFiller(factory.getConcept(first.value), first.id);
-                Existential exis = new Existential(role, filler);
-                if (neverGroupedIds.contains(first.role)) {
-                    // Does not need a role group
-                    conjs.add(exis);
+                final TreeSet<Concept> innerConjs = new TreeSet<Concept>();
+                RoleValuePair rv = rvs.iterator().next();
+
+                resolveFiller(innerConjs, rv.id);
+                final NamedRole role = factory.getRole(rv.role);
+                final Existential exis = new Existential(role, factory.getConcept(rv.value));
+                if (neverGroupedIds.contains(rv.role)) {
+                    // Must not be in a role group
+                    if (!innerConjs.isEmpty()) {
+                        throw new RuntimeException(StructuredLog.UngroupedConcreteDomains.error(log, rv.id, rv.role));
+                    }
+                    conjuncts.add(exis);
                 } else {
                     // Needs a role group
-                    conjs.add(new Existential(factory.getRole(roleGroupId), exis));
+                    innerConjs.add(exis);
+                    conjuncts.add(new Existential(factory.getRole(roleGroupId), new Conjunction(innerConjs)));
                 }
             }
         }
 
-        protected Concept resolveFiller(Concept value, String compId) {
-            if (cdsMap.containsKey(compId)) {
+        protected void resolveFiller(Collection<Concept> innerConjs, String relationshipId) {
+            if (cdsMap.containsKey(relationshipId)) {
                 final List<Concept> concepts = new ArrayList<>();
-                concepts.add(value);
-                for (String[] datatype : cdsMap.get(compId)) {
+                for (String[] datatype : cdsMap.get(relationshipId)) {
                     mapDatatype(concepts, datatype);
                 }
-                final Conjunction result = new Conjunction(concepts);
+                innerConjs.addAll(concepts);
+
                 if (log.isTraceEnabled()) {
-                    log.trace("Mapping CD info: " + result.toString());
+                    log.trace("Mapping CD info: " + new Conjunction(concepts));
                 }
-                return result;
-            } else {
-                return value;
             }
         }
 
@@ -1299,11 +1325,8 @@ public class RF2Importer extends BaseImporter {
             }
 
             if (equalsOperatorId.equals(operatorId)) {
-                Concept[] concepts = {
-                        new Existential(factory.getRole(unitRoleId), factory.getConcept(unitId)),
-                        new Datatype(feature, Operator.EQUALS, value), };
-
-                conjs.add(new Existential(factory.getRole(roleGroupId), new Conjunction(concepts)));
+                conjs.add(new Existential(factory.getRole(unitRoleId), factory.getConcept(unitId)));
+                conjs.add(new Datatype(feature, Operator.EQUALS, value));
             } else {
                 StructuredLog.UnknownConcreteDomainOperator.error(log, operatorId);
             }

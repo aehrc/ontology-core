@@ -52,6 +52,9 @@ public enum StructuredLog {
             "srcModule", "targetModule", "transitiveModule"),
     CyclicDependency("Cyclic dependency"),
 
+    GroupingError("Found grouped relationship for attribute type marked as never-grouped: %s", "attribute"),
+    UngroupedConcreteDomains("Concrete domain data supplied (%s) for never-grouped attribute: %s", "relationshipId", "attribute"),
+
     None(null); // sentinal; do not use
 
     final private static String PREFIX = "json: ";
