@@ -1289,6 +1289,13 @@ public class RF2Importer extends BaseImporter {
             }
         }
 
+        /**
+         * Look for ConcreteDomains Refset entries that reference the relationshipId and add the
+         * corresponding expression to the innerConjs list.
+         *
+         * @param innerConjs
+         * @param relationshipId
+         */
         protected void resolveFiller(Collection<Concept> innerConjs, String relationshipId) {
             if (cdsMap.containsKey(relationshipId)) {
                 final List<Concept> concepts = new ArrayList<>();

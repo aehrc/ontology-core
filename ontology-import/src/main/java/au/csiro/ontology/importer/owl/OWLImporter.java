@@ -122,7 +122,7 @@ public class OWLImporter extends BaseImporter {
      * built-in data types instead of the math types.
      */
     private boolean useSimpleInts = true;
-    private boolean useSimpleFloats = true;
+    private boolean useSimpleFloats = false;
 
     public OWLImporter(OWLOntology ontology) {
         this();
