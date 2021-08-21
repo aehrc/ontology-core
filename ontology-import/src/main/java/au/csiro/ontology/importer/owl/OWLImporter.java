@@ -62,6 +62,7 @@ import org.semanticweb.owlapi.model.OWLObjectUnionOf;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLReflexiveObjectPropertyAxiom;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
+import org.semanticweb.owlapi.model.OWLSubDataPropertyOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubObjectPropertyOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubPropertyChainOfAxiom;
 import org.semanticweb.owlapi.model.OWLTransitiveObjectPropertyAxiom;
@@ -216,6 +217,27 @@ public class OWLImporter extends BaseImporter {
         return new FunctionalFeature(feature);
     }
 
+    private Collection<Axiom> transformOWLSubDataPropertyOfAxiom(OWLSubDataPropertyOfAxiom a) {
+        // special-case SNOMED parent concept (762706009 is not a real data property)
+        if (!"762706009".equals(a.getSuperProperty().asOWLDataProperty().toStringID())) {
+            final String message = "The axiom " + a.toString() + " is not currently supported by Snorocket.";
+            problems.add(message);
+            System.err.println(message);
+            throw new RuntimeException(message);
+        }
+
+        // Define the feature
+        OWLDataPropertyExpression prop = a.getSubProperty();
+        NamedFeature feature = new NamedFeature(prop.asOWLDataProperty().toStringID());
+
+        // Define the corresponding "concept"
+        OWLDataProperty lhs = a.getSubProperty().asOWLDataProperty();
+        OWLDataProperty rhs = a.getSuperProperty().asOWLDataProperty();
+        ConceptInclusion ci = new ConceptInclusion(new NamedConcept(lhs.toStringID()), new NamedConcept(rhs.toStringID()));
+
+        return Arrays.asList(new FunctionalFeature(feature), ci);
+    }
+
     private Axiom transformOWLSubClassOfAxiom(OWLSubClassOfAxiom a) {
         OWLClassExpression sub = a.getSubClass();
         OWLClassExpression sup = a.getSuperClass();
@@ -348,6 +370,10 @@ public class OWLImporter extends BaseImporter {
             } else if (axiom instanceof OWLFunctionalDataPropertyAxiom) {
                 OWLFunctionalDataPropertyAxiom a = (OWLFunctionalDataPropertyAxiom) axiom;
                 res.add(transformOWLFunctionalDataPropertyAxiom(a));
+                monitor.step(++workDone, totalAxioms);
+            } else if (axiom instanceof OWLSubDataPropertyOfAxiom) {
+                OWLSubDataPropertyOfAxiom a = (OWLSubDataPropertyOfAxiom) axiom;
+                res.addAll(transformOWLSubDataPropertyOfAxiom(a));
                 monitor.step(++workDone, totalAxioms);
             } else if (axiom instanceof OWLAnnotationAssertionAxiom) {
                 // Do nothing
