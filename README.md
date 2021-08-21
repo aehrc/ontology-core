@@ -12,3 +12,5 @@ Version 3.2.0 refuses to use infered relationships if OWL Axioms are available
 
 Version 4.0.0 support new RF2 format with OWL-based stated form and NNF inferred form
 
+Version 4.1.0 support new RF2 format with concrete domains
+
