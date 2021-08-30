@@ -21,6 +21,7 @@ public class RF2Input extends Input {
     protected Set<String> relationshipsFiles = new HashSet<>();         // deprecated
     protected Set<String> statedRelationshipsFiles = new HashSet<>();
     protected Set<String> nnfRelationshipsFiles = new HashSet<>();
+    protected Set<String> nnfConcreteDomainsFiles = new HashSet<>();
     protected Set<String> textDefinitionsFiles = new HashSet<>();
     protected Set<String> owlOntologyRefsetFiles = new HashSet<>();     // deprecated
     protected Set<String> owlAxiomRefsetFiles = new HashSet<>();        // deprecated
@@ -137,6 +138,20 @@ public class RF2Input extends Input {
      */
     public void setNnfRelationshipsFiles(Set<String> relationshipsFiles) {
         this.nnfRelationshipsFiles = relationshipsFiles;
+    }
+
+    /**
+     * @return the concreteDomainsFiles
+     */
+    public Set<String> getNnfConcreteDomainsFiles() {
+        return nnfConcreteDomainsFiles;
+    }
+
+    /**
+     * @param relationshipsFiles the relationshipsFiles to set
+     */
+    public void setNnfConcreteDomainsFiles(Set<String> concreteDomainsFiles) {
+        this.nnfConcreteDomainsFiles = concreteDomainsFiles;
     }
 
     /**

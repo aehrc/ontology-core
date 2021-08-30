@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<inputs>
+  <inputs xsi:type="rf2Input" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <inputType>CLASSPATH</inputType>
+    <conceptsFiles>/rf2_full_con_test.txt</conceptsFiles>
+    <statedRelationshipsFiles>/rf2_full_rel_test.txt</statedRelationshipsFiles>
+    <releaseType>FULL</releaseType>
+  </inputs>
+</inputs>

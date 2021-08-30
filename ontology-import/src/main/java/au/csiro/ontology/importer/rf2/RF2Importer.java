@@ -308,6 +308,7 @@ public class RF2Importer extends BaseImporter {
                 throw new ImportException(message, e);
             }
         }
+        log.info("Imported " + conceptMap.size() + " concepts.");
 
         // Load concrete domains refsets
         final Set<String> concreteDomainRefsetFiles = input.getConcreteDomainRefsetFiles();
@@ -374,6 +375,22 @@ public class RF2Importer extends BaseImporter {
             log.info("Reading inferred relationships info: " + inferredRelationshipsFiles.size());
 
             for(String relationshipsFile : inferredRelationshipsFiles) {
+                try {
+                    loadRelationshipRows(modMap, inferredRelationshipMap, input.getInputStream(relationshipsFile));
+                } catch (NullPointerException | IOException e) {
+                    final String message = StructuredLog.FileLoadFailure.error(log, "relationships", inputType, relationshipsFile, e);
+                    throw new ImportException(message, e);
+                }
+            }
+        }
+
+        // Load inferred concrete values, if any
+        Set<String> inferredConcreteDomainsFiles = input.getNnfConcreteDomainsFiles();
+
+        if (inferredConcreteDomainsFiles != null && !inferredConcreteDomainsFiles.isEmpty()) {
+            log.info("Reading inferred concrete values info: " + inferredConcreteDomainsFiles.size());
+
+            for(String relationshipsFile : inferredConcreteDomainsFiles) {
                 try {
                     loadRelationshipRows(modMap, inferredRelationshipMap, input.getInputStream(relationshipsFile));
                 } catch (NullPointerException | IOException e) {
@@ -518,6 +535,7 @@ public class RF2Importer extends BaseImporter {
 
                 String tgtVer = modMap.get(moduleId);
                 if(tgtVer == null) continue;
+
                 int rel = effectiveTime.compareTo(tgtVer);
                 if(rel <= 0) {
                     ConceptRow currConceptRow = conceptMap.get(id);
@@ -879,6 +897,13 @@ public class RF2Importer extends BaseImporter {
             this.rootModuleId = rootModuleId;
             this.rootModuleVersion = rootModuleVersion;
 
+            // Known defaults from AMT
+            featureType.put("700000111000036105", "float");
+            featureType.put("700000131000036101", "float");
+            featureType.put("700000141000036106", "float");
+            featureType.put("700000221000036108", "float");
+            featureType.put("700000121000036103", "int");
+
             conceptDefinedId = metadata.get("conceptDefinedId");
             someId = metadata.get("someId");
             isAId = metadata.get("isAId");
@@ -1061,22 +1086,25 @@ public class RF2Importer extends BaseImporter {
                     // &populateCDs( $values[5], $values[4], $values[7],
                     // $values[8], $values[6] );
                     final String[] extras = rr.getExtras();
-                    populateCDs(cdsMap, rr.getReferencedComponentId(), rr.getRefsetId(), extras[1], extras[2], extras[0]);
+                    final String featureId = rr.getRefsetId();
+                    populateCDs(cdsMap, rr.getReferencedComponentId(), featureId, extras[1], extras[2], extras[0]);
 
-                    final Set<String> allParents = parents.get(rr.getRefsetId());
+                    final Set<String> allParents = parents.get(featureId);
                     if (allParents == null) {
-                        missingRefsets.add(rr.getRefsetId());
+                        missingRefsets.add(featureId);
                         continue;
                     }
                     if (allParents.contains(measurementTypeFloat)) {
-                        featureType.put(rr.getRefsetId(), "float");
+                        featureType.put(featureId, "float");
                     } else if (allParents.contains(measurementTypeInt)) {
-                        featureType.put(rr.getRefsetId(), "int");
-                    } else {
-                        untypedFeatures.add(rr.getRefsetId());
+                        featureType.put(featureId, "int");
+                    } else if (!featureType.containsKey(featureId)) {
+                        untypedFeatures.add(featureId);
                     }
                 }
             }
+
+            missingRefsets.removeAll(featureType.keySet());
 
             for (String refsetId : missingRefsets) {
                 StructuredLog.MissingRefsetId.error(log, refsetId);
@@ -1289,6 +1317,13 @@ public class RF2Importer extends BaseImporter {
             }
         }
 
+        /**
+         * Look for ConcreteDomains Refset entries that reference the relationshipId and add the
+         * corresponding expression to the innerConjs list.
+         *
+         * @param innerConjs
+         * @param relationshipId
+         */
         protected void resolveFiller(Collection<Concept> innerConjs, String relationshipId) {
             if (cdsMap.containsKey(relationshipId)) {
                 final List<Concept> concepts = new ArrayList<>();

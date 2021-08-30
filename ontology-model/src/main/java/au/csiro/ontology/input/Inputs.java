@@ -55,6 +55,17 @@ public class Inputs {
         return inputs;
     }
 
+    public static RF2Input loadRF2(InputStream in) throws JAXBException {
+        JAXBContext context = JAXBContext.newInstance(RF2Input.class, OWLInput.class);
+        Unmarshaller u = context.createUnmarshaller();
+        RF2Input input = (RF2Input) u.unmarshal(in);
+
+        input.validate();
+
+        return input;
+    }
+
+
     /**
      * Constructor.
      *
