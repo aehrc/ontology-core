@@ -308,6 +308,7 @@ public class RF2Importer extends BaseImporter {
                 throw new ImportException(message, e);
             }
         }
+        log.info("Imported " + conceptMap.size() + " concepts.");
 
         // Load concrete domains refsets
         final Set<String> concreteDomainRefsetFiles = input.getConcreteDomainRefsetFiles();
@@ -534,6 +535,7 @@ public class RF2Importer extends BaseImporter {
 
                 String tgtVer = modMap.get(moduleId);
                 if(tgtVer == null) continue;
+
                 int rel = effectiveTime.compareTo(tgtVer);
                 if(rel <= 0) {
                     ConceptRow currConceptRow = conceptMap.get(id);
